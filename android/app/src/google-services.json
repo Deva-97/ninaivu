@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "302492772767",
+    "project_id": "insurance-reminder-6899c",
+    "storage_bucket": "insurance-reminder-6899c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:302492772767:android:e0fca0496402659a7c35aa",
+        "android_client_info": {
+          "package_name": "com.devendiran.insurance_reminders"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCd6-6KR2lgJ67bmbQKmSt1EXP6RB7KoxE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
