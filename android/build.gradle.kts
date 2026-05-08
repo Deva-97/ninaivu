@@ -1,10 +1,5 @@
-plugins {
-  // ...
-
-  // Add the dependency for the Google services Gradle plugin
-  id("com.google.gms.google-services") version "4.4.4" apply false
-
-}
+import org.gradle.api.tasks.compile.JavaCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 allprojects {
     repositories {
@@ -25,6 +20,17 @@ subprojects {
 }
 subprojects {
     project.evaluationDependsOn(":app")
+
+    // Keep third-party Android plugin warnings from polluting the terminal.
+    tasks.withType<JavaCompile>().configureEach {
+        options.compilerArgs.add("-nowarn")
+    }
+
+    tasks.withType<KotlinCompile>().configureEach {
+        compilerOptions {
+            suppressWarnings.set(true)
+        }
+    }
 }
 
 tasks.register<Delete>("clean") {

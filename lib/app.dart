@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:insurance_reminders/core/theme/app_theme.dart';
+import 'package:insurance_reminders/presentation/routes/app_pages.dart';
+import 'package:insurance_reminders/presentation/routes/app_routes.dart';
 
 class InsuranceRemindersApp extends StatelessWidget {
   const InsuranceRemindersApp({super.key});
@@ -9,9 +12,11 @@ class InsuranceRemindersApp extends StatelessWidget {
     return GetMaterialApp(
       title: "Insurance Reminders",
       // initialBinding: Binding(),
-      // initialRoute: AppRoutes.splashScreen,
-      // getPages: AppPages.pages,
-      // theme: AppTheme.light,
+      initialRoute: AppRoutes.splashScreen,
+      getPages: AppPages.pages,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
     );
   }
 }
