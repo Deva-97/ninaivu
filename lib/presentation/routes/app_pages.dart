@@ -6,6 +6,8 @@ import 'package:insurance_reminders/presentation/modules/common/splash/splash_sc
 import 'package:insurance_reminders/presentation/routes/app_routes.dart';
 
 class AppPages {
+  AppPages._();
+
   static final pages = [
     GetPage(name: AppRoutes.splashScreen, page: () => SplashScreen()),
     GetPage(name: AppRoutes.login, page: () => LoginScreen()),

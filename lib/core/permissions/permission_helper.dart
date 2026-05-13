@@ -1,6 +1,8 @@
-import '../constants/app_enums.dart';
+import 'user_role.dart';
 
 class PermissionHelper {
+  PermissionHelper._();
+
   static bool canCreateAgent(UserRole role) {
     return role == UserRole.admin;
   }
@@ -10,10 +12,22 @@ class PermissionHelper {
   }
 
   static bool canDeletePolicy(UserRole role) {
+    return role == UserRole.admin;
+  }
+
+  static bool canManageOwnClients(UserRole role) {
     return role == UserRole.admin || role == UserRole.agent;
   }
 
-  static bool canAccessGlobalSettings(UserRole role) {
-    return role == UserRole.admin;
+  static bool canManageOwnPolicies(UserRole role) {
+    return role == UserRole.admin || role == UserRole.agent;
+  }
+
+  static bool canCreateFollowUp(UserRole role) {
+    return role == UserRole.admin || role == UserRole.agent;
+  }
+
+  static bool canViewReports(UserRole role) {
+    return role == UserRole.admin || role == UserRole.agent;
   }
 }
