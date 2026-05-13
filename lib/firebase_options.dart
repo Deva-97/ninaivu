@@ -54,6 +54,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '302492772767',
     projectId: 'insurance-reminder-6899c',
     storageBucket: 'insurance-reminder-6899c.firebasestorage.app',
+    androidClientId:
+        '302492772767-3vo5u7sdqs71q6odt984ptrkqj1np3j9.apps.googleusercontent.com',
+    iosClientId:
+        '302492772767-d72pnkslnf3fs8547deh5fv0u7sd86gb.apps.googleusercontent.com',
     iosBundleId: 'com.devendiran.insuranceReminders',
   );
 }

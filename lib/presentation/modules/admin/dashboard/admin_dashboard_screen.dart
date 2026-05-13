@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:insurance_reminders/core/services/auth_service.dart';
 
-class AgentDashboardScreen extends StatefulWidget {
-  const AgentDashboardScreen({super.key});
+class AdminDashboardScreen extends StatefulWidget {
+  const AdminDashboardScreen({super.key});
 
   @override
-  State<AgentDashboardScreen> createState() => _AgentDashboardScreenState();
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
 }
 
-class _AgentDashboardScreenState extends State<AgentDashboardScreen> {
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   final AuthService _authService = AuthService();
 
   bool _isSigningOut = false;
@@ -24,11 +24,7 @@ class _AgentDashboardScreenState extends State<AgentDashboardScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e.toString().replaceFirst('Exception: ', ''),
-          ),
-        ),
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
       );
     } finally {
       if (mounted) {
@@ -41,7 +37,7 @@ class _AgentDashboardScreenState extends State<AgentDashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agent Dashboard'),
+        title: const Text('Admin Dashboard'),
         actions: [
           TextButton.icon(
             onPressed: _isSigningOut ? null : _signOut,
@@ -62,10 +58,10 @@ class _AgentDashboardScreenState extends State<AgentDashboardScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: const [
-            _DashboardCard(title: 'My Clients', value: '0'),
-            _DashboardCard(title: 'My Policies', value: '0'),
+            _DashboardCard(title: 'Total Agents', value: '0'),
+            _DashboardCard(title: 'Total Clients', value: '0'),
+            _DashboardCard(title: 'Total Policies', value: '0'),
             _DashboardCard(title: 'Renewals Today', value: '0'),
-            _DashboardCard(title: 'Follow-ups Today', value: '0'),
           ],
         ),
       ),
