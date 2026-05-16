@@ -17,6 +17,8 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   bool _isInitialized = false;
+  bool _hasRequestedPermissions = false;
+  bool _permissionsGranted = true;
 
   Future<void> init() async {
     if (_isInitialized) {
@@ -99,10 +101,14 @@ class NotificationService {
               ?.requestPermissions(alert: true, badge: true, sound: true) ??
           true;
 
-      return androidGranted && iosGranted && macosGranted;
+      _hasRequestedPermissions = true;
+      _permissionsGranted = androidGranted && iosGranted && macosGranted;
+      return _permissionsGranted;
     } catch (e, stackTrace) {
       debugPrint('Notification permission request failed: $e');
       debugPrintStack(stackTrace: stackTrace);
+      _hasRequestedPermissions = true;
+      _permissionsGranted = false;
       return false;
     }
   }
@@ -122,6 +128,17 @@ class NotificationService {
       if (!scheduledDateTime.isAfter(DateTime.now())) {
         debugPrint(
           'Skipping notification $notificationId because scheduled time is in the past.',
+        );
+        return;
+      }
+
+      if (!_hasRequestedPermissions) {
+        await requestPermissions();
+      }
+
+      if (!_permissionsGranted) {
+        debugPrint(
+          'Skipping notification $notificationId because notification permission was denied.',
         );
         return;
       }

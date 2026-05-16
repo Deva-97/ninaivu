@@ -1,11 +1,16 @@
 import 'package:insurance_reminders/core/database/database_tables.dart';
 import 'package:insurance_reminders/core/permissions/permission_helper.dart';
 import 'package:insurance_reminders/core/permissions/user_role.dart';
+import 'package:insurance_reminders/core/services/reminder_generator_service.dart';
+import 'package:insurance_reminders/core/services/reminder_scheduler_service.dart';
+import 'package:insurance_reminders/data/datasources/local/client_local_data_source.dart';
 import 'package:insurance_reminders/data/datasources/local/policy_local_data_source.dart';
+import 'package:insurance_reminders/data/datasources/local/reminder_local_data_source.dart';
 import 'package:insurance_reminders/data/datasources/local/sync_queue_local_data_source.dart';
 import 'package:insurance_reminders/data/datasources/local/user_local_data_source.dart';
 import 'package:insurance_reminders/data/models/app_user_model.dart';
 import 'package:insurance_reminders/data/models/policy_model.dart';
+import 'package:insurance_reminders/data/models/reminder_model.dart';
 import 'package:insurance_reminders/data/models/sync_queue_model.dart';
 import 'package:insurance_reminders/domain/entities/policy.dart';
 import 'package:insurance_reminders/domain/repositories/policy_repository.dart';
@@ -14,18 +19,33 @@ import 'package:uuid/uuid.dart';
 class PolicyRepositoryImpl implements PolicyRepository {
   PolicyRepositoryImpl({
     PolicyLocalDataSource? localDataSource,
+    ClientLocalDataSource? clientLocalDataSource,
     UserLocalDataSource? userLocalDataSource,
+    ReminderLocalDataSource? reminderLocalDataSource,
     SyncQueueLocalDataSource? syncQueueLocalDataSource,
+    ReminderGeneratorService? reminderGeneratorService,
+    ReminderSchedulerService? reminderSchedulerService,
     Uuid? uuid,
   }) : _localDataSource = localDataSource ?? PolicyLocalDataSource(),
+       _clientLocalDataSource = clientLocalDataSource ?? ClientLocalDataSource(),
        _userLocalDataSource = userLocalDataSource ?? UserLocalDataSource(),
+       _reminderLocalDataSource =
+           reminderLocalDataSource ?? ReminderLocalDataSource(),
        _syncQueueLocalDataSource =
            syncQueueLocalDataSource ?? SyncQueueLocalDataSource(),
+       _reminderGeneratorService =
+           reminderGeneratorService ?? ReminderGeneratorService(),
+       _reminderSchedulerService =
+           reminderSchedulerService ?? ReminderSchedulerService(),
        _uuid = uuid ?? const Uuid();
 
   final PolicyLocalDataSource _localDataSource;
+  final ClientLocalDataSource _clientLocalDataSource;
   final UserLocalDataSource _userLocalDataSource;
+  final ReminderLocalDataSource _reminderLocalDataSource;
   final SyncQueueLocalDataSource _syncQueueLocalDataSource;
+  final ReminderGeneratorService _reminderGeneratorService;
+  final ReminderSchedulerService _reminderSchedulerService;
   final Uuid _uuid;
 
   @override
@@ -97,6 +117,7 @@ class PolicyRepositoryImpl implements PolicyRepository {
       syncStatus: 'pending_create',
     );
     await _localDataSource.insertPolicy(model);
+    await _refreshRemindersForPolicy(model);
     await _enqueue(model, 'create', 'pending_create');
     return model;
   }
@@ -115,6 +136,7 @@ class PolicyRepositoryImpl implements PolicyRepository {
       syncStatus: 'pending_update',
     );
     await _localDataSource.updatePolicy(model);
+    await _refreshRemindersForPolicy(model);
     await _enqueue(model, 'update', 'pending_update');
     return model;
   }
@@ -133,6 +155,7 @@ class PolicyRepositoryImpl implements PolicyRepository {
       throw Exception('You can only delete your own policies.');
     }
 
+    await _cancelAndSoftDeleteReminders(existing.id);
     await _localDataSource.softDeletePolicy(policyId);
     final deletedModel = existing.copyWith(
       isDeleted: true,
@@ -179,5 +202,30 @@ class PolicyRepositoryImpl implements PolicyRepository {
       throw Exception('You do not have permission to manage policies.');
     }
     return currentUser;
+  }
+
+  Future<void> _refreshRemindersForPolicy(PolicyModel policy) async {
+    await _cancelAndSoftDeleteReminders(policy.id);
+
+    final reminders = _reminderGeneratorService.generateForPolicy(policy);
+    await _reminderLocalDataSource.insertReminders(reminders);
+
+    final client = await _clientLocalDataSource.getClientById(policy.clientId);
+    await _reminderSchedulerService.scheduleReminders(
+      reminders: reminders.where((item) => item.status != 'missed').toList(),
+      clientName: client?.name ?? 'Client',
+      policyNumber: policy.policyNumber,
+      companyName: policy.companyName,
+    );
+  }
+
+  Future<void> _cancelAndSoftDeleteReminders(String policyId) async {
+    final existingReminders = await _reminderLocalDataSource.getRemindersByPolicy(
+      policyId,
+    );
+    if (existingReminders.isNotEmpty) {
+      await _reminderSchedulerService.cancelReminders(existingReminders);
+      await _reminderLocalDataSource.softDeleteByPolicy(policyId);
+    }
   }
 }

@@ -1,7 +1,10 @@
 import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:insurance_reminders/presentation/bindings/admin_user_bindings.dart';
 import 'package:insurance_reminders/presentation/bindings/client_bindings.dart';
+import 'package:insurance_reminders/presentation/bindings/dashboard_bindings.dart';
+import 'package:insurance_reminders/presentation/bindings/follow_up_bindings.dart';
 import 'package:insurance_reminders/presentation/bindings/policy_bindings.dart';
+import 'package:insurance_reminders/presentation/bindings/reminder_bindings.dart';
 import 'package:insurance_reminders/presentation/modules/admin/dashboard/admin_dashboard_screen.dart';
 import 'package:insurance_reminders/presentation/modules/admin/users/add_edit_agent_screen.dart';
 import 'package:insurance_reminders/presentation/modules/admin/users/agent_list_screen.dart';
@@ -13,9 +16,14 @@ import 'package:insurance_reminders/presentation/modules/common/auth/login_scree
 import 'package:insurance_reminders/presentation/modules/common/auth/otp_verification_screen.dart';
 import 'package:insurance_reminders/presentation/modules/common/auth/profile_setup_screen.dart';
 import 'package:insurance_reminders/presentation/modules/common/splash/splash_screen.dart';
+import 'package:insurance_reminders/presentation/modules/follow_ups/add_edit_follow_up_screen.dart';
+import 'package:insurance_reminders/presentation/modules/follow_ups/follow_up_detail_screen.dart';
+import 'package:insurance_reminders/presentation/modules/follow_ups/follow_up_list_screen.dart';
 import 'package:insurance_reminders/presentation/modules/policies/add_edit_policy_screen.dart';
 import 'package:insurance_reminders/presentation/modules/policies/policy_detail_screen.dart';
 import 'package:insurance_reminders/presentation/modules/policies/policy_list_screen.dart';
+import 'package:insurance_reminders/presentation/modules/reminders/reminder_detail_screen.dart';
+import 'package:insurance_reminders/presentation/modules/reminders/reminder_list_screen.dart';
 import 'package:insurance_reminders/presentation/routes/app_routes.dart';
 
 class AppPages {
@@ -35,10 +43,12 @@ class AppPages {
     GetPage(
       name: AppRoutes.adminDashboard,
       page: () => const AdminDashboardScreen(),
+      binding: AdminDashboardBinding(),
     ),
     GetPage(
       name: AppRoutes.agentDashboard,
       page: () => const AgentDashboardScreen(),
+      binding: AgentDashboardBinding(),
     ),
     GetPage(
       name: AppRoutes.agentList,
@@ -89,6 +99,31 @@ class AppPages {
       name: AppRoutes.policyDetails,
       page: () => const PolicyDetailScreen(),
       binding: PolicyDetailBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.reminders,
+      page: () => const ReminderListScreen(),
+      binding: ReminderListBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.reminderDetails,
+      page: () => const ReminderDetailScreen(),
+      binding: ReminderDetailBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.followUps,
+      page: () => const FollowUpListScreen(),
+      binding: FollowUpListBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.followUpForm,
+      page: () => const AddEditFollowUpScreen(),
+      binding: FollowUpFormBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.followUpDetails,
+      page: () => const FollowUpDetailScreen(),
+      binding: FollowUpDetailBinding(),
     ),
   ];
 }

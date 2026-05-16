@@ -1,0 +1,32 @@
+import 'package:get/get.dart';
+import 'package:insurance_reminders/data/repositories/reminder_repository_impl.dart';
+import 'package:insurance_reminders/domain/usecases/reminders/get_reminder_by_id_usecase.dart';
+import 'package:insurance_reminders/domain/usecases/reminders/get_reminders_usecase.dart';
+import 'package:insurance_reminders/domain/usecases/reminders/mark_reminder_completed_usecase.dart';
+import 'package:insurance_reminders/presentation/controllers/reminder_detail_controller.dart';
+import 'package:insurance_reminders/presentation/controllers/reminder_list_controller.dart';
+
+class ReminderListBinding extends Bindings {
+  @override
+  void dependencies() {
+    final repository = ReminderRepositoryImpl();
+    Get.lazyPut(
+      () => ReminderListController(
+        getRemindersUseCase: GetRemindersUseCase(repository),
+      ),
+    );
+  }
+}
+
+class ReminderDetailBinding extends Bindings {
+  @override
+  void dependencies() {
+    final repository = ReminderRepositoryImpl();
+    Get.lazyPut(
+      () => ReminderDetailController(
+        getReminderByIdUseCase: GetReminderByIdUseCase(repository),
+        markReminderCompletedUseCase: MarkReminderCompletedUseCase(repository),
+      ),
+    );
+  }
+}
