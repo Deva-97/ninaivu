@@ -20,6 +20,8 @@ class OtpSendResult {
 }
 
 class AuthService {
+  // TODO(dev): Move auth orchestration behind repository/usecase layers once the
+  // Week 1 foundation is stable. UI currently instantiates this service directly.
   final FirebaseAuth firebaseAuth;
   final UserLocalDataSource userLocalDataSource;
   final UserRemoteDataSource userRemoteDataSource;
@@ -64,7 +66,7 @@ class AuthService {
     } on GoogleSignInException catch (e) {
       throw Exception(e.description ?? 'Google login failed');
     } on FirebaseAuthException catch (e) {
-      throw Exception(e.message ?? 'Google login failed');
+      throw Exception(_friendlyAuthError(e, fallback: 'Google login failed'));
     } catch (e) {
       throw Exception(e.toString().replaceFirst('Exception: ', ''));
     }
@@ -87,7 +89,9 @@ class AuthService {
         } on FirebaseAuthException catch (e) {
           if (!completer.isCompleted) {
             completer.completeError(
-              Exception(e.message ?? 'OTP verification failed'),
+              Exception(
+                _friendlyAuthError(e, fallback: 'OTP verification failed'),
+              ),
             );
           }
         } catch (_) {
@@ -100,7 +104,9 @@ class AuthService {
       },
       verificationFailed: (FirebaseAuthException e) {
         if (!completer.isCompleted) {
-          completer.completeError(Exception(e.message ?? 'OTP sending failed'));
+          completer.completeError(
+            Exception(_friendlyAuthError(e, fallback: 'OTP sending failed')),
+          );
         }
       },
       codeSent: (String verificationId, int? resendToken) {
@@ -145,7 +151,9 @@ class AuthService {
         } on FirebaseAuthException catch (e) {
           if (!completer.isCompleted) {
             completer.completeError(
-              Exception(e.message ?? 'OTP verification failed'),
+              Exception(
+                _friendlyAuthError(e, fallback: 'OTP verification failed'),
+              ),
             );
           }
         } catch (_) {
@@ -158,7 +166,9 @@ class AuthService {
       },
       verificationFailed: (FirebaseAuthException e) {
         if (!completer.isCompleted) {
-          completer.completeError(Exception(e.message ?? 'OTP resend failed'));
+          completer.completeError(
+            Exception(_friendlyAuthError(e, fallback: 'OTP resend failed')),
+          );
         }
       },
       codeSent: (String verificationId, int? newResendToken) {
@@ -190,7 +200,7 @@ class AuthService {
       await firebaseAuth.signInWithCredential(credential);
       await checkUserAfterLogin();
     } on FirebaseAuthException catch (e) {
-      throw Exception(e.message ?? 'Invalid OTP');
+      throw Exception(_friendlyAuthError(e, fallback: 'Invalid OTP'));
     } catch (_) {
       throw Exception('OTP verification failed. Please try again.');
     }
@@ -334,5 +344,44 @@ class AuthService {
       default:
         Get.offAllNamed(AppRoutes.login);
     }
+  }
+
+  String _friendlyAuthError(
+    FirebaseAuthException e, {
+    required String fallback,
+  }) {
+    final code = e.code.toLowerCase();
+    final message = (e.message ?? '').toLowerCase();
+
+    if (message.contains('billing_not_enabled') ||
+        code == 'billing-not-enabled' ||
+        code == 'internal-error') {
+      if (message.contains('billing_not_enabled')) {
+        return 'Phone login is not enabled for this Firebase project yet. '
+            'Enable billing in Google Cloud/Firebase for this project, then try again.';
+      }
+    }
+
+    if (code == 'invalid-phone-number') {
+      return 'Enter a valid mobile number with the correct country format.';
+    }
+
+    if (code == 'too-many-requests') {
+      return 'Too many OTP attempts were made. Please wait a while and try again.';
+    }
+
+    if (code == 'session-expired') {
+      return 'The OTP session expired. Please request a new OTP.';
+    }
+
+    if (code == 'invalid-verification-code') {
+      return 'The OTP you entered is incorrect. Please try again.';
+    }
+
+    if (code == 'network-request-failed') {
+      return 'Network error while contacting Firebase. Please check your connection and try again.';
+    }
+
+    return e.message ?? fallback;
   }
 }

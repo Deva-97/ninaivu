@@ -1,4 +1,5 @@
 import 'package:insurance_reminders/core/database/database_helper.dart';
+import 'package:insurance_reminders/core/database/database_tables.dart';
 import 'package:insurance_reminders/data/models/app_user_model.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -12,8 +13,9 @@ class UserLocalDataSource {
     final db = await databaseHelper.database;
 
     final result = await db.query(
-      'users',
-      where: 'id = ? AND is_deleted = ?',
+      DatabaseTables.users,
+      where:
+          '${DatabaseColumns.id} = ? AND ${DatabaseColumns.isDeleted} = ?',
       whereArgs: [id, 0],
       limit: 1,
     );
@@ -27,7 +29,7 @@ class UserLocalDataSource {
     final db = await databaseHelper.database;
 
     await db.insert(
-      'users',
+      DatabaseTables.users,
       user.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
@@ -37,12 +39,12 @@ class UserLocalDataSource {
     final db = await databaseHelper.database;
 
     await db.update(
-      'users',
+      DatabaseTables.users,
       {
-        'sync_status': 'synced',
-        'updated_at': DateTime.now().millisecondsSinceEpoch,
+        DatabaseColumns.syncStatus: 'synced',
+        DatabaseColumns.updatedAt: DateTime.now().millisecondsSinceEpoch,
       },
-      where: 'id = ?',
+      where: '${DatabaseColumns.id} = ?',
       whereArgs: [id],
     );
   }
