@@ -137,4 +137,51 @@ class ClientModel extends Client {
       policyCount: map['policy_count'] as int? ?? 0,
     );
   }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'id': id,
+      'businessId': businessId,
+      'name': name,
+      'mobile': mobile,
+      'alternateMobile': alternateMobile,
+      'email': email,
+      'address': address,
+      'areaCity': areaCity,
+      'notes': notes,
+      'createdBy': createdBy,
+      'agentId': agentId,
+      'subAgentId': subAgentId,
+      'customerUserId': customerUserId,
+      'assignedTo': assignedTo,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'isDeleted': isDeleted,
+      'syncStatus': syncStatus,
+    };
+  }
+
+  factory ClientModel.fromFirestore(Map<String, dynamic> map) {
+    return ClientModel(
+      id: map['id'] as String,
+      businessId: map['businessId'] as String,
+      name: map['name'] as String,
+      mobile: map['mobile'] as String,
+      alternateMobile: map['alternateMobile'] as String?,
+      email: map['email'] as String?,
+      address: map['address'] as String?,
+      areaCity: map['areaCity'] as String?,
+      notes: map['notes'] as String?,
+      createdBy: map['createdBy'] as String,
+      agentId: map['agentId'] as String?,
+      subAgentId: map['subAgentId'] as String?,
+      customerUserId: map['customerUserId'] as String?,
+      assignedTo: map['assignedTo'] as String?,
+      createdAt: map['createdAt'] as int,
+      updatedAt: map['updatedAt'] as int,
+      isDeleted: map['isDeleted'] as bool? ?? false,
+      syncStatus: map['syncStatus'] as String? ?? 'synced',
+      policyCount: map['policyCount'] as int? ?? 0,
+    );
+  }
 }

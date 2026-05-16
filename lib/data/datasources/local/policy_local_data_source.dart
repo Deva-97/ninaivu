@@ -35,10 +35,23 @@ class PolicyLocalDataSource {
   }
 
   Future<PolicyModel?> getPolicyById(String policyId) async {
+    return _getPolicyById(policyId, includeDeleted: false);
+  }
+
+  Future<PolicyModel?> getPolicyByIdIncludingDeleted(String policyId) async {
+    return _getPolicyById(policyId, includeDeleted: true);
+  }
+
+  Future<PolicyModel?> _getPolicyById(
+    String policyId, {
+    required bool includeDeleted,
+  }) async {
     final db = await _databaseHelper.database;
     final result = await db.query(
       DatabaseTables.policies,
-      where: '${DatabaseColumns.id} = ? AND ${DatabaseColumns.isDeleted} = 0',
+      where: includeDeleted
+          ? '${DatabaseColumns.id} = ?'
+          : '${DatabaseColumns.id} = ? AND ${DatabaseColumns.isDeleted} = 0',
       whereArgs: [policyId],
       limit: 1,
     );
@@ -48,6 +61,19 @@ class PolicyLocalDataSource {
     }
 
     return PolicyModel.fromMap(result.first);
+  }
+
+  Future<void> markPolicySynced(String policyId) async {
+    final db = await _databaseHelper.database;
+    await db.update(
+      DatabaseTables.policies,
+      {
+        DatabaseColumns.syncStatus: 'synced',
+        DatabaseColumns.updatedAt: DateTime.now().millisecondsSinceEpoch,
+      },
+      where: '${DatabaseColumns.id} = ?',
+      whereArgs: [policyId],
+    );
   }
 
   Future<List<PolicyModel>> getPoliciesForAdmin({

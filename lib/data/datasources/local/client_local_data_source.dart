@@ -35,6 +35,17 @@ class ClientLocalDataSource {
   }
 
   Future<ClientModel?> getClientById(String clientId) async {
+    return _getClientById(clientId, includeDeleted: false);
+  }
+
+  Future<ClientModel?> getClientByIdIncludingDeleted(String clientId) async {
+    return _getClientById(clientId, includeDeleted: true);
+  }
+
+  Future<ClientModel?> _getClientById(
+    String clientId, {
+    required bool includeDeleted,
+  }) async {
     final db = await _databaseHelper.database;
     final result = await db.rawQuery(
       '''
@@ -45,7 +56,8 @@ class ClientLocalDataSource {
           WHERE p.client_id = c.id AND p.is_deleted = 0
         ) AS policy_count
       FROM ${DatabaseTables.clients} c
-      WHERE c.${DatabaseColumns.id} = ? AND c.${DatabaseColumns.isDeleted} = 0
+      WHERE c.${DatabaseColumns.id} = ?
+      ${includeDeleted ? '' : 'AND c.${DatabaseColumns.isDeleted} = 0'}
       LIMIT 1
       ''',
       [clientId],
@@ -56,6 +68,19 @@ class ClientLocalDataSource {
     }
 
     return ClientModel.fromMap(result.first);
+  }
+
+  Future<void> markClientSynced(String clientId) async {
+    final db = await _databaseHelper.database;
+    await db.update(
+      DatabaseTables.clients,
+      {
+        DatabaseColumns.syncStatus: 'synced',
+        DatabaseColumns.updatedAt: DateTime.now().millisecondsSinceEpoch,
+      },
+      where: '${DatabaseColumns.id} = ?',
+      whereArgs: [clientId],
+    );
   }
 
   Future<List<ClientModel>> getClientsForAdmin({

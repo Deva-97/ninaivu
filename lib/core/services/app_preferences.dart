@@ -13,6 +13,8 @@ class AppPreferences {
 
   static AppPreferences? _instance;
 
+  static AppPreferences? get currentInstance => _instance;
+
   static Future<AppPreferences> getInstance() async {
     if (_instance != null) {
       return _instance!;

@@ -143,4 +143,54 @@ class FollowUpModel extends FollowUp {
       policyNumber: map['policy_number'] as String?,
     );
   }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'id': id,
+      'businessId': businessId,
+      'clientId': clientId,
+      'policyId': policyId,
+      'followUpDateTime': followUpDateTime,
+      'type': type,
+      'status': status,
+      'remarks': remarks,
+      'createdBy': createdBy,
+      'agentId': agentId,
+      'subAgentId': subAgentId,
+      'customerUserId': customerUserId,
+      'assignedTo': assignedTo,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'isDeleted': isDeleted,
+      'syncStatus': syncStatus,
+      'clientName': clientName,
+      'clientMobile': clientMobile,
+      'policyNumber': policyNumber,
+    };
+  }
+
+  factory FollowUpModel.fromFirestore(Map<String, dynamic> map) {
+    return FollowUpModel(
+      id: map['id'] as String,
+      businessId: map['businessId'] as String,
+      clientId: map['clientId'] as String,
+      policyId: map['policyId'] as String?,
+      followUpDateTime: map['followUpDateTime'] as int,
+      type: map['type'] as String,
+      status: map['status'] as String,
+      remarks: map['remarks'] as String?,
+      createdBy: map['createdBy'] as String,
+      agentId: map['agentId'] as String?,
+      subAgentId: map['subAgentId'] as String?,
+      customerUserId: map['customerUserId'] as String?,
+      assignedTo: map['assignedTo'] as String?,
+      createdAt: map['createdAt'] as int,
+      updatedAt: map['updatedAt'] as int,
+      isDeleted: map['isDeleted'] as bool? ?? false,
+      syncStatus: map['syncStatus'] as String? ?? 'synced',
+      clientName: map['clientName'] as String?,
+      clientMobile: map['clientMobile'] as String?,
+      policyNumber: map['policyNumber'] as String?,
+    );
+  }
 }

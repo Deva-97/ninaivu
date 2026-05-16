@@ -1,5 +1,6 @@
 import 'package:insurance_reminders/core/database/database_helper.dart';
 import 'package:insurance_reminders/core/database/database_tables.dart';
+import 'package:insurance_reminders/core/utils/follow_up_status_helper.dart';
 import 'package:insurance_reminders/data/models/follow_up_model.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -37,11 +38,23 @@ class FollowUpLocalDataSource {
 
   Future<FollowUpModel?> getFollowUpById(String followUpId) async {
     await markPendingPastFollowUpsAsMissed();
+    return _getFollowUpById(followUpId, includeDeleted: false);
+  }
+
+  Future<FollowUpModel?> getFollowUpByIdIncludingDeleted(String followUpId) async {
+    return _getFollowUpById(followUpId, includeDeleted: true);
+  }
+
+  Future<FollowUpModel?> _getFollowUpById(
+    String followUpId, {
+    required bool includeDeleted,
+  }) async {
     final db = await _databaseHelper.database;
     final result = await db.rawQuery(
       _baseFollowUpQuery(
-        whereClause:
-            'f.${DatabaseColumns.id} = ? AND f.${DatabaseColumns.isDeleted} = 0',
+        whereClause: includeDeleted
+            ? 'f.${DatabaseColumns.id} = ?'
+            : 'f.${DatabaseColumns.id} = ? AND f.${DatabaseColumns.isDeleted} = 0',
       ),
       [followUpId],
     );
@@ -51,6 +64,19 @@ class FollowUpLocalDataSource {
     }
 
     return FollowUpModel.fromMap(result.first);
+  }
+
+  Future<void> markFollowUpSynced(String followUpId) async {
+    final db = await _databaseHelper.database;
+    await db.update(
+      DatabaseTables.followUps,
+      {
+        DatabaseColumns.syncStatus: 'synced',
+        DatabaseColumns.updatedAt: DateTime.now().millisecondsSinceEpoch,
+      },
+      where: '${DatabaseColumns.id} = ?',
+      whereArgs: [followUpId],
+    );
   }
 
   Future<List<FollowUpModel>> getFollowUps({
@@ -141,6 +167,14 @@ class FollowUpLocalDataSource {
       where:
           "status = ? AND follow_up_date_time < ? AND ${DatabaseColumns.isDeleted} = 0",
       whereArgs: ['Pending', DateTime.now().millisecondsSinceEpoch],
+    );
+  }
+
+  bool isMissedFollowUp(FollowUpModel followUp, {DateTime? now}) {
+    return FollowUpStatusHelper.isMissed(
+      status: followUp.status,
+      followUpDateTime: followUp.followUpDateTime,
+      now: now ?? DateTime.now(),
     );
   }
 

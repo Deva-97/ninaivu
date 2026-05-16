@@ -10,6 +10,8 @@ class ReminderDetailScreen extends GetView<ReminderDetailController> {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
+    final responsive = context.responsive;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Reminder Details')),
       body: Obx(() {
@@ -35,12 +37,13 @@ class ReminderDetailScreen extends GetView<ReminderDetailController> {
           );
         }
 
-        return ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        return ResponsiveContent(
+          child: ListView(
+            padding: EdgeInsets.all(responsive.pagePadding),
+            children: [
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(18),
+                padding: EdgeInsets.all(responsive.scaled(18, min: 14)),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -48,9 +51,9 @@ class ReminderDetailScreen extends GetView<ReminderDetailController> {
                       reminder.clientName ?? 'Client ${reminder.clientId}',
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: responsive.itemGap),
                     StatusBadge(label: _statusLabel(reminder.status)),
-                    const SizedBox(height: 18),
+                    SizedBox(height: responsive.scaled(18, min: 14)),
                     _DetailRow(label: 'Policy', value: reminder.policyNumber ?? reminder.policyId),
                     _DetailRow(label: 'Company', value: reminder.companyName ?? 'Not available'),
                     _DetailRow(label: 'Reminder Type', value: reminder.reminderType),
@@ -68,18 +71,19 @@ class ReminderDetailScreen extends GetView<ReminderDetailController> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: responsive.sectionGap),
             if (reminder.status.toLowerCase() != 'completed' &&
                 reminder.status.toLowerCase() != 'cancelled')
               SizedBox(
-                height: 50,
+                height: responsive.compactButtonHeight,
                 child: AppButton(
                   label: 'Mark Completed',
                   onPressed: controller.markCompleted,
                   isLoading: controller.isUpdating.value,
                 ),
               ),
-          ],
+            ],
+          ),
         );
       }),
     );
@@ -102,12 +106,14 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = context.responsive;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: responsive.scaled(12, min: 10)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 120, child: Text(label)),
+          SizedBox(width: responsive.detailLabelWidth, child: Text(label)),
           Expanded(child: Text(value)),
         ],
       ),

@@ -10,17 +10,32 @@ class AgentDashboardScreen extends GetView<AgentDashboardController> {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = context.responsive;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Agent Dashboard'),
         actions: [
           Obx(
             () => TextButton.icon(
+              onPressed: controller.isSyncing.value ? null : controller.syncNow,
+              icon: controller.isSyncing.value
+                  ? SizedBox(
+                      width: responsive.scaled(18, min: 16),
+                      height: responsive.scaled(18, min: 16),
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.sync_rounded),
+              label: Text(controller.isSyncing.value ? 'Syncing...' : 'Sync now'),
+            ),
+          ),
+          Obx(
+            () => TextButton.icon(
               onPressed: controller.isSigningOut.value ? null : controller.signOut,
               icon: controller.isSigningOut.value
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
+                  ? SizedBox(
+                      width: responsive.scaled(18, min: 16),
+                      height: responsive.scaled(18, min: 16),
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.logout_rounded),
@@ -29,7 +44,7 @@ class AgentDashboardScreen extends GetView<AgentDashboardController> {
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: responsive.scaled(8, min: 6)),
         ],
       ),
       body: Obx(() {
@@ -57,24 +72,44 @@ class AgentDashboardScreen extends GetView<AgentDashboardController> {
 
         return RefreshIndicator(
           onRefresh: controller.loadDashboard,
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-            children: [
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: responsive.dashboardContentMaxWidth,
+              ),
+              child: ListView(
+                padding: EdgeInsets.fromLTRB(
+                  responsive.pagePadding,
+                  responsive.pagePadding,
+                  responsive.pagePadding,
+                  responsive.sectionGap,
+                ),
+                children: [
               Text(
                 'Your portfolio',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: responsive.scaled(6, min: 4)),
               Text(
                 'Track your renewals and follow-ups from live SQLite data.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-              const SizedBox(height: 18),
-              GridView.count(
-                crossAxisCount: MediaQuery.of(context).size.width > 720 ? 3 : 2,
-                crossAxisSpacing: 14,
-                mainAxisSpacing: 14,
-                childAspectRatio: 1.08,
+              SizedBox(height: responsive.scaled(4, min: 4)),
+              Obx(
+                () => Text(
+                  'Last backup: ${controller.lastSyncLabel.value}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+              SizedBox(height: responsive.scaled(18, min: 14)),
+              GridView(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: responsive.dashboardGridCount,
+                  crossAxisSpacing: responsive.metricGridSpacing,
+                  mainAxisSpacing: responsive.metricGridSpacing,
+                  mainAxisExtent: responsive.dashboardMetricHeight,
+                ),
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
@@ -125,15 +160,15 @@ class AgentDashboardScreen extends GetView<AgentDashboardController> {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: responsive.sectionGap),
               Text(
                 'Quick actions',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: responsive.scaled(12, min: 10)),
               Wrap(
-                spacing: 12,
-                runSpacing: 12,
+                spacing: responsive.scaled(12, min: 10),
+                runSpacing: responsive.scaled(12, min: 10),
                 children: [
                   DashboardQuickAction(
                     label: 'Add Client',
@@ -159,12 +194,14 @@ class AgentDashboardScreen extends GetView<AgentDashboardController> {
                     color: Colors.teal,
                     onTap: () => Get.toNamed(
                       AppRoutes.reminders,
-                      arguments: {'filter': 'upcoming7days'},
+                      arguments: {'filter': 'pending'},
                     ),
                   ),
                 ],
               ),
-            ],
+                ],
+              ),
+            ),
           ),
         );
       }),

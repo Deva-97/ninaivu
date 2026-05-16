@@ -10,6 +10,8 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd MMM yyyy');
+    final responsive = context.responsive;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -18,25 +20,26 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
       ),
       body: Form(
         key: controller.formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        child: ResponsiveContent(
+          child: ListView(
+            padding: EdgeInsets.all(responsive.pagePadding),
+            children: [
             TextFormField(
               controller: controller.clientIdController,
               decoration: const InputDecoration(labelText: 'Client ID'),
               validator: (value) => controller.validateRequired(value, 'client ID'),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             TextFormField(
               controller: controller.policyIdController,
               decoration: const InputDecoration(
                 labelText: 'Policy ID (optional)',
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             Obx(
               () => DropdownButtonFormField<String>(
-                value: controller.selectedType.value,
+                initialValue: controller.selectedType.value,
                 decoration: const InputDecoration(labelText: 'Type'),
                 items: FollowUpFormController.followUpTypes
                     .map(
@@ -51,10 +54,10 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
                 },
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             Obx(
               () => DropdownButtonFormField<String>(
-                value: controller.selectedStatus.value,
+                initialValue: controller.selectedStatus.value,
                 decoration: const InputDecoration(labelText: 'Status'),
                 items: FollowUpFormController.followUpStatuses
                     .map(
@@ -69,7 +72,7 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
                 },
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             Obx(
               () => ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -88,17 +91,17 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
                 onTap: () => controller.pickTime(context),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             TextFormField(
               controller: controller.remarksController,
               minLines: 3,
               maxLines: 5,
               decoration: const InputDecoration(labelText: 'Remarks'),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: responsive.sectionGap),
             Obx(
               () => SizedBox(
-                height: 52,
+                height: responsive.buttonHeight,
                 child: AppButton(
                   label: controller.editingFollowUp == null
                       ? 'Save Follow-up'
@@ -108,7 +111,8 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );

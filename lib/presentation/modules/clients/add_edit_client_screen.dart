@@ -8,19 +8,22 @@ class AddEditClientScreen extends GetView<ClientFormController> {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = context.responsive;
+
     return Scaffold(
       appBar: AppBar(title: Text(controller.title)),
       body: Form(
         key: controller.formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        child: ResponsiveContent(
+          child: ListView(
+            padding: EdgeInsets.all(responsive.pagePadding),
+            children: [
             TextFormField(
               controller: controller.nameController,
               validator: controller.validateName,
               decoration: const InputDecoration(labelText: 'Client Name'),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             TextFormField(
               controller: controller.mobileController,
               validator: controller.validateMobile,
@@ -30,7 +33,7 @@ class AddEditClientScreen extends GetView<ClientFormController> {
                 prefixText: '+91 ',
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             TextFormField(
               controller: controller.alternateMobileController,
               keyboardType: TextInputType.phone,
@@ -39,36 +42,36 @@ class AddEditClientScreen extends GetView<ClientFormController> {
                 prefixText: '+91 ',
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             TextFormField(
               controller: controller.emailController,
               validator: controller.validateOptionalEmail,
               keyboardType: TextInputType.emailAddress,
               decoration: const InputDecoration(labelText: 'Email'),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             TextFormField(
               controller: controller.addressController,
               minLines: 2,
               maxLines: 3,
               decoration: const InputDecoration(labelText: 'Address'),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             TextFormField(
               controller: controller.areaCityController,
               decoration: const InputDecoration(labelText: 'Area / City'),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             TextFormField(
               controller: controller.notesController,
               minLines: 3,
               maxLines: 5,
               decoration: const InputDecoration(labelText: 'Notes'),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: responsive.sectionGap),
             Obx(
               () => SizedBox(
-                height: 52,
+                height: responsive.buttonHeight,
                 child: AppButton(
                   label: controller.editingClient == null ? 'Save Client' : 'Update Client',
                   onPressed: controller.submit,
@@ -76,7 +79,8 @@ class AddEditClientScreen extends GetView<ClientFormController> {
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );

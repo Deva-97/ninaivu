@@ -10,24 +10,27 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd MMM yyyy');
+    final responsive = context.responsive;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(controller.editingPolicy == null ? 'Add Policy' : 'Edit Policy'),
       ),
       body: Form(
         key: controller.formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        child: ResponsiveContent(
+          child: ListView(
+            padding: EdgeInsets.all(responsive.pagePadding),
+            children: [
             TextFormField(
               controller: controller.clientIdController,
               validator: (value) => controller.validateRequired(value, 'client ID'),
               decoration: const InputDecoration(labelText: 'Client ID'),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             Obx(
               () => DropdownButtonFormField<String>(
-                value: controller.selectedInsuranceType.value,
+                initialValue: controller.selectedInsuranceType.value,
                 decoration: const InputDecoration(labelText: 'Insurance Type'),
                 items: PolicyFormController.insuranceTypes
                     .map(
@@ -44,29 +47,29 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
                 },
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             TextFormField(
               controller: controller.policyNumberController,
               validator: (value) => controller.validateRequired(value, 'policy number'),
               decoration: const InputDecoration(labelText: 'Policy Number'),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             TextFormField(
               controller: controller.companyNameController,
               validator: (value) => controller.validateRequired(value, 'company name'),
               decoration: const InputDecoration(labelText: 'Company Name'),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             TextFormField(
               controller: controller.premiumController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               validator: controller.validatePremium,
               decoration: const InputDecoration(labelText: 'Premium Amount'),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             Obx(
               () => DropdownButtonFormField<String>(
-                value: controller.selectedPaymentFrequency.value,
+                initialValue: controller.selectedPaymentFrequency.value,
                 decoration: const InputDecoration(labelText: 'Payment Frequency'),
                 items: PolicyFormController.paymentFrequencies
                     .map(
@@ -83,10 +86,10 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
                 },
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             Obx(
               () => DropdownButtonFormField<String>(
-                value: controller.selectedStatus.value,
+                initialValue: controller.selectedStatus.value,
                 decoration: const InputDecoration(labelText: 'Status'),
                 items: PolicyFormController.policyStatuses
                     .map(
@@ -103,7 +106,7 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
                 },
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             Obx(
               () => ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -122,27 +125,27 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
                 onTap: () => controller.pickDate(context: context, isStartDate: false),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             TextFormField(
               controller: controller.vehicleNumberController,
               decoration: const InputDecoration(labelText: 'Vehicle Number'),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             TextFormField(
               controller: controller.vehicleModelController,
               decoration: const InputDecoration(labelText: 'Vehicle Model'),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             TextFormField(
               controller: controller.notesController,
               minLines: 3,
               maxLines: 5,
               decoration: const InputDecoration(labelText: 'Notes'),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: responsive.sectionGap),
             Obx(
               () => SizedBox(
-                height: 52,
+                height: responsive.buttonHeight,
                 child: AppButton(
                   label: controller.editingPolicy == null ? 'Save Policy' : 'Update Policy',
                   onPressed: controller.submit,
@@ -150,7 +153,8 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );

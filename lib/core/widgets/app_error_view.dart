@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:insurance_reminders/core/widgets/responsive_layout.dart';
 
 import 'app_button.dart';
 
@@ -17,38 +18,42 @@ class AppErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final responsive = context.responsive;
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.error_outline_rounded,
-              size: 48,
-              color: theme.colorScheme.error,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: theme.textTheme.titleLarge,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              style: theme.textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-            if (onRetry != null) ...[
-              const SizedBox(height: 20),
-              AppButton(
-                label: 'Retry',
-                onPressed: onRetry,
+    return ResponsiveContent(
+      alignment: Alignment.center,
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.all(responsive.pagePadding),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.error_outline_rounded,
+                size: responsive.scaled(48, min: 40),
+                color: theme.colorScheme.error,
               ),
+              SizedBox(height: responsive.itemGap),
+              Text(
+                title,
+                style: theme.textTheme.titleLarge,
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: responsive.scaled(8, min: 6)),
+              Text(
+                message,
+                style: theme.textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+              if (onRetry != null) ...[
+                SizedBox(height: responsive.scaled(20, min: 16)),
+                AppButton(
+                  label: 'Retry',
+                  onPressed: onRetry,
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

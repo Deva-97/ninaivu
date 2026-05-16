@@ -3,6 +3,7 @@ import 'package:insurance_reminders/core/permissions/permission_helper.dart';
 import 'package:insurance_reminders/core/permissions/user_role.dart';
 import 'package:insurance_reminders/core/services/reminder_generator_service.dart';
 import 'package:insurance_reminders/core/services/reminder_scheduler_service.dart';
+import 'package:insurance_reminders/core/services/sync_service.dart';
 import 'package:insurance_reminders/data/datasources/local/client_local_data_source.dart';
 import 'package:insurance_reminders/data/datasources/local/policy_local_data_source.dart';
 import 'package:insurance_reminders/data/datasources/local/reminder_local_data_source.dart';
@@ -25,6 +26,7 @@ class PolicyRepositoryImpl implements PolicyRepository {
     SyncQueueLocalDataSource? syncQueueLocalDataSource,
     ReminderGeneratorService? reminderGeneratorService,
     ReminderSchedulerService? reminderSchedulerService,
+    SyncService? syncService,
     Uuid? uuid,
   }) : _localDataSource = localDataSource ?? PolicyLocalDataSource(),
        _clientLocalDataSource = clientLocalDataSource ?? ClientLocalDataSource(),
@@ -37,6 +39,7 @@ class PolicyRepositoryImpl implements PolicyRepository {
            reminderGeneratorService ?? ReminderGeneratorService(),
        _reminderSchedulerService =
            reminderSchedulerService ?? ReminderSchedulerService(),
+       _syncService = syncService ?? SyncService(),
        _uuid = uuid ?? const Uuid();
 
   final PolicyLocalDataSource _localDataSource;
@@ -46,6 +49,7 @@ class PolicyRepositoryImpl implements PolicyRepository {
   final SyncQueueLocalDataSource _syncQueueLocalDataSource;
   final ReminderGeneratorService _reminderGeneratorService;
   final ReminderSchedulerService _reminderSchedulerService;
+  final SyncService _syncService;
   final Uuid _uuid;
 
   @override
@@ -75,8 +79,15 @@ class PolicyRepositoryImpl implements PolicyRepository {
   }
 
   @override
-  Future<List<Policy>> getPoliciesByClient(String clientId) =>
-      _localDataSource.getPoliciesByClient(clientId);
+  Future<List<Policy>> getPoliciesByClient(String clientId) async {
+    final currentUser = await _requireCurrentUser();
+    final client = await _clientLocalDataSource.getClientById(clientId);
+    if (client == null) {
+      return const [];
+    }
+    _ensurePolicyAccess(currentUser, createdBy: client.createdBy, agentId: client.agentId);
+    return _localDataSource.getPoliciesByClient(clientId);
+  }
 
   @override
   Future<List<Policy>> getExpiringPolicies({int withinDays = 30}) async {
@@ -102,8 +113,20 @@ class PolicyRepositoryImpl implements PolicyRepository {
   }
 
   @override
-  Future<Policy?> getPolicyById(String policyId) =>
-      _localDataSource.getPolicyById(policyId);
+  Future<Policy?> getPolicyById(String policyId) async {
+    final currentUser = await _requireCurrentUser();
+    final policy = await _localDataSource.getPolicyById(policyId);
+    if (policy == null) {
+      return null;
+    }
+    _ensurePolicyAccess(
+      currentUser,
+      createdBy: policy.createdBy,
+      agentId: policy.agentId,
+      assignedTo: policy.assignedTo,
+    );
+    return policy;
+  }
 
   @override
   Future<Policy> addPolicy(Policy policy) async {
@@ -119,6 +142,7 @@ class PolicyRepositoryImpl implements PolicyRepository {
     await _localDataSource.insertPolicy(model);
     await _refreshRemindersForPolicy(model);
     await _enqueue(model, 'create', 'pending_create');
+    await _syncService.syncPendingData();
     return model;
   }
 
@@ -131,13 +155,18 @@ class PolicyRepositoryImpl implements PolicyRepository {
     }
 
     final model = PolicyModel.fromEntity(policy).copyWith(
+      businessId: existing.businessId,
+      createdBy: existing.createdBy,
       createdAt: existing.createdAt,
+      agentId: policy.agentId ?? existing.agentId,
+      assignedTo: policy.assignedTo ?? existing.assignedTo ?? existing.agentId,
       updatedAt: DateTime.now().millisecondsSinceEpoch,
       syncStatus: 'pending_update',
     );
     await _localDataSource.updatePolicy(model);
     await _refreshRemindersForPolicy(model);
     await _enqueue(model, 'update', 'pending_update');
+    await _syncService.syncPendingData();
     return model;
   }
 
@@ -163,6 +192,7 @@ class PolicyRepositoryImpl implements PolicyRepository {
       syncStatus: 'pending_delete',
     );
     await _enqueue(deletedModel, 'delete', 'pending_delete');
+    await _syncService.syncPendingData();
   }
 
   Future<void> _enqueue(
@@ -209,6 +239,9 @@ class PolicyRepositoryImpl implements PolicyRepository {
 
     final reminders = _reminderGeneratorService.generateForPolicy(policy);
     await _reminderLocalDataSource.insertReminders(reminders);
+    for (final reminder in reminders) {
+      await _enqueueReminder(reminder, 'create', 'pending_create');
+    }
 
     final client = await _clientLocalDataSource.getClientById(policy.clientId);
     await _reminderSchedulerService.scheduleReminders(
@@ -226,6 +259,55 @@ class PolicyRepositoryImpl implements PolicyRepository {
     if (existingReminders.isNotEmpty) {
       await _reminderSchedulerService.cancelReminders(existingReminders);
       await _reminderLocalDataSource.softDeleteByPolicy(policyId);
+      for (final reminder in existingReminders) {
+        final deletedReminder = reminder.copyWith(
+          isDeleted: true,
+          status: 'cancelled',
+          updatedAt: DateTime.now().millisecondsSinceEpoch,
+          syncStatus: 'pending_delete',
+        );
+        await _enqueueReminder(deletedReminder, 'delete', 'pending_delete');
+      }
     }
+  }
+
+  void _ensurePolicyAccess(
+    AppUserModel currentUser, {
+    required String createdBy,
+    String? agentId,
+    String? assignedTo,
+  }) {
+    final role = currentUser.role.toAppRole();
+    if (!PermissionHelper.canAccessOwnRecord(
+      role: role,
+      currentUserId: currentUser.id,
+      createdBy: createdBy,
+      agentId: agentId,
+      assignedTo: assignedTo,
+    )) {
+      throw Exception('You can only access your own policies.');
+    }
+  }
+
+  Future<void> _enqueueReminder(
+    ReminderModel reminder,
+    String operation,
+    String syncStatus,
+  ) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await _syncQueueLocalDataSource.enqueue(
+      SyncQueueModel(
+        id: _uuid.v4(),
+        businessId: reminder.businessId,
+        tableName: DatabaseTables.reminders,
+        recordId: reminder.id,
+        operation: operation,
+        payload: reminder.toMap(),
+        retryCount: 0,
+        createdAt: now,
+        updatedAt: now,
+        syncStatus: syncStatus,
+      ),
+    );
   }
 }

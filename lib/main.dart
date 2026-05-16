@@ -7,6 +7,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:insurance_reminders/app.dart';
+import 'package:insurance_reminders/core/services/app_preferences.dart';
 import 'package:insurance_reminders/core/services/notification_service.dart';
 import 'package:insurance_reminders/core/theme/theme_controller.dart';
 import 'package:insurance_reminders/firebase_options.dart';
@@ -24,6 +25,7 @@ Future<void> main() async {
   };
   await NotificationService.instance.init();
   await GoogleSignIn.instance.initialize(serverClientId: _googleServerClientId);
+  await AppPreferences.getInstance();
   Get.put(ThemeController(), permanent: true);
   runApp(const InsuranceRemindersApp());
 }

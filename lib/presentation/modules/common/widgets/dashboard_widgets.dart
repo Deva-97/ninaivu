@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:insurance_reminders/core/widgets/status_badge.dart';
+import 'package:insurance_reminders/core/widgets/responsive_layout.dart';
 
 class DashboardMetricCard extends StatelessWidget {
   const DashboardMetricCard({
@@ -20,17 +21,19 @@ class DashboardMetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = context.responsive;
+
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: EdgeInsets.all(responsive.scaled(15, min: 12)),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(responsive.scaled(20, min: 16)),
         border: Border.all(color: color.withValues(alpha: 0.18)),
         boxShadow: [
           BoxShadow(
             color: color.withValues(alpha: 0.08),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
+            blurRadius: responsive.scaled(14, min: 10),
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -40,29 +43,42 @@ class DashboardMetricCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: EdgeInsets.all(responsive.scaled(8, min: 7)),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(
+                    responsive.scaled(14, min: 10),
+                  ),
                 ),
-                child: Icon(icon, color: color),
+                child: Icon(
+                  icon,
+                  color: color,
+                  size: responsive.scaled(20, min: 16),
+                ),
               ),
               const Spacer(),
               if (badgeLabel != null) StatusBadge(label: badgeLabel!),
             ],
           ),
-          const SizedBox(height: 18),
+          const Spacer(),
           Text(
             value.toString(),
+            maxLines: 1,
+            overflow: TextOverflow.fade,
+            softWrap: false,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.w800,
+              fontSize: responsive.scaled(28, min: 24),
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: responsive.scaled(4, min: 3)),
           Text(
             title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: responsive.scaled(13, min: 12),
             ),
           ),
         ],
@@ -87,6 +103,8 @@ class DashboardQuickAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = context.responsive;
+
     return FilledButton.tonalIcon(
       onPressed: onTap,
       icon: Icon(icon, color: color),
@@ -94,8 +112,13 @@ class DashboardQuickAction extends StatelessWidget {
       style: FilledButton.styleFrom(
         foregroundColor: Theme.of(context).colorScheme.onSurface,
         backgroundColor: color.withValues(alpha: 0.12),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        padding: EdgeInsets.symmetric(
+          horizontal: responsive.scaled(16, min: 12),
+          vertical: responsive.scaled(16, min: 12),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(responsive.scaled(18, min: 14)),
+        ),
       ),
     );
   }

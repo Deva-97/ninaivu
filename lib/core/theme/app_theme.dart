@@ -318,4 +318,90 @@ class AppTheme {
       ),
     ),
   );
+
+  static ThemeData scaleTheme(ThemeData base, double scale) {
+    if (scale == 1) {
+      return base;
+    }
+
+    final inputTheme = base.inputDecorationTheme;
+
+    return base.copyWith(
+      appBarTheme: base.appBarTheme.copyWith(
+        titleTextStyle: base.appBarTheme.titleTextStyle?.copyWith(
+          fontSize: (base.appBarTheme.titleTextStyle?.fontSize ?? 20) * scale,
+        ),
+      ),
+      cardTheme: base.cardTheme.copyWith(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18 * scale),
+          side:
+              (base.cardTheme.shape as RoundedRectangleBorder?)?.side ??
+              BorderSide.none,
+        ),
+      ),
+      inputDecorationTheme: inputTheme.copyWith(
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 16 * scale,
+          vertical: 14 * scale,
+        ),
+        hintStyle: inputTheme.hintStyle?.copyWith(
+          fontSize: (inputTheme.hintStyle?.fontSize ?? 14) * scale,
+        ),
+        labelStyle: inputTheme.labelStyle?.copyWith(
+          fontSize: (inputTheme.labelStyle?.fontSize ?? 14) * scale,
+        ),
+        border: _scaledBorder(inputTheme.border, scale),
+        enabledBorder: _scaledBorder(inputTheme.enabledBorder, scale),
+        focusedBorder: _scaledBorder(inputTheme.focusedBorder, scale),
+        errorBorder: _scaledBorder(inputTheme.errorBorder, scale),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: base.elevatedButtonTheme.style?.copyWith(
+          minimumSize: WidgetStatePropertyAll(
+            Size(double.infinity, 50 * scale),
+          ),
+          textStyle: WidgetStatePropertyAll(
+            TextStyle(fontSize: 15 * scale, fontWeight: FontWeight.w600),
+          ),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14 * scale),
+            ),
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: base.outlinedButtonTheme.style?.copyWith(
+          minimumSize: WidgetStatePropertyAll(
+            Size(double.infinity, 50 * scale),
+          ),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14 * scale),
+            ),
+          ),
+        ),
+      ),
+      listTileTheme: base.listTileTheme.copyWith(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14 * scale),
+        ),
+      ),
+      textTheme: base.textTheme.apply(fontSizeFactor: scale),
+    );
+  }
+
+  static InputBorder? _scaledBorder(InputBorder? border, double scale) {
+    if (border is! OutlineInputBorder) {
+      return border;
+    }
+
+    return border.copyWith(
+      borderRadius: BorderRadius.circular(14 * scale),
+      borderSide: border.borderSide.copyWith(
+        width: border.borderSide.width * scale,
+      ),
+    );
+  }
 }

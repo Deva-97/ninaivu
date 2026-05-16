@@ -1,9 +1,13 @@
 import 'package:insurance_reminders/core/permissions/permission_helper.dart';
 import 'package:insurance_reminders/core/permissions/user_role.dart';
+import 'package:insurance_reminders/core/services/sync_service.dart';
+import 'package:insurance_reminders/core/database/database_tables.dart';
 import 'package:insurance_reminders/data/datasources/local/follow_up_local_data_source.dart';
+import 'package:insurance_reminders/data/datasources/local/sync_queue_local_data_source.dart';
 import 'package:insurance_reminders/data/datasources/local/user_local_data_source.dart';
 import 'package:insurance_reminders/data/models/app_user_model.dart';
 import 'package:insurance_reminders/data/models/follow_up_model.dart';
+import 'package:insurance_reminders/data/models/sync_queue_model.dart';
 import 'package:insurance_reminders/domain/entities/follow_up.dart';
 import 'package:insurance_reminders/domain/repositories/follow_up_repository.dart';
 import 'package:uuid/uuid.dart';
@@ -12,13 +16,20 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
   FollowUpRepositoryImpl({
     FollowUpLocalDataSource? localDataSource,
     UserLocalDataSource? userLocalDataSource,
+    SyncQueueLocalDataSource? syncQueueLocalDataSource,
+    SyncService? syncService,
     Uuid? uuid,
   }) : _localDataSource = localDataSource ?? FollowUpLocalDataSource(),
        _userLocalDataSource = userLocalDataSource ?? UserLocalDataSource(),
+       _syncQueueLocalDataSource =
+           syncQueueLocalDataSource ?? SyncQueueLocalDataSource(),
+       _syncService = syncService ?? SyncService(),
        _uuid = uuid ?? const Uuid();
 
   final FollowUpLocalDataSource _localDataSource;
   final UserLocalDataSource _userLocalDataSource;
+  final SyncQueueLocalDataSource _syncQueueLocalDataSource;
+  final SyncService _syncService;
   final Uuid _uuid;
 
   @override
@@ -41,6 +52,8 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
       syncStatus: 'pending_create',
     );
     await _localDataSource.insertFollowUp(model);
+    await _enqueue(model, 'create', 'pending_create');
+    await _syncService.syncPendingData();
     return model;
   }
 
@@ -63,6 +76,8 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
       syncStatus: 'pending_update',
     );
     await _localDataSource.updateFollowUp(model);
+    await _enqueue(model, 'update', 'pending_update');
+    await _syncService.syncPendingData();
     return model;
   }
 
@@ -75,6 +90,14 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
     }
     _ensureFollowUpAccess(currentUser, existing);
     await _localDataSource.softDeleteFollowUp(followUpId);
+    final deleted = existing.copyWith(
+      isDeleted: true,
+      status: 'Cancelled',
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
+      syncStatus: 'pending_delete',
+    );
+    await _enqueue(deleted, 'delete', 'pending_delete');
+    await _syncService.syncPendingData();
   }
 
   @override
@@ -86,6 +109,13 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
     }
     _ensureFollowUpAccess(currentUser, existing);
     await _localDataSource.markFollowUpCompleted(followUpId);
+    final updated = existing.copyWith(
+      status: 'Completed',
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
+      syncStatus: 'pending_update',
+    );
+    await _enqueue(updated, 'update', 'pending_update');
+    await _syncService.syncPendingData();
   }
 
   @override
@@ -120,8 +150,15 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
   }
 
   @override
-  Future<FollowUp?> getFollowUpById(String followUpId) =>
-      _localDataSource.getFollowUpById(followUpId);
+  Future<FollowUp?> getFollowUpById(String followUpId) async {
+    final currentUser = await _requireCurrentUser();
+    final followUp = await _localDataSource.getFollowUpById(followUpId);
+    if (followUp == null) {
+      return null;
+    }
+    _ensureFollowUpAccess(currentUser, followUp);
+    return followUp;
+  }
 
   Future<AppUserModel> _requireCurrentUser() async {
     final currentUser = await _userLocalDataSource.getCurrentUser();
@@ -144,5 +181,27 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
     if (!canAccess) {
       throw Exception('You can only manage your own follow-ups.');
     }
+  }
+
+  Future<void> _enqueue(
+    FollowUpModel followUp,
+    String operation,
+    String syncStatus,
+  ) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await _syncQueueLocalDataSource.enqueue(
+      SyncQueueModel(
+        id: _uuid.v4(),
+        businessId: followUp.businessId,
+        tableName: DatabaseTables.followUps,
+        recordId: followUp.id,
+        operation: operation,
+        payload: followUp.toMap(),
+        retryCount: 0,
+        createdAt: now,
+        updatedAt: now,
+        syncStatus: syncStatus,
+      ),
+    );
   }
 }

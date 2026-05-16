@@ -12,7 +12,11 @@ class ReminderGeneratorService {
   List<ReminderModel> generateForPolicy(PolicyModel policy) {
     final now = DateTime.now().millisecondsSinceEpoch;
     final expiryDate = DateTime.fromMillisecondsSinceEpoch(policy.endDate);
-    final baseExpiry = DateTime(expiryDate.year, expiryDate.month, expiryDate.day);
+    final baseExpiry = DateTime(
+      expiryDate.year,
+      expiryDate.month,
+      expiryDate.day,
+    );
 
     return reminderOffsets.map((daysBefore) {
       final scheduledDate = DateTime(
@@ -29,7 +33,9 @@ class ReminderGeneratorService {
         policyId: policy.id,
         reminderDateTime: scheduledDate.millisecondsSinceEpoch,
         reminderType: daysBefore == 0 ? 'On Expiry' : '$daysBefore Days Before',
-        status: scheduledDate.millisecondsSinceEpoch < now ? 'missed' : 'pending',
+        status: scheduledDate.millisecondsSinceEpoch < now
+            ? 'missed'
+            : 'pending',
         notificationId: _notificationIdFor(reminderId),
         createdBy: policy.createdBy,
         agentId: policy.agentId,

@@ -1,8 +1,11 @@
 import 'package:insurance_reminders/core/permissions/permission_helper.dart';
 import 'package:insurance_reminders/core/permissions/user_role.dart';
+import 'package:insurance_reminders/core/database/database_tables.dart';
+import 'package:insurance_reminders/core/services/sync_service.dart';
+import 'package:insurance_reminders/data/datasources/local/sync_queue_local_data_source.dart';
 import 'package:insurance_reminders/data/datasources/local/user_local_data_source.dart';
-import 'package:insurance_reminders/data/datasources/remote/user_remote_data_source.dart';
 import 'package:insurance_reminders/data/models/app_user_model.dart';
+import 'package:insurance_reminders/data/models/sync_queue_model.dart';
 import 'package:insurance_reminders/domain/entities/app_user.dart';
 import 'package:insurance_reminders/domain/repositories/user_repository.dart';
 import 'package:uuid/uuid.dart';
@@ -10,14 +13,18 @@ import 'package:uuid/uuid.dart';
 class UserRepositoryImpl implements UserRepository {
   UserRepositoryImpl({
     UserLocalDataSource? localDataSource,
-    UserRemoteDataSource? remoteDataSource,
+    SyncQueueLocalDataSource? syncQueueLocalDataSource,
+    SyncService? syncService,
     Uuid? uuid,
   }) : _localDataSource = localDataSource ?? UserLocalDataSource(),
-       _remoteDataSource = remoteDataSource ?? UserRemoteDataSource(),
+       _syncQueueLocalDataSource =
+           syncQueueLocalDataSource ?? SyncQueueLocalDataSource(),
+       _syncService = syncService ?? SyncService(),
        _uuid = uuid ?? const Uuid();
 
   final UserLocalDataSource _localDataSource;
-  final UserRemoteDataSource _remoteDataSource;
+  final SyncQueueLocalDataSource _syncQueueLocalDataSource;
+  final SyncService _syncService;
   final Uuid _uuid;
 
   @override
@@ -86,7 +93,8 @@ class UserRepositoryImpl implements UserRepository {
     );
 
     await _localDataSource.insertOrUpdateUser(updatedUser);
-    await _tryRemoteUpsert(updatedUser);
+    await _enqueue(updatedUser, 'update', 'pending_update');
+    await _syncService.syncPendingData();
     return updatedUser;
   }
 
@@ -105,7 +113,8 @@ class UserRepositoryImpl implements UserRepository {
     );
 
     await _localDataSource.insertOrUpdateUser(deletedUser);
-    await _tryRemoteUpsert(deletedUser);
+    await _enqueue(deletedUser, 'delete', 'pending_delete');
+    await _syncService.syncPendingData();
   }
 
   Future<AppUser> _createUser({
@@ -135,7 +144,8 @@ class UserRepositoryImpl implements UserRepository {
     );
 
     await _localDataSource.insertOrUpdateUser(user);
-    await _tryRemoteUpsert(user);
+    await _enqueue(user, 'create', 'pending_create');
+    await _syncService.syncPendingData();
     return user;
   }
 
@@ -153,12 +163,25 @@ class UserRepositoryImpl implements UserRepository {
     return currentUser;
   }
 
-  Future<void> _tryRemoteUpsert(AppUserModel user) async {
-    try {
-      await _remoteDataSource.upsertUser(user);
-      await _localDataSource.markUserSynced(user.id);
-    } catch (_) {
-      // Keep SQLite as source of truth for Phase 1 even if Firestore is unavailable.
-    }
+  Future<void> _enqueue(
+    AppUserModel user,
+    String operation,
+    String syncStatus,
+  ) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await _syncQueueLocalDataSource.enqueue(
+      SyncQueueModel(
+        id: _uuid.v4(),
+        businessId: user.businessId,
+        tableName: DatabaseTables.users,
+        recordId: user.id,
+        operation: operation,
+        payload: user.toMap(),
+        retryCount: 0,
+        createdAt: now,
+        updatedAt: now,
+        syncStatus: syncStatus,
+      ),
+    );
   }
 }

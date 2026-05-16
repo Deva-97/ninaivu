@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:insurance_reminders/core/services/auth_service.dart';
+import 'package:insurance_reminders/core/widgets/responsive_layout.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   const OtpVerificationScreen({super.key});
@@ -153,88 +154,87 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final responsive = context.responsive;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Verify OTP')),
       body: SafeArea(
         child: AbsorbPointer(
           absorbing: _isLoading,
-          child: ListView(
-            padding: const EdgeInsets.all(24),
-            children: [
-              const SizedBox(height: 24),
-
-              Icon(Icons.sms_outlined, size: 72, color: colorScheme.primary),
-
-              const SizedBox(height: 24),
-
-              const Text(
-                'OTP Verification',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-              ),
-
-              const SizedBox(height: 8),
-
-              Text(
-                'Enter the OTP sent to +91 $_mobileNumber',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: colorScheme.onSurfaceVariant),
-              ),
-
-              const SizedBox(height: 32),
-
-              TextField(
-                controller: _otpController,
-                keyboardType: TextInputType.number,
-                maxLength: 6,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: const InputDecoration(
-                  labelText: 'OTP',
-                  hintText: 'Enter 6-digit OTP',
-                  border: OutlineInputBorder(),
-                  counterText: '',
+          child: ResponsiveContent(
+            child: ListView(
+              padding: EdgeInsets.all(responsive.pagePadding),
+              children: [
+                SizedBox(height: responsive.sectionGap),
+                Icon(
+                  Icons.sms_outlined,
+                  size: responsive.heroIconSize,
+                  color: colorScheme.primary,
                 ),
-              ),
-
-              const SizedBox(height: 20),
-
-              SizedBox(
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: _verifyOtp,
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2.5),
-                        )
-                      : const Text('Verify OTP'),
+                SizedBox(height: responsive.sectionGap),
+                Text(
+                  'OTP Verification',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: responsive.titleSize,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-
-              const SizedBox(height: 16),
-
-              SizedBox(
-                height: 48,
-                child: OutlinedButton.icon(
-                  onPressed: _canResend ? _resendOtp : null,
-                  icon: const Icon(Icons.refresh_rounded),
-                  label: Text(_resendButtonText),
+                SizedBox(height: responsive.scaled(8, min: 6)),
+                Text(
+                  'Enter the OTP sent to +91 $_mobileNumber',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: colorScheme.onSurfaceVariant),
                 ),
-              ),
-
-              const SizedBox(height: 16),
-
-              Text(
-                'Didn’t receive the SMS? You can request a new OTP after 60 seconds.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: colorScheme.onSurfaceVariant,
+                SizedBox(height: responsive.scaled(32, min: 24)),
+                TextField(
+                  controller: _otpController,
+                  keyboardType: TextInputType.number,
+                  maxLength: 6,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: const InputDecoration(
+                    labelText: 'OTP',
+                    hintText: 'Enter 6-digit OTP',
+                    border: OutlineInputBorder(),
+                    counterText: '',
+                  ),
                 ),
-              ),
-            ],
+                SizedBox(height: responsive.scaled(20, min: 16)),
+                SizedBox(
+                  height: responsive.buttonHeight,
+                  child: ElevatedButton(
+                    onPressed: _verifyOtp,
+                    child: _isLoading
+                        ? SizedBox(
+                            width: responsive.scaled(22, min: 18),
+                            height: responsive.scaled(22, min: 18),
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                            ),
+                          )
+                        : const Text('Verify OTP'),
+                  ),
+                ),
+                SizedBox(height: responsive.itemGap),
+                SizedBox(
+                  height: responsive.compactButtonHeight,
+                  child: OutlinedButton.icon(
+                    onPressed: _canResend ? _resendOtp : null,
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: Text(_resendButtonText),
+                  ),
+                ),
+                SizedBox(height: responsive.itemGap),
+                Text(
+                  'Didn\'t receive the SMS? You can request a new OTP after 60 seconds.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: responsive.helperTextSize,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

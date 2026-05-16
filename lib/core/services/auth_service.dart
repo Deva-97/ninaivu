@@ -4,11 +4,16 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:insurance_reminders/core/database/database_tables.dart';
 import 'package:insurance_reminders/core/services/app_preferences.dart';
+import 'package:insurance_reminders/core/services/sync_service.dart';
+import 'package:insurance_reminders/data/datasources/local/sync_queue_local_data_source.dart';
 import 'package:insurance_reminders/data/datasources/local/user_local_data_source.dart';
 import 'package:insurance_reminders/data/datasources/remote/user_remote_data_source.dart';
 import 'package:insurance_reminders/data/models/app_user_model.dart';
+import 'package:insurance_reminders/data/models/sync_queue_model.dart';
 import 'package:insurance_reminders/presentation/routes/app_routes.dart';
+import 'package:uuid/uuid.dart';
 
 class OtpSendResult {
   final String verificationId;
@@ -24,14 +29,24 @@ class AuthService {
   final FirebaseAuth firebaseAuth;
   final UserLocalDataSource userLocalDataSource;
   final UserRemoteDataSource userRemoteDataSource;
+  final SyncQueueLocalDataSource _syncQueueLocalDataSource;
+  final SyncService _syncService;
+  final Uuid _uuid;
 
   AuthService({
     FirebaseAuth? firebaseAuth,
     UserLocalDataSource? userLocalDataSource,
     UserRemoteDataSource? userRemoteDataSource,
+    SyncQueueLocalDataSource? syncQueueLocalDataSource,
+    SyncService? syncService,
+    Uuid? uuid,
   }) : firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
        userLocalDataSource = userLocalDataSource ?? UserLocalDataSource(),
-       userRemoteDataSource = userRemoteDataSource ?? UserRemoteDataSource();
+       userRemoteDataSource = userRemoteDataSource ?? UserRemoteDataSource(),
+       _syncQueueLocalDataSource =
+           syncQueueLocalDataSource ?? SyncQueueLocalDataSource(),
+       _syncService = syncService ?? SyncService(),
+       _uuid = uuid ?? const Uuid();
 
   User? get currentUser => firebaseAuth.currentUser;
 
@@ -317,8 +332,21 @@ class AuthService {
     );
 
     await userLocalDataSource.insertOrUpdateUser(user);
-    await userRemoteDataSource.createOrUpdateUser(user);
-    await userLocalDataSource.markUserSynced(user.id);
+    await _syncQueueLocalDataSource.enqueue(
+      SyncQueueModel(
+        id: _uuid.v4(),
+        businessId: user.businessId,
+        tableName: DatabaseTables.users,
+        recordId: user.id,
+        operation: 'create',
+        payload: user.toMap(),
+        retryCount: 0,
+        createdAt: now,
+        updatedAt: now,
+        syncStatus: 'pending_create',
+      ),
+    );
+    await _syncService.syncPendingData();
 
     final preferences = await AppPreferences.getInstance();
     await preferences.saveSession(

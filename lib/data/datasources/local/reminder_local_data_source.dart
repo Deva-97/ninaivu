@@ -41,11 +41,23 @@ class ReminderLocalDataSource {
 
   Future<ReminderModel?> getReminderById(String reminderId) async {
     await markDueRemindersAsMissed();
+    return _getReminderById(reminderId, includeDeleted: false);
+  }
+
+  Future<ReminderModel?> getReminderByIdIncludingDeleted(String reminderId) async {
+    return _getReminderById(reminderId, includeDeleted: true);
+  }
+
+  Future<ReminderModel?> _getReminderById(
+    String reminderId, {
+    required bool includeDeleted,
+  }) async {
     final db = await _databaseHelper.database;
     final result = await db.rawQuery(
       _baseReminderQuery(
-        whereClause:
-            'r.${DatabaseColumns.id} = ? AND r.${DatabaseColumns.isDeleted} = 0',
+        whereClause: includeDeleted
+            ? 'r.${DatabaseColumns.id} = ?'
+            : 'r.${DatabaseColumns.id} = ? AND r.${DatabaseColumns.isDeleted} = 0',
       ),
       [reminderId],
     );
@@ -57,11 +69,24 @@ class ReminderLocalDataSource {
     return ReminderModel.fromMap(result.first);
   }
 
+  Future<void> markReminderSynced(String reminderId) async {
+    final db = await _databaseHelper.database;
+    await db.update(
+      DatabaseTables.reminders,
+      {
+        DatabaseColumns.syncStatus: 'synced',
+        DatabaseColumns.updatedAt: DateTime.now().millisecondsSinceEpoch,
+      },
+      where: '${DatabaseColumns.id} = ?',
+      whereArgs: [reminderId],
+    );
+  }
+
   Future<List<ReminderModel>> getReminders({
     required String businessId,
     required bool isAdmin,
     required String userId,
-    String filter = 'today',
+    String filter = 'pending',
   }) async {
     await markDueRemindersAsMissed();
     final db = await _databaseHelper.database;
@@ -93,6 +118,14 @@ class ReminderLocalDataSource {
     }
 
     switch (normalizedFilter) {
+      case 'pending':
+      case 'all_upcoming':
+      case 'allupcoming':
+        whereClauses.add(
+          "r.status IN ('pending', 'notified') AND r.reminder_date_time >= ?",
+        );
+        args.add(startMs);
+        break;
       case 'today':
         whereClauses.add('r.reminder_date_time >= ? AND r.reminder_date_time < ?');
         args.addAll([startMs, endOfToday]);

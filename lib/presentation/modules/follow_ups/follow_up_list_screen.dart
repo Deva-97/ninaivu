@@ -18,6 +18,8 @@ class FollowUpListScreen extends GetView<FollowUpListController> {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
+    final responsive = context.responsive;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Follow-ups')),
       floatingActionButton: FloatingActionButton.extended(
@@ -33,15 +35,19 @@ class FollowUpListScreen extends GetView<FollowUpListController> {
       body: Column(
         children: [
           SizedBox(
-            height: 58,
-            child: Obx(
-              () {
-                final selectedFilter = controller.selectedFilter.value;
-                return ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            height: responsive.chipBarHeight,
+            child: Obx(() {
+              final selectedFilter = controller.selectedFilter.value;
+              return ResponsiveContent(
+                child: ListView.separated(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: responsive.pagePadding,
+                    vertical: responsive.scaled(10, min: 8),
+                  ),
                   scrollDirection: Axis.horizontal,
                   itemCount: filters.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 8),
+                  separatorBuilder: (_, _) =>
+                      SizedBox(width: responsive.scaled(8, min: 6)),
                   itemBuilder: (context, index) {
                     final filter = filters[index];
                     return ChoiceChip(
@@ -50,9 +56,9 @@ class FollowUpListScreen extends GetView<FollowUpListController> {
                       onSelected: (_) => controller.loadFollowUps(filter: filter.key),
                     );
                   },
-                );
-              },
-            ),
+                ),
+              );
+            }),
           ),
           Expanded(
             child: Obx(() {
@@ -79,73 +85,85 @@ class FollowUpListScreen extends GetView<FollowUpListController> {
 
               return RefreshIndicator(
                 onRefresh: controller.loadFollowUps,
-                child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
-                  itemCount: controller.followUps.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final followUp = controller.followUps[index];
-                    return Card(
-                      child: ListTile(
-                        onTap: () async {
-                          final refreshed = await Get.toNamed(
-                            AppRoutes.followUpDetails,
-                            arguments: followUp.id,
-                          );
-                          if (refreshed == true) {
-                            await controller.loadFollowUps();
-                          }
-                        },
-                        title: Text(followUp.clientName ?? 'Client ${followUp.clientId}'),
-                        subtitle: Text(
-                          '${followUp.type} • ${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(followUp.followUpDateTime))}\n'
-                          '${followUp.policyNumber ?? 'No policy linked'}',
-                        ),
-                        isThreeLine: true,
-                        trailing: PopupMenuButton<String>(
-                          onSelected: (value) async {
-                            if (value == 'edit') {
-                              final refreshed = await Get.toNamed(
-                                AppRoutes.followUpForm,
-                                arguments: followUp,
-                              );
-                              if (refreshed == true) {
-                                await controller.loadFollowUps();
-                              }
-                            } else if (value == 'delete') {
-                              final confirmed = await Get.dialog<bool>(
-                                AlertDialog(
-                                  title: const Text('Delete follow-up'),
-                                  content: const Text('Soft-delete this follow-up?'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Get.back(result: false),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () => Get.back(result: true),
-                                      child: const Text('Delete'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                              if (confirmed == true) {
-                                await controller.deleteFollowUp(followUp.id);
-                              }
+                child: ResponsiveContent(
+                  child: ListView.separated(
+                    padding: EdgeInsets.fromLTRB(
+                      responsive.pagePadding,
+                      responsive.scaled(8, min: 6),
+                      responsive.pagePadding,
+                      responsive.scaled(96, min: 84),
+                    ),
+                    itemCount: controller.followUps.length,
+                    separatorBuilder: (_, _) =>
+                        SizedBox(height: responsive.scaled(12, min: 10)),
+                    itemBuilder: (context, index) {
+                      final followUp = controller.followUps[index];
+                      return Card(
+                        child: ListTile(
+                          onTap: () async {
+                            final refreshed = await Get.toNamed(
+                              AppRoutes.followUpDetails,
+                              arguments: followUp.id,
+                            );
+                            if (refreshed == true) {
+                              await controller.loadFollowUps();
                             }
                           },
-                          itemBuilder: (_) => const [
-                            PopupMenuItem(value: 'edit', child: Text('Edit')),
-                            PopupMenuItem(value: 'delete', child: Text('Delete')),
-                          ],
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: StatusBadge(label: followUp.status),
+                          title: Text(
+                            followUp.clientName ?? 'Client ${followUp.clientId}',
+                          ),
+                          subtitle: Text(
+                            '${followUp.type} • ${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(followUp.followUpDateTime))}\n'
+                            '${followUp.policyNumber ?? 'No policy linked'}',
+                          ),
+                          isThreeLine: true,
+                          trailing: PopupMenuButton<String>(
+                            onSelected: (value) async {
+                              if (value == 'edit') {
+                                final refreshed = await Get.toNamed(
+                                  AppRoutes.followUpForm,
+                                  arguments: followUp,
+                                );
+                                if (refreshed == true) {
+                                  await controller.loadFollowUps();
+                                }
+                              } else if (value == 'delete') {
+                                final confirmed = await Get.dialog<bool>(
+                                  AlertDialog(
+                                    title: const Text('Delete follow-up'),
+                                    content: const Text('Soft-delete this follow-up?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Get.back(result: false),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () => Get.back(result: true),
+                                        child: const Text('Delete'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirmed == true) {
+                                  await controller.deleteFollowUp(followUp.id);
+                                }
+                              }
+                            },
+                            itemBuilder: (_) => const [
+                              PopupMenuItem(value: 'edit', child: Text('Edit')),
+                              PopupMenuItem(value: 'delete', child: Text('Delete')),
+                            ],
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: responsive.scaled(8, min: 6),
+                              ),
+                              child: StatusBadge(label: followUp.status),
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               );
             }),

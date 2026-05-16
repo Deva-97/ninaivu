@@ -1,9 +1,13 @@
 import 'package:insurance_reminders/core/permissions/permission_helper.dart';
 import 'package:insurance_reminders/core/permissions/user_role.dart';
+import 'package:insurance_reminders/core/services/sync_service.dart';
+import 'package:insurance_reminders/core/database/database_tables.dart';
 import 'package:insurance_reminders/data/datasources/local/client_local_data_source.dart';
+import 'package:insurance_reminders/data/datasources/local/sync_queue_local_data_source.dart';
 import 'package:insurance_reminders/data/datasources/local/user_local_data_source.dart';
 import 'package:insurance_reminders/data/models/app_user_model.dart';
 import 'package:insurance_reminders/data/models/client_model.dart';
+import 'package:insurance_reminders/data/models/sync_queue_model.dart';
 import 'package:insurance_reminders/domain/entities/client.dart';
 import 'package:insurance_reminders/domain/repositories/client_repository.dart';
 import 'package:uuid/uuid.dart';
@@ -11,14 +15,21 @@ import 'package:uuid/uuid.dart';
 class ClientRepositoryImpl implements ClientRepository {
   ClientRepositoryImpl({
     ClientLocalDataSource? localDataSource,
+    SyncQueueLocalDataSource? syncQueueLocalDataSource,
     UserLocalDataSource? userLocalDataSource,
+    SyncService? syncService,
     Uuid? uuid,
   }) : _localDataSource = localDataSource ?? ClientLocalDataSource(),
+       _syncQueueLocalDataSource =
+           syncQueueLocalDataSource ?? SyncQueueLocalDataSource(),
        _userLocalDataSource = userLocalDataSource ?? UserLocalDataSource(),
+       _syncService = syncService ?? SyncService(),
        _uuid = uuid ?? const Uuid();
 
   final ClientLocalDataSource _localDataSource;
+  final SyncQueueLocalDataSource _syncQueueLocalDataSource;
   final UserLocalDataSource _userLocalDataSource;
+  final SyncService _syncService;
   final Uuid _uuid;
 
   @override
@@ -61,8 +72,15 @@ class ClientRepositoryImpl implements ClientRepository {
   }
 
   @override
-  Future<Client?> getClientDetails(String clientId) =>
-      _localDataSource.getClientById(clientId);
+  Future<Client?> getClientDetails(String clientId) async {
+    final currentUser = await _requireCurrentUser();
+    final client = await _localDataSource.getClientById(clientId);
+    if (client == null) {
+      return null;
+    }
+    _ensureClientAccess(currentUser, client);
+    return client;
+  }
 
   @override
   Future<Client> addClient({
@@ -95,6 +113,8 @@ class ClientRepositoryImpl implements ClientRepository {
     );
 
     await _localDataSource.insertClient(client);
+    await _enqueue(client, 'create', 'pending_create');
+    await _syncService.syncPendingData();
     return client;
   }
 
@@ -113,10 +133,17 @@ class ClientRepositoryImpl implements ClientRepository {
     }
 
     final updatedClient = ClientModel.fromEntity(client).copyWith(
+      businessId: existing.businessId,
+      createdBy: existing.createdBy,
+      agentId: client.agentId ?? existing.agentId,
+      assignedTo: client.assignedTo ?? existing.assignedTo ?? existing.agentId,
+      createdAt: existing.createdAt,
       updatedAt: DateTime.now().millisecondsSinceEpoch,
       syncStatus: 'pending_update',
     );
     await _localDataSource.updateClient(updatedClient);
+    await _enqueue(updatedClient, 'update', 'pending_update');
+    await _syncService.syncPendingData();
     return updatedClient;
   }
 
@@ -135,6 +162,13 @@ class ClientRepositoryImpl implements ClientRepository {
     }
 
     await _localDataSource.softDeleteClient(clientId);
+    final deletedClient = existing.copyWith(
+      isDeleted: true,
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
+      syncStatus: 'pending_delete',
+    );
+    await _enqueue(deletedClient, 'delete', 'pending_delete');
+    await _syncService.syncPendingData();
   }
 
   Future<AppUserModel> _requireCurrentUser() async {
@@ -152,5 +186,40 @@ class ClientRepositoryImpl implements ClientRepository {
       throw Exception('You do not have permission to manage clients.');
     }
     return currentUser;
+  }
+
+  void _ensureClientAccess(AppUserModel currentUser, Client client) {
+    final role = currentUser.role.toAppRole();
+    if (!PermissionHelper.canAccessOwnRecord(
+      role: role,
+      currentUserId: currentUser.id,
+      createdBy: client.createdBy,
+      agentId: client.agentId,
+      assignedTo: client.assignedTo,
+    )) {
+      throw Exception('You can only view your own clients.');
+    }
+  }
+
+  Future<void> _enqueue(
+    ClientModel client,
+    String operation,
+    String syncStatus,
+  ) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await _syncQueueLocalDataSource.enqueue(
+      SyncQueueModel(
+        id: _uuid.v4(),
+        businessId: client.businessId,
+        tableName: DatabaseTables.clients,
+        recordId: client.id,
+        operation: operation,
+        payload: client.toMap(),
+        retryCount: 0,
+        createdAt: now,
+        updatedAt: now,
+        syncStatus: syncStatus,
+      ),
+    );
   }
 }

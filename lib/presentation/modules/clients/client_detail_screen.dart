@@ -9,6 +9,8 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = context.responsive;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Client Details'),
@@ -51,12 +53,13 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
           );
         }
 
-        return ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        return ResponsiveContent(
+          child: ListView(
+            padding: EdgeInsets.all(responsive.pagePadding),
+            children: [
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(responsive.pagePadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -64,7 +67,7 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
                       client.name,
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: responsive.itemGap),
                     _DetailRow(label: 'Mobile', value: client.mobile),
                     _DetailRow(
                       label: 'Alternate',
@@ -82,10 +85,10 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             Wrap(
-              spacing: 12,
-              runSpacing: 12,
+              spacing: responsive.scaled(12, min: 10),
+              runSpacing: responsive.scaled(12, min: 10),
               children: [
                 FilledButton.icon(
                   onPressed: () => controller.callClient().catchError(_showError),
@@ -115,7 +118,7 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: responsive.sectionGap),
             TextButton.icon(
               onPressed: () async {
                 final confirmed = await Get.dialog<bool>(
@@ -141,7 +144,8 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
               icon: const Icon(Icons.delete_outline),
               label: const Text('Delete Client'),
             ),
-          ],
+            ],
+          ),
         );
       }),
     );
@@ -160,12 +164,14 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = context.responsive;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: EdgeInsets.only(bottom: responsive.scaled(10, min: 8)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 110, child: Text(label)),
+          SizedBox(width: responsive.detailLabelWidth, child: Text(label)),
           Expanded(child: Text(value)),
         ],
       ),

@@ -162,4 +162,60 @@ class PolicyModel extends Policy {
       syncStatus: map['sync_status'] as String? ?? 'synced',
     );
   }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'id': id,
+      'businessId': businessId,
+      'clientId': clientId,
+      'insuranceType': insuranceType,
+      'policyNumber': policyNumber,
+      'companyName': companyName,
+      'startDate': startDate,
+      'endDate': endDate,
+      'premiumAmount': premiumAmount,
+      'paymentFrequency': paymentFrequency,
+      'vehicleNumber': vehicleNumber,
+      'vehicleModel': vehicleModel,
+      'status': status,
+      'notes': notes,
+      'createdBy': createdBy,
+      'agentId': agentId,
+      'subAgentId': subAgentId,
+      'customerUserId': customerUserId,
+      'assignedTo': assignedTo,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'isDeleted': isDeleted,
+      'syncStatus': syncStatus,
+    };
+  }
+
+  factory PolicyModel.fromFirestore(Map<String, dynamic> map) {
+    return PolicyModel(
+      id: map['id'] as String,
+      businessId: map['businessId'] as String,
+      clientId: map['clientId'] as String,
+      insuranceType: map['insuranceType'] as String,
+      policyNumber: map['policyNumber'] as String,
+      companyName: map['companyName'] as String,
+      startDate: map['startDate'] as int,
+      endDate: map['endDate'] as int,
+      premiumAmount: (map['premiumAmount'] as num).toDouble(),
+      paymentFrequency: map['paymentFrequency'] as String?,
+      vehicleNumber: map['vehicleNumber'] as String?,
+      vehicleModel: map['vehicleModel'] as String?,
+      status: map['status'] as String,
+      notes: map['notes'] as String?,
+      createdBy: map['createdBy'] as String,
+      agentId: map['agentId'] as String?,
+      subAgentId: map['subAgentId'] as String?,
+      customerUserId: map['customerUserId'] as String?,
+      assignedTo: map['assignedTo'] as String?,
+      createdAt: map['createdAt'] as int,
+      updatedAt: map['updatedAt'] as int,
+      isDeleted: map['isDeleted'] as bool? ?? false,
+      syncStatus: map['syncStatus'] as String? ?? 'synced',
+    );
+  }
 }

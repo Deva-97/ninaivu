@@ -32,19 +32,22 @@ class _AdminUserFormScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = context.responsive;
+
     return Scaffold(
       appBar: AppBar(title: Text(controller.title)),
       body: Form(
         key: controller.formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        child: ResponsiveContent(
+          child: ListView(
+            padding: EdgeInsets.all(responsive.pagePadding),
+            children: [
             TextFormField(
               controller: controller.nameController,
               validator: controller.validateName,
               decoration: const InputDecoration(labelText: 'Name'),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             TextFormField(
               controller: controller.mobileController,
               keyboardType: TextInputType.phone,
@@ -54,7 +57,7 @@ class _AdminUserFormScaffold extends StatelessWidget {
                 prefixText: '+91 ',
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             TextFormField(
               controller: controller.emailController,
               keyboardType: TextInputType.emailAddress,
@@ -62,10 +65,10 @@ class _AdminUserFormScaffold extends StatelessWidget {
               decoration: const InputDecoration(labelText: 'Email (optional)'),
             ),
             if (!isAgentForm) ...[
-              const SizedBox(height: 16),
+              SizedBox(height: responsive.itemGap),
               Obx(
                 () => DropdownButtonFormField<String?>(
-                  value: controller.selectedAgentId.value,
+                  initialValue: controller.selectedAgentId.value,
                   decoration: const InputDecoration(labelText: 'Assign Agent'),
                   items: [
                     const DropdownMenuItem<String?>(
@@ -84,10 +87,10 @@ class _AdminUserFormScaffold extends StatelessWidget {
               ),
             ],
             if (controller.editingUser != null) ...[
-              const SizedBox(height: 16),
+              SizedBox(height: responsive.itemGap),
               Obx(
                 () => DropdownButtonFormField<String>(
-                  value: controller.status.value,
+                  initialValue: controller.status.value,
                   decoration: const InputDecoration(labelText: 'Status'),
                   items: const [
                     DropdownMenuItem(value: 'active', child: Text('Active')),
@@ -101,10 +104,10 @@ class _AdminUserFormScaffold extends StatelessWidget {
                 ),
               ),
             ],
-            const SizedBox(height: 24),
+            SizedBox(height: responsive.sectionGap),
             Obx(
               () => SizedBox(
-                height: 52,
+                height: responsive.buttonHeight,
                 child: AppButton(
                   label: controller.editingUser == null ? 'Create' : 'Save',
                   onPressed: controller.submit,
@@ -112,7 +115,8 @@ class _AdminUserFormScaffold extends StatelessWidget {
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );

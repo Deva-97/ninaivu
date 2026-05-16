@@ -12,6 +12,8 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
+    final responsive = context.responsive;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Follow-up Details'),
@@ -57,12 +59,13 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
           );
         }
 
-        return ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        return ResponsiveContent(
+          child: ListView(
+            padding: EdgeInsets.all(responsive.pagePadding),
+            children: [
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(18),
+                padding: EdgeInsets.all(responsive.scaled(18, min: 14)),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -70,9 +73,9 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
                       followUp.clientName ?? 'Client ${followUp.clientId}',
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: responsive.itemGap),
                     StatusBadge(label: followUp.status),
-                    const SizedBox(height: 18),
+                    SizedBox(height: responsive.scaled(18, min: 14)),
                     _DetailRow(label: 'Type', value: followUp.type),
                     _DetailRow(
                       label: 'When',
@@ -98,11 +101,11 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: responsive.itemGap),
             if ((followUp.clientMobile ?? '').isNotEmpty)
               Wrap(
-                spacing: 12,
-                runSpacing: 12,
+                spacing: responsive.scaled(12, min: 10),
+                runSpacing: responsive.scaled(12, min: 10),
                 children: [
                   OutlinedButton.icon(
                     onPressed: () => _openUri('tel:${followUp.clientMobile}'),
@@ -118,17 +121,17 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
                   ),
                 ],
               ),
-            const SizedBox(height: 24),
+            SizedBox(height: responsive.sectionGap),
             if (followUp.status != 'Completed' && followUp.status != 'Cancelled')
               SizedBox(
-                height: 50,
+                height: responsive.compactButtonHeight,
                 child: AppButton(
                   label: 'Mark Completed',
                   onPressed: controller.markCompleted,
                   isLoading: controller.isUpdating.value,
                 ),
               ),
-            const SizedBox(height: 12),
+            SizedBox(height: responsive.scaled(12, min: 10)),
             TextButton.icon(
               onPressed: () async {
                 final confirmed = await Get.dialog<bool>(
@@ -154,7 +157,8 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
               icon: const Icon(Icons.delete_outline),
               label: const Text('Delete Follow-up'),
             ),
-          ],
+            ],
+          ),
         );
       }),
     );
@@ -176,12 +180,14 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = context.responsive;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: responsive.scaled(12, min: 10)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 130, child: Text(label)),
+          SizedBox(width: responsive.detailLabelWidth, child: Text(label)),
           Expanded(child: Text(value)),
         ],
       ),

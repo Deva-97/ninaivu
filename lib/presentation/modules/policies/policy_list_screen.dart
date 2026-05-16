@@ -11,6 +11,8 @@ class PolicyListScreen extends GetView<PolicyListController> {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd MMM yyyy');
+    final responsive = context.responsive;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Policies')),
       floatingActionButton: FloatingActionButton.extended(
@@ -29,17 +31,19 @@ class PolicyListScreen extends GetView<PolicyListController> {
       body: Column(
         children: [
           if (controller.clientId == null)
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: TextField(
-                controller: controller.searchController,
-                onSubmitted: (_) => controller.loadPolicies(),
-                decoration: InputDecoration(
-                  hintText: 'Search by policy number, company or type',
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: IconButton(
-                    onPressed: controller.loadPolicies,
-                    icon: const Icon(Icons.refresh),
+            ResponsiveContent(
+              child: Padding(
+                padding: EdgeInsets.all(responsive.pagePadding),
+                child: TextField(
+                  controller: controller.searchController,
+                  onSubmitted: (_) => controller.loadPolicies(),
+                  decoration: InputDecoration(
+                    hintText: 'Search by policy number, company or type',
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: IconButton(
+                      onPressed: controller.loadPolicies,
+                      icon: const Icon(Icons.refresh),
+                    ),
                   ),
                 ),
               ),
@@ -69,69 +73,77 @@ class PolicyListScreen extends GetView<PolicyListController> {
 
               return RefreshIndicator(
                 onRefresh: controller.loadPolicies,
-                child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
-                  itemCount: controller.policies.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final policy = controller.policies[index];
-                    return Card(
-                      child: ListTile(
-                        onTap: () async {
-                          final refreshed = await Get.toNamed(
-                            AppRoutes.policyDetails,
-                            arguments: policy.id,
-                          );
-                          if (refreshed == true) {
-                            await controller.loadPolicies();
-                          }
-                        },
-                        title: Text(policy.policyNumber),
-                        subtitle: Text(
-                          '${policy.companyName} • ${policy.insuranceType}\n'
-                          'Valid till ${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(policy.endDate))}',
-                        ),
-                        isThreeLine: true,
-                        trailing: PopupMenuButton<String>(
-                          onSelected: (value) async {
-                            if (value == 'edit') {
-                              final refreshed = await Get.toNamed(
-                                AppRoutes.policyForm,
-                                arguments: policy,
-                              );
-                              if (refreshed == true) {
-                                await controller.loadPolicies();
-                              }
-                            } else if (value == 'delete') {
-                              final confirmed = await Get.dialog<bool>(
-                                AlertDialog(
-                                  title: const Text('Delete policy'),
-                                  content: Text('Soft-delete ${policy.policyNumber}?'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Get.back(result: false),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () => Get.back(result: true),
-                                      child: const Text('Delete'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                              if (confirmed == true) {
-                                await controller.deletePolicy(policy.id);
-                              }
+                child: ResponsiveContent(
+                  child: ListView.separated(
+                    padding: EdgeInsets.fromLTRB(
+                      responsive.pagePadding,
+                      0,
+                      responsive.pagePadding,
+                      responsive.scaled(96, min: 84),
+                    ),
+                    itemCount: controller.policies.length,
+                    separatorBuilder: (_, _) =>
+                        SizedBox(height: responsive.scaled(12, min: 10)),
+                    itemBuilder: (context, index) {
+                      final policy = controller.policies[index];
+                      return Card(
+                        child: ListTile(
+                          onTap: () async {
+                            final refreshed = await Get.toNamed(
+                              AppRoutes.policyDetails,
+                              arguments: policy.id,
+                            );
+                            if (refreshed == true) {
+                              await controller.loadPolicies();
                             }
                           },
-                          itemBuilder: (_) => const [
-                            PopupMenuItem(value: 'edit', child: Text('Edit')),
-                            PopupMenuItem(value: 'delete', child: Text('Delete')),
-                          ],
+                          title: Text(policy.policyNumber),
+                          subtitle: Text(
+                            '${policy.companyName} • ${policy.insuranceType}\n'
+                            'Valid till ${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(policy.endDate))}',
+                          ),
+                          isThreeLine: true,
+                          trailing: PopupMenuButton<String>(
+                            onSelected: (value) async {
+                              if (value == 'edit') {
+                                final refreshed = await Get.toNamed(
+                                  AppRoutes.policyForm,
+                                  arguments: policy,
+                                );
+                                if (refreshed == true) {
+                                  await controller.loadPolicies();
+                                }
+                              } else if (value == 'delete') {
+                                final confirmed = await Get.dialog<bool>(
+                                  AlertDialog(
+                                    title: const Text('Delete policy'),
+                                    content: Text('Soft-delete ${policy.policyNumber}?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Get.back(result: false),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () => Get.back(result: true),
+                                        child: const Text('Delete'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirmed == true) {
+                                  await controller.deletePolicy(policy.id);
+                                }
+                              }
+                            },
+                            itemBuilder: (_) => const [
+                              PopupMenuItem(value: 'edit', child: Text('Edit')),
+                              PopupMenuItem(value: 'delete', child: Text('Delete')),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               );
             }),

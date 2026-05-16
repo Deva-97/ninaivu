@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:insurance_reminders/core/validation/policy_validator.dart';
 import 'package:insurance_reminders/data/models/policy_model.dart';
 import 'package:insurance_reminders/domain/entities/policy.dart';
 import 'package:insurance_reminders/domain/usecases/policies/add_policy_usecase.dart';
@@ -132,8 +133,12 @@ class PolicyFormController extends GetxController {
       return;
     }
 
-    if (!endDate.value.isAfter(startDate.value)) {
-      Get.snackbar('Invalid dates', 'Policy end date must be after start date.');
+    final dateError = PolicyValidator.validateDateRange(
+      startDate: startDate.value,
+      endDate: endDate.value,
+    );
+    if (dateError != null) {
+      Get.snackbar('Invalid dates', dateError);
       return;
     }
 

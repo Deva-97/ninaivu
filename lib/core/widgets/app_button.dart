@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:insurance_reminders/core/widgets/responsive_layout.dart';
 
 class AppButton extends StatelessWidget {
   const AppButton({
@@ -18,19 +19,21 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = context.responsive;
     final child = Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (isLoading)
-          const SizedBox(
-            width: 18,
-            height: 18,
+          SizedBox(
+            width: responsive.scaled(18, min: 16),
+            height: responsive.scaled(18, min: 16),
             child: CircularProgressIndicator(strokeWidth: 2.2),
           )
         else if (icon != null)
-          Icon(icon, size: 18),
-        if (isLoading || icon != null) const SizedBox(width: 10),
+          Icon(icon, size: responsive.scaled(18, min: 16)),
+        if (isLoading || icon != null)
+          SizedBox(width: responsive.scaled(10, min: 8)),
         Flexible(
           child: Text(
             label,

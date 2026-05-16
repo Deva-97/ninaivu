@@ -65,6 +65,13 @@ class UserRemoteDataSource {
 
   Future<void> syncUser(AppUserModel user) => upsertUser(user);
 
+  Future<void> deleteUser({
+    required String businessId,
+    required String userId,
+  }) async {
+    await _userCollection(businessId).doc(userId).delete();
+  }
+
   Future<List<AppUserModel>> fetchUsersForBusiness(String businessId) async {
     final snapshot = await _userCollection(businessId).get();
     return snapshot.docs

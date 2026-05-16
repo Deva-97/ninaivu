@@ -10,7 +10,7 @@ class ReminderListController extends GetxController {
   final GetRemindersUseCase _getRemindersUseCase;
 
   final reminders = <Reminder>[].obs;
-  final selectedFilter = 'today'.obs;
+  final selectedFilter = 'pending'.obs;
   final isLoading = false.obs;
   final errorMessage = RxnString();
 
@@ -37,7 +37,7 @@ class ReminderListController extends GetxController {
     super.onInit();
     final args = Get.arguments;
     if (args is Map<String, dynamic>) {
-      selectedFilter.value = args['filter'] as String? ?? 'today';
+      selectedFilter.value = args['filter'] as String? ?? 'pending';
     }
     loadReminders();
   }

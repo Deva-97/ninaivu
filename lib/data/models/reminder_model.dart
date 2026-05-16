@@ -144,4 +144,54 @@ class ReminderModel extends Reminder {
       companyName: map['company_name'] as String?,
     );
   }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'id': id,
+      'businessId': businessId,
+      'clientId': clientId,
+      'policyId': policyId,
+      'reminderDateTime': reminderDateTime,
+      'reminderType': reminderType,
+      'status': status,
+      'notificationId': notificationId,
+      'createdBy': createdBy,
+      'agentId': agentId,
+      'subAgentId': subAgentId,
+      'customerUserId': customerUserId,
+      'assignedTo': assignedTo,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'isDeleted': isDeleted,
+      'syncStatus': syncStatus,
+      'clientName': clientName,
+      'policyNumber': policyNumber,
+      'companyName': companyName,
+    };
+  }
+
+  factory ReminderModel.fromFirestore(Map<String, dynamic> map) {
+    return ReminderModel(
+      id: map['id'] as String,
+      businessId: map['businessId'] as String,
+      clientId: map['clientId'] as String,
+      policyId: map['policyId'] as String,
+      reminderDateTime: map['reminderDateTime'] as int,
+      reminderType: map['reminderType'] as String,
+      status: map['status'] as String,
+      notificationId: map['notificationId'] as int?,
+      createdBy: map['createdBy'] as String,
+      agentId: map['agentId'] as String?,
+      subAgentId: map['subAgentId'] as String?,
+      customerUserId: map['customerUserId'] as String?,
+      assignedTo: map['assignedTo'] as String?,
+      createdAt: map['createdAt'] as int,
+      updatedAt: map['updatedAt'] as int,
+      isDeleted: map['isDeleted'] as bool? ?? false,
+      syncStatus: map['syncStatus'] as String? ?? 'synced',
+      clientName: map['clientName'] as String?,
+      policyNumber: map['policyNumber'] as String?,
+      companyName: map['companyName'] as String?,
+    );
+  }
 }

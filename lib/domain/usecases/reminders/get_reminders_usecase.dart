@@ -6,6 +6,6 @@ class GetRemindersUseCase {
 
   final ReminderRepository _repository;
 
-  Future<List<Reminder>> call({String filter = 'today'}) =>
+  Future<List<Reminder>> call({String filter = 'pending'}) =>
       _repository.getReminders(filter: filter);
 }

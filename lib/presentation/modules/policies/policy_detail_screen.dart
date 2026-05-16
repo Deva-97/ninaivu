@@ -12,6 +12,8 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
   Widget build(BuildContext context) {
     final currency = NumberFormat.currency(symbol: 'Rs. ');
     final dateFormat = DateFormat('dd MMM yyyy');
+    final responsive = context.responsive;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Policy Details'),
@@ -54,12 +56,13 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
           );
         }
 
-        return ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        return ResponsiveContent(
+          child: ListView(
+            padding: EdgeInsets.all(responsive.pagePadding),
+            children: [
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(responsive.pagePadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -67,7 +70,7 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
                       policy.policyNumber,
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: responsive.itemGap),
                     _DetailRow(label: 'Company', value: policy.companyName),
                     _DetailRow(label: 'Type', value: policy.insuranceType),
                     _DetailRow(label: 'Client ID', value: policy.clientId),
@@ -97,7 +100,7 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: responsive.sectionGap),
             TextButton.icon(
               onPressed: () async {
                 final confirmed = await Get.dialog<bool>(
@@ -123,7 +126,8 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
               icon: const Icon(Icons.delete_outline),
               label: const Text('Delete Policy'),
             ),
-          ],
+            ],
+          ),
         );
       }),
     );
@@ -138,12 +142,14 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = context.responsive;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: EdgeInsets.only(bottom: responsive.scaled(10, min: 8)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 110, child: Text(label)),
+          SizedBox(width: responsive.detailLabelWidth, child: Text(label)),
           Expanded(child: Text(value)),
         ],
       ),

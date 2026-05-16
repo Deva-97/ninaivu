@@ -1,4 +1,4 @@
-import 'package:get/get_navigation/src/routes/get_route.dart';
+import 'package:get/get.dart';
 import 'package:insurance_reminders/presentation/bindings/admin_user_bindings.dart';
 import 'package:insurance_reminders/presentation/bindings/client_bindings.dart';
 import 'package:insurance_reminders/presentation/bindings/dashboard_bindings.dart';
@@ -25,6 +25,7 @@ import 'package:insurance_reminders/presentation/modules/policies/policy_list_sc
 import 'package:insurance_reminders/presentation/modules/reminders/reminder_detail_screen.dart';
 import 'package:insurance_reminders/presentation/modules/reminders/reminder_list_screen.dart';
 import 'package:insurance_reminders/presentation/routes/app_routes.dart';
+import 'package:insurance_reminders/presentation/routes/route_middleware.dart';
 
 class AppPages {
   AppPages._();
@@ -44,86 +45,154 @@ class AppPages {
       name: AppRoutes.adminDashboard,
       page: () => const AdminDashboardScreen(),
       binding: AdminDashboardBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin']),
+      ],
     ),
     GetPage(
       name: AppRoutes.agentDashboard,
       page: () => const AgentDashboardScreen(),
       binding: AgentDashboardBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin', 'agent']),
+      ],
     ),
     GetPage(
       name: AppRoutes.agentList,
       page: () => const AgentListScreen(),
       binding: AgentListBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin']),
+      ],
     ),
     GetPage(
       name: AppRoutes.addEditAgent,
       page: () => const AddEditAgentScreen(),
       binding: AgentFormBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin']),
+      ],
     ),
     GetPage(
       name: AppRoutes.customerList,
       page: () => const CustomerListScreen(),
       binding: CustomerListBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin']),
+      ],
     ),
     GetPage(
       name: AppRoutes.addEditCustomer,
       page: () => const AddEditCustomerScreen(),
       binding: CustomerFormBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin']),
+      ],
     ),
     GetPage(
       name: AppRoutes.clients,
       page: () => const ClientListScreen(),
       binding: ClientListBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin', 'agent']),
+      ],
     ),
     GetPage(
       name: AppRoutes.clientForm,
       page: () => const AddEditClientScreen(),
       binding: ClientFormBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin', 'agent']),
+      ],
     ),
     GetPage(
       name: AppRoutes.clientDetails,
       page: () => const ClientDetailScreen(),
       binding: ClientDetailBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin', 'agent']),
+      ],
     ),
     GetPage(
       name: AppRoutes.policies,
       page: () => const PolicyListScreen(),
       binding: PolicyListBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin', 'agent']),
+      ],
     ),
     GetPage(
       name: AppRoutes.policyForm,
       page: () => const AddEditPolicyScreen(),
       binding: PolicyFormBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin', 'agent']),
+      ],
     ),
     GetPage(
       name: AppRoutes.policyDetails,
       page: () => const PolicyDetailScreen(),
       binding: PolicyDetailBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin', 'agent']),
+      ],
     ),
     GetPage(
       name: AppRoutes.reminders,
       page: () => const ReminderListScreen(),
       binding: ReminderListBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin', 'agent']),
+      ],
     ),
     GetPage(
       name: AppRoutes.reminderDetails,
       page: () => const ReminderDetailScreen(),
       binding: ReminderDetailBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin', 'agent']),
+      ],
     ),
     GetPage(
       name: AppRoutes.followUps,
       page: () => const FollowUpListScreen(),
       binding: FollowUpListBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin', 'agent']),
+      ],
     ),
     GetPage(
       name: AppRoutes.followUpForm,
       page: () => const AddEditFollowUpScreen(),
       binding: FollowUpFormBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin', 'agent']),
+      ],
     ),
     GetPage(
       name: AppRoutes.followUpDetails,
       page: () => const FollowUpDetailScreen(),
       binding: FollowUpDetailBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin', 'agent']),
+      ],
     ),
   ];
 }

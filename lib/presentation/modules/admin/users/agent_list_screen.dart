@@ -39,6 +39,8 @@ class _AdminUserListScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = context.responsive;
+
     return Scaffold(
       appBar: AppBar(title: Text(controller.title)),
       floatingActionButton: FloatingActionButton.extended(
@@ -53,17 +55,19 @@ class _AdminUserListScaffold extends StatelessWidget {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: controller.searchController,
-              onSubmitted: (_) => controller.loadUsers(),
-              decoration: InputDecoration(
-                hintText: 'Search by name, mobile or email',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: IconButton(
-                  onPressed: controller.loadUsers,
-                  icon: const Icon(Icons.refresh),
+          ResponsiveContent(
+            child: Padding(
+              padding: EdgeInsets.all(responsive.pagePadding),
+              child: TextField(
+                controller: controller.searchController,
+                onSubmitted: (_) => controller.loadUsers(),
+                decoration: InputDecoration(
+                  hintText: 'Search by name, mobile or email',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: IconButton(
+                    onPressed: controller.loadUsers,
+                    icon: const Icon(Icons.refresh),
+                  ),
                 ),
               ),
             ),
@@ -89,64 +93,79 @@ class _AdminUserListScaffold extends StatelessWidget {
                       ? Icons.manage_accounts_outlined
                       : Icons.groups_outlined,
                   title: 'No ${controller.title.toLowerCase()} yet',
-                  subtitle: 'Create your first ${controller.isAgentList ? 'agent' : 'customer'} to get started.',
+                  subtitle:
+                      'Create your first ${controller.isAgentList ? 'agent' : 'customer'} to get started.',
                 );
               }
 
               return RefreshIndicator(
                 onRefresh: controller.loadUsers,
-                child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
-                  itemCount: controller.users.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final user = controller.users[index];
-                    return Card(
-                      child: ListTile(
-                        title: Text(user.name),
-                        subtitle: Text(
-                          [
-                            if ((user.mobile ?? '').isNotEmpty) user.mobile!,
-                            if ((user.email ?? '').isNotEmpty) user.email!,
-                          ].join(' • '),
-                        ),
-                        trailing: PopupMenuButton<String>(
-                          onSelected: (value) async {
-                            if (value == 'edit') {
-                              final refreshed = await Get.toNamed(formRoute, arguments: user);
-                              if (refreshed == true) {
-                                await controller.loadUsers();
+                child: ResponsiveContent(
+                  child: ListView.separated(
+                    padding: EdgeInsets.fromLTRB(
+                      responsive.pagePadding,
+                      0,
+                      responsive.pagePadding,
+                      responsive.scaled(96, min: 84),
+                    ),
+                    itemCount: controller.users.length,
+                    separatorBuilder: (_, _) =>
+                        SizedBox(height: responsive.scaled(12, min: 10)),
+                    itemBuilder: (context, index) {
+                      final user = controller.users[index];
+                      return Card(
+                        child: ListTile(
+                          title: Text(user.name),
+                          subtitle: Text(
+                            [
+                              if ((user.mobile ?? '').isNotEmpty) user.mobile!,
+                              if ((user.email ?? '').isNotEmpty) user.email!,
+                            ].join(' • '),
+                          ),
+                          trailing: PopupMenuButton<String>(
+                            onSelected: (value) async {
+                              if (value == 'edit') {
+                                final refreshed = await Get.toNamed(
+                                  formRoute,
+                                  arguments: user,
+                                );
+                                if (refreshed == true) {
+                                  await controller.loadUsers();
+                                }
+                              } else if (value == 'delete') {
+                                final confirmed = await Get.dialog<bool>(
+                                  AlertDialog(
+                                    title: const Text('Delete user'),
+                                    content: Text('Soft-delete ${user.name}?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Get.back(result: false),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () => Get.back(result: true),
+                                        child: const Text('Delete'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirmed == true) {
+                                  await controller.deleteUser(user.id);
+                                }
                               }
-                            } else if (value == 'delete') {
-                              final confirmed = await Get.dialog<bool>(
-                                AlertDialog(
-                                  title: const Text('Delete user'),
-                                  content: Text('Soft-delete ${user.name}?'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Get.back(result: false),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () => Get.back(result: true),
-                                      child: const Text('Delete'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                              if (confirmed == true) {
-                                await controller.deleteUser(user.id);
-                              }
-                            }
-                          },
-                          itemBuilder: (_) => const [
-                            PopupMenuItem(value: 'edit', child: Text('Edit status')),
-                            PopupMenuItem(value: 'delete', child: Text('Delete')),
-                          ],
+                            },
+                            itemBuilder: (_) => const [
+                              PopupMenuItem(
+                                value: 'edit',
+                                child: Text('Edit status'),
+                              ),
+                              PopupMenuItem(value: 'delete', child: Text('Delete')),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               );
             }),

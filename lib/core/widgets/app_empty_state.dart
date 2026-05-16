@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:insurance_reminders/core/widgets/responsive_layout.dart';
 
 import 'app_button.dart';
 
@@ -21,38 +22,42 @@ class AppEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final responsive = context.responsive;
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 48,
-              color: theme.colorScheme.primary,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: theme.textTheme.titleLarge,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              subtitle,
-              style: theme.textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-            if (buttonLabel != null && onPressed != null) ...[
-              const SizedBox(height: 20),
-              AppButton(
-                label: buttonLabel!,
-                onPressed: onPressed,
+    return ResponsiveContent(
+      alignment: Alignment.center,
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.all(responsive.pagePadding),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: responsive.scaled(48, min: 40),
+                color: theme.colorScheme.primary,
               ),
+              SizedBox(height: responsive.itemGap),
+              Text(
+                title,
+                style: theme.textTheme.titleLarge,
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: responsive.scaled(8, min: 6)),
+              Text(
+                subtitle,
+                style: theme.textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+              if (buttonLabel != null && onPressed != null) ...[
+                SizedBox(height: responsive.scaled(20, min: 16)),
+                AppButton(
+                  label: buttonLabel!,
+                  onPressed: onPressed,
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

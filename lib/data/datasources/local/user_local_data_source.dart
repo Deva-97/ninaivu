@@ -21,10 +21,20 @@ class UserLocalDataSource {
   }
 
   Future<AppUserModel?> getUserById(String id) async {
+    return _getUserById(id, includeDeleted: false);
+  }
+
+  Future<AppUserModel?> getUserByIdIncludingDeleted(String id) async {
+    return _getUserById(id, includeDeleted: true);
+  }
+
+  Future<AppUserModel?> _getUserById(String id, {required bool includeDeleted}) async {
     final db = await databaseHelper.database;
     final result = await db.query(
       DatabaseTables.users,
-      where: '${DatabaseColumns.id} = ? AND ${DatabaseColumns.isDeleted} = 0',
+      where: includeDeleted
+          ? '${DatabaseColumns.id} = ?'
+          : '${DatabaseColumns.id} = ? AND ${DatabaseColumns.isDeleted} = 0',
       whereArgs: [id],
       limit: 1,
     );
@@ -131,6 +141,22 @@ class UserLocalDataSource {
       DatabaseTables.users,
       {
         DatabaseColumns.syncStatus: 'synced',
+        DatabaseColumns.updatedAt: DateTime.now().millisecondsSinceEpoch,
+      },
+      where: '${DatabaseColumns.id} = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> markUserSyncStatus({
+    required String id,
+    required String syncStatus,
+  }) async {
+    final db = await databaseHelper.database;
+    await db.update(
+      DatabaseTables.users,
+      {
+        DatabaseColumns.syncStatus: syncStatus,
         DatabaseColumns.updatedAt: DateTime.now().millisecondsSinceEpoch,
       },
       where: '${DatabaseColumns.id} = ?',

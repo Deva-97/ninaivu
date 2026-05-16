@@ -23,7 +23,15 @@ subprojects {
 
     // Keep third-party Android plugin warnings from polluting the terminal.
     tasks.withType<JavaCompile>().configureEach {
-        options.compilerArgs.add("-nowarn")
+        options.isWarnings = false
+        options.isDeprecation = false
+        options.compilerArgs.addAll(
+            listOf(
+                "-nowarn",
+                "-Xlint:-unchecked",
+                "-Xlint:-deprecation",
+            )
+        )
     }
 
     tasks.withType<KotlinCompile>().configureEach {
