@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:insurance_reminders/core/services/app_preferences.dart';
 import 'package:insurance_reminders/data/datasources/local/user_local_data_source.dart';
 import 'package:insurance_reminders/data/datasources/remote/user_remote_data_source.dart';
 import 'package:insurance_reminders/data/models/app_user_model.dart';
@@ -20,8 +21,6 @@ class OtpSendResult {
 }
 
 class AuthService {
-  // TODO(dev): Move auth orchestration behind repository/usecase layers once the
-  // Week 1 foundation is stable. UI currently instantiates this service directly.
   final FirebaseAuth firebaseAuth;
   final UserLocalDataSource userLocalDataSource;
   final UserRemoteDataSource userRemoteDataSource;
@@ -40,8 +39,9 @@ class AuthService {
     await Future.delayed(const Duration(seconds: 1));
 
     final user = firebaseAuth.currentUser;
-
     if (user == null) {
+      final preferences = await AppPreferences.getInstance();
+      await preferences.clearSession();
       Get.offAllNamed(AppRoutes.login);
       return;
     }
@@ -60,7 +60,6 @@ class AuthService {
       }
 
       final credential = GoogleAuthProvider.credential(idToken: idToken);
-
       await firebaseAuth.signInWithCredential(credential);
       await checkUserAfterLogin();
     } on GoogleSignInException catch (e) {
@@ -208,36 +207,50 @@ class AuthService {
 
   Future<void> checkUserAfterLogin() async {
     final firebaseUser = firebaseAuth.currentUser;
-
     if (firebaseUser == null) {
+      final preferences = await AppPreferences.getInstance();
+      await preferences.clearSession();
       Get.offAllNamed(AppRoutes.login);
       return;
     }
 
+    final preferences = await AppPreferences.getInstance();
     final localUser = await userLocalDataSource.getUserById(firebaseUser.uid);
 
     if (localUser != null && localUser.profileCompleted) {
+      await preferences.saveSession(
+        userId: localUser.id,
+        role: localUser.role,
+        businessId: localUser.businessId,
+      );
       _navigateByRole(localUser.role);
       return;
     }
 
     try {
-      final remoteUser = await userRemoteDataSource.getUserById(
-        firebaseUser.uid,
-      );
-
+      final remoteUser = await userRemoteDataSource.getUserById(firebaseUser.uid);
       if (remoteUser != null && remoteUser.profileCompleted) {
         await userLocalDataSource.insertOrUpdateUser(remoteUser);
+        await userLocalDataSource.markUserSynced(remoteUser.id);
+        await preferences.saveSession(
+          userId: remoteUser.id,
+          role: remoteUser.role,
+          businessId: remoteUser.businessId,
+        );
         _navigateByRole(remoteUser.role);
         return;
       }
     } on UserFetchUnavailableException {
       debugPrint(
-        'Firestore user lookup is temporarily unavailable for '
-        '${firebaseUser.uid}.',
+        'Firestore user lookup is temporarily unavailable for ${firebaseUser.uid}.',
       );
 
       if (localUser != null) {
+        await preferences.saveSession(
+          userId: localUser.id,
+          role: localUser.role,
+          businessId: localUser.businessId,
+        );
         Get.offAllNamed(AppRoutes.profileSetup);
         return;
       }
@@ -248,8 +261,7 @@ class AuthService {
       );
     } on FirebaseException catch (e) {
       debugPrint(
-        'Firestore user lookup failed for ${firebaseUser.uid}: '
-        '${e.code} ${e.message}',
+        'Firestore user lookup failed for ${firebaseUser.uid}: ${e.code} ${e.message}',
       );
       rethrow;
     } catch (e) {
@@ -280,7 +292,6 @@ class AuthService {
     required String inviteCode,
   }) async {
     final firebaseUser = firebaseAuth.currentUser;
-
     if (firebaseUser == null) {
       Get.offAllNamed(AppRoutes.login);
       return;
@@ -288,7 +299,6 @@ class AuthService {
 
     final role = _getRoleFromInviteCode(inviteCode);
     final now = DateTime.now().millisecondsSinceEpoch;
-
     final user = AppUserModel(
       id: firebaseUser.uid,
       businessId: UserRemoteDataSource.defaultBusinessId,
@@ -302,13 +312,20 @@ class AuthService {
       updatedAt: now,
       isDeleted: false,
       syncStatus: 'pending_create',
+      createdBy: firebaseUser.uid,
+      agentId: role == 'agent' ? firebaseUser.uid : null,
     );
 
     await userLocalDataSource.insertOrUpdateUser(user);
-
     await userRemoteDataSource.createOrUpdateUser(user);
-
     await userLocalDataSource.markUserSynced(user.id);
+
+    final preferences = await AppPreferences.getInstance();
+    await preferences.saveSession(
+      userId: user.id,
+      role: user.role,
+      businessId: user.businessId,
+    );
 
     _navigateByRole(role);
   }
@@ -316,20 +333,19 @@ class AuthService {
   Future<void> logout() async {
     await firebaseAuth.signOut();
     await GoogleSignIn.instance.signOut();
+    final preferences = await AppPreferences.getInstance();
+    await preferences.clearSession();
     Get.offAllNamed(AppRoutes.login);
   }
 
   String _getRoleFromInviteCode(String inviteCode) {
     final code = inviteCode.trim().toUpperCase();
-
     if (code == 'NINAIVU_ADMIN') {
       return 'admin';
     }
-
     if (code == 'NINAIVU_AGENT') {
       return 'agent';
     }
-
     throw Exception('Invalid invite code');
   }
 
@@ -365,19 +381,15 @@ class AuthService {
     if (code == 'invalid-phone-number') {
       return 'Enter a valid mobile number with the correct country format.';
     }
-
     if (code == 'too-many-requests') {
       return 'Too many OTP attempts were made. Please wait a while and try again.';
     }
-
     if (code == 'session-expired') {
       return 'The OTP session expired. Please request a new OTP.';
     }
-
     if (code == 'invalid-verification-code') {
       return 'The OTP you entered is incorrect. Please try again.';
     }
-
     if (code == 'network-request-failed') {
       return 'Network error while contacting Firebase. Please check your connection and try again.';
     }

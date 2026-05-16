@@ -1,0 +1,140 @@
+import 'package:insurance_reminders/domain/entities/client.dart';
+
+class ClientModel extends Client {
+  const ClientModel({
+    required super.id,
+    required super.businessId,
+    required super.name,
+    required super.mobile,
+    super.alternateMobile,
+    super.email,
+    super.address,
+    super.areaCity,
+    super.notes,
+    required super.createdBy,
+    super.agentId,
+    super.subAgentId,
+    super.customerUserId,
+    super.assignedTo,
+    required super.createdAt,
+    required super.updatedAt,
+    required super.isDeleted,
+    required super.syncStatus,
+    super.policyCount,
+  });
+
+  factory ClientModel.fromEntity(Client entity) {
+    return ClientModel(
+      id: entity.id,
+      businessId: entity.businessId,
+      name: entity.name,
+      mobile: entity.mobile,
+      alternateMobile: entity.alternateMobile,
+      email: entity.email,
+      address: entity.address,
+      areaCity: entity.areaCity,
+      notes: entity.notes,
+      createdBy: entity.createdBy,
+      agentId: entity.agentId,
+      subAgentId: entity.subAgentId,
+      customerUserId: entity.customerUserId,
+      assignedTo: entity.assignedTo,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      isDeleted: entity.isDeleted,
+      syncStatus: entity.syncStatus,
+      policyCount: entity.policyCount,
+    );
+  }
+
+  ClientModel copyWith({
+    String? id,
+    String? businessId,
+    String? name,
+    String? mobile,
+    String? alternateMobile,
+    String? email,
+    String? address,
+    String? areaCity,
+    String? notes,
+    String? createdBy,
+    String? agentId,
+    String? subAgentId,
+    String? customerUserId,
+    String? assignedTo,
+    int? createdAt,
+    int? updatedAt,
+    bool? isDeleted,
+    String? syncStatus,
+    int? policyCount,
+  }) {
+    return ClientModel(
+      id: id ?? this.id,
+      businessId: businessId ?? this.businessId,
+      name: name ?? this.name,
+      mobile: mobile ?? this.mobile,
+      alternateMobile: alternateMobile ?? this.alternateMobile,
+      email: email ?? this.email,
+      address: address ?? this.address,
+      areaCity: areaCity ?? this.areaCity,
+      notes: notes ?? this.notes,
+      createdBy: createdBy ?? this.createdBy,
+      agentId: agentId ?? this.agentId,
+      subAgentId: subAgentId ?? this.subAgentId,
+      customerUserId: customerUserId ?? this.customerUserId,
+      assignedTo: assignedTo ?? this.assignedTo,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isDeleted: isDeleted ?? this.isDeleted,
+      syncStatus: syncStatus ?? this.syncStatus,
+      policyCount: policyCount ?? this.policyCount,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'business_id': businessId,
+      'name': name,
+      'mobile': mobile,
+      'alternate_mobile': alternateMobile,
+      'email': email,
+      'address': address,
+      'area_city': areaCity,
+      'notes': notes,
+      'created_by': createdBy,
+      'agent_id': agentId,
+      'sub_agent_id': subAgentId,
+      'customer_user_id': customerUserId,
+      'assigned_to': assignedTo,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
+      'is_deleted': isDeleted ? 1 : 0,
+      'sync_status': syncStatus,
+    };
+  }
+
+  factory ClientModel.fromMap(Map<String, dynamic> map) {
+    return ClientModel(
+      id: map['id'] as String,
+      businessId: map['business_id'] as String,
+      name: map['name'] as String,
+      mobile: map['mobile'] as String,
+      alternateMobile: map['alternate_mobile'] as String?,
+      email: map['email'] as String?,
+      address: map['address'] as String?,
+      areaCity: map['area_city'] as String?,
+      notes: map['notes'] as String?,
+      createdBy: map['created_by'] as String,
+      agentId: map['agent_id'] as String?,
+      subAgentId: map['sub_agent_id'] as String?,
+      customerUserId: map['customer_user_id'] as String?,
+      assignedTo: map['assigned_to'] as String?,
+      createdAt: map['created_at'] as int,
+      updatedAt: map['updated_at'] as int,
+      isDeleted: (map['is_deleted'] as int? ?? 0) == 1,
+      syncStatus: map['sync_status'] as String? ?? 'synced',
+      policyCount: map['policy_count'] as int? ?? 0,
+    );
+  }
+}

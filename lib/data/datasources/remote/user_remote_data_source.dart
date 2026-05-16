@@ -10,10 +10,10 @@ class UserFetchUnavailableException implements Exception {
 }
 
 class UserRemoteDataSource {
-  final FirebaseFirestore firestore;
-
   UserRemoteDataSource({FirebaseFirestore? firestore})
     : firestore = firestore ?? FirebaseFirestore.instance;
+
+  final FirebaseFirestore firestore;
 
   static const String defaultBusinessId = 'default_business';
 
@@ -22,19 +22,14 @@ class UserRemoteDataSource {
 
     for (var attempt = 0; attempt < 3; attempt++) {
       try {
-        final doc = await firestore
-            .collection('businesses')
-            .doc(defaultBusinessId)
-            .collection('users')
-            .doc(userId)
-            .get();
-
-        if (!doc.exists || doc.data() == null) return null;
+        final doc = await _userCollection(defaultBusinessId).doc(userId).get();
+        if (!doc.exists || doc.data() == null) {
+          return null;
+        }
 
         return AppUserModel.fromFirestore(doc.data()!);
       } on FirebaseException catch (e) {
         lastError = e;
-
         if (!_isTransientFirestoreError(e) || attempt == 2) {
           break;
         }
@@ -59,13 +54,29 @@ class UserRemoteDataSource {
     return null;
   }
 
-  Future<void> createOrUpdateUser(AppUserModel user) async {
-    await firestore
+  Future<void> upsertUser(AppUserModel user) async {
+    await _userCollection(user.businessId).doc(user.id).set(
+      user.toFirestore(),
+      SetOptions(merge: true),
+    );
+  }
+
+  Future<void> createOrUpdateUser(AppUserModel user) => upsertUser(user);
+
+  Future<void> syncUser(AppUserModel user) => upsertUser(user);
+
+  Future<List<AppUserModel>> fetchUsersForBusiness(String businessId) async {
+    final snapshot = await _userCollection(businessId).get();
+    return snapshot.docs
+        .map((doc) => AppUserModel.fromFirestore(doc.data()))
+        .toList();
+  }
+
+  CollectionReference<Map<String, dynamic>> _userCollection(String businessId) {
+    return firestore
         .collection('businesses')
-        .doc(user.businessId)
-        .collection('users')
-        .doc(user.id)
-        .set(user.toFirestore(), SetOptions(merge: true));
+        .doc(businessId)
+        .collection('users');
   }
 
   bool _isTransientFirestoreError(FirebaseException exception) {

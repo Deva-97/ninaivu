@@ -1,31 +1,47 @@
-enum UserRole { admin, agent, subAgent, customer }
+enum AppRole { admin, agent, subAgent, customer }
 
-extension UserRoleExtension on UserRole {
+extension AppRoleExtension on AppRole {
   String get value {
     switch (this) {
-      case UserRole.admin:
+      case AppRole.admin:
         return 'admin';
-      case UserRole.agent:
+      case AppRole.agent:
         return 'agent';
-      case UserRole.subAgent:
+      case AppRole.subAgent:
         return 'sub_agent';
-      case UserRole.customer:
+      case AppRole.customer:
         return 'customer';
     }
   }
 
-  static UserRole fromString(String role) {
-    switch (role) {
+  String get label {
+    switch (this) {
+      case AppRole.admin:
+        return 'Admin';
+      case AppRole.agent:
+        return 'Agent';
+      case AppRole.subAgent:
+        return 'Sub Agent';
+      case AppRole.customer:
+        return 'Customer';
+    }
+  }
+}
+
+extension AppRoleParsing on String {
+  AppRole toAppRole() {
+    switch (trim().toLowerCase()) {
       case 'admin':
-        return UserRole.admin;
+        return AppRole.admin;
       case 'agent':
-        return UserRole.agent;
+        return AppRole.agent;
       case 'sub_agent':
-        return UserRole.subAgent;
+      case 'subagent':
+        return AppRole.subAgent;
       case 'customer':
-        return UserRole.customer;
+        return AppRole.customer;
       default:
-        return UserRole.agent;
+        return AppRole.agent;
     }
   }
 }

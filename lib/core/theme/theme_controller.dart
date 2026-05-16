@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:insurance_reminders/core/services/app_preferences.dart';
 
 enum AppThemeMode { system, light, dark }
 
 class ThemeController extends GetxController {
-  static const String _themeKey = 'app_theme_mode';
-
   final Rx<AppThemeMode> selectedThemeMode = AppThemeMode.system.obs;
 
   @override
@@ -16,20 +14,18 @@ class ThemeController extends GetxController {
   }
 
   Future<void> loadThemeMode() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedTheme = prefs.getString(_themeKey);
+    final preferences = await AppPreferences.getInstance();
+    final savedTheme = preferences.themeMode;
 
     switch (savedTheme) {
       case 'light':
         selectedThemeMode.value = AppThemeMode.light;
         Get.changeThemeMode(ThemeMode.light);
         break;
-
       case 'dark':
         selectedThemeMode.value = AppThemeMode.dark;
         Get.changeThemeMode(ThemeMode.dark);
         break;
-
       case 'system':
       default:
         selectedThemeMode.value = AppThemeMode.system;
@@ -39,23 +35,20 @@ class ThemeController extends GetxController {
   }
 
   Future<void> changeThemeMode(AppThemeMode mode) async {
-    final prefs = await SharedPreferences.getInstance();
-
+    final preferences = await AppPreferences.getInstance();
     selectedThemeMode.value = mode;
 
     switch (mode) {
       case AppThemeMode.light:
-        await prefs.setString(_themeKey, 'light');
+        await preferences.setThemeMode('light');
         Get.changeThemeMode(ThemeMode.light);
         break;
-
       case AppThemeMode.dark:
-        await prefs.setString(_themeKey, 'dark');
+        await preferences.setThemeMode('dark');
         Get.changeThemeMode(ThemeMode.dark);
         break;
-
       case AppThemeMode.system:
-        await prefs.setString(_themeKey, 'system');
+        await preferences.setThemeMode('system');
         Get.changeThemeMode(ThemeMode.system);
         break;
     }

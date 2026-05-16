@@ -11,7 +11,7 @@ class DatabaseHelper {
   static Database? _database;
 
   static const String databaseName = 'ninaivu.db';
-  static const int databaseVersion = 2;
+  static const int databaseVersion = 3;
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -51,6 +51,12 @@ class DatabaseHelper {
       await _createSyncQueueTable(db);
       await _createAllIndexes(db);
     }
+
+    if (oldVersion < 3) {
+      await _addColumnIfMissing(db, DatabaseTables.users, 'created_by TEXT');
+      await _addColumnIfMissing(db, DatabaseTables.users, 'agent_id TEXT');
+      await _createAllIndexes(db);
+    }
   }
 
   Future<void> _createUsersTable(Database db) async {
@@ -67,7 +73,9 @@ class DatabaseHelper {
         ${DatabaseColumns.createdAt} INTEGER NOT NULL,
         ${DatabaseColumns.updatedAt} INTEGER NOT NULL,
         ${DatabaseColumns.isDeleted} INTEGER NOT NULL DEFAULT 0,
-        ${DatabaseColumns.syncStatus} TEXT NOT NULL
+        ${DatabaseColumns.syncStatus} TEXT NOT NULL,
+        ${DatabaseColumns.createdBy} TEXT,
+        ${DatabaseColumns.agentId} TEXT
       )
     ''');
   }
@@ -203,6 +211,12 @@ class DatabaseHelper {
     await _createIndex(db, 'idx_users_role', DatabaseTables.users, 'role');
     await _createIndex(db, 'idx_users_mobile', DatabaseTables.users, 'mobile');
     await _createIndex(db, 'idx_users_email', DatabaseTables.users, 'email');
+    await _createIndex(
+      db,
+      'idx_users_agent_id',
+      DatabaseTables.users,
+      DatabaseColumns.agentId,
+    );
 
     await _createIndex(
       db,
@@ -433,5 +447,14 @@ class DatabaseHelper {
     await db.execute(
       'CREATE INDEX IF NOT EXISTS $indexName ON $tableName($columnName)',
     );
+  }
+
+  Future<void> _addColumnIfMissing(Database db, String table, String columnDefinition) async {
+    final columnName = columnDefinition.split(' ').first;
+    final tableInfo = await db.rawQuery('PRAGMA table_info($table)');
+    final alreadyExists = tableInfo.any((row) => row['name'] == columnName);
+    if (!alreadyExists) {
+      await db.execute('ALTER TABLE $table ADD COLUMN $columnDefinition');
+    }
   }
 }

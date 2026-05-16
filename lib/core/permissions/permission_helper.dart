@@ -3,31 +3,19 @@ import 'user_role.dart';
 class PermissionHelper {
   PermissionHelper._();
 
-  static bool canCreateAgent(UserRole role) {
-    return role == UserRole.admin;
-  }
+  static bool canManageUsers(AppRole role) => role == AppRole.admin;
 
-  static bool canViewAllClients(UserRole role) {
-    return role == UserRole.admin;
-  }
+  static bool canManageAllClients(AppRole role) => role == AppRole.admin;
 
-  static bool canDeletePolicy(UserRole role) {
-    return role == UserRole.admin;
-  }
+  static bool canManageOwnClients(AppRole role) =>
+      role == AppRole.admin || role == AppRole.agent;
 
-  static bool canManageOwnClients(UserRole role) {
-    return role == UserRole.admin || role == UserRole.agent;
-  }
+  static bool canManagePolicies(AppRole role) =>
+      role == AppRole.admin || role == AppRole.agent;
 
-  static bool canManageOwnPolicies(UserRole role) {
-    return role == UserRole.admin || role == UserRole.agent;
-  }
+  static bool canDeletePolicy(AppRole role) => role == AppRole.admin;
 
-  static bool canCreateFollowUp(UserRole role) {
-    return role == UserRole.admin || role == UserRole.agent;
-  }
+  static bool canViewGlobalDashboard(AppRole role) => role == AppRole.admin;
 
-  static bool canViewReports(UserRole role) {
-    return role == UserRole.admin || role == UserRole.agent;
-  }
+  static bool canAccessSettings(AppRole role) => role == AppRole.admin;
 }
