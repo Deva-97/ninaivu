@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppPreferences {
@@ -8,12 +10,14 @@ class AppPreferences {
   static const String _userIdKey = 'user_id';
   static const String _roleKey = 'role';
   static const String _businessIdKey = 'business_id';
-  static const String _themeModeKey = 'theme_mode';
   static const String _lastSyncTimeKey = 'last_sync_time';
 
   static AppPreferences? _instance;
+  static final StreamController<int?> _lastSyncTimeController =
+      StreamController<int?>.broadcast();
 
   static AppPreferences? get currentInstance => _instance;
+  static Stream<int?> get lastSyncTimeStream => _lastSyncTimeController.stream;
 
   static Future<AppPreferences> getInstance() async {
     if (_instance != null) {
@@ -28,7 +32,6 @@ class AppPreferences {
   String? get userId => _sharedPreferences.getString(_userIdKey);
   String? get role => _sharedPreferences.getString(_roleKey);
   String? get businessId => _sharedPreferences.getString(_businessIdKey);
-  String get themeMode => _sharedPreferences.getString(_themeModeKey) ?? 'system';
   int? get lastSyncTime => _sharedPreferences.getInt(_lastSyncTimeKey);
 
   Future<void> setUserId(String? value) async {
@@ -43,17 +46,15 @@ class AppPreferences {
     await _setOrRemoveString(_businessIdKey, value);
   }
 
-  Future<void> setThemeMode(String value) async {
-    await _sharedPreferences.setString(_themeModeKey, value);
-  }
-
   Future<void> setLastSyncTime(int? value) async {
     if (value == null) {
       await _sharedPreferences.remove(_lastSyncTimeKey);
+      _lastSyncTimeController.add(null);
       return;
     }
 
     await _sharedPreferences.setInt(_lastSyncTimeKey, value);
+    _lastSyncTimeController.add(value);
   }
 
   Future<void> saveSession({
@@ -71,6 +72,7 @@ class AppPreferences {
     await _sharedPreferences.remove(_roleKey);
     await _sharedPreferences.remove(_businessIdKey);
     await _sharedPreferences.remove(_lastSyncTimeKey);
+    _lastSyncTimeController.add(null);
   }
 
   Future<void> _setOrRemoveString(String key, String? value) async {

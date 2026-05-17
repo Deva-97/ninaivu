@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ninaivu/core/constants/app_colors.dart';
 import 'package:ninaivu/core/services/auth_service.dart';
 import 'package:ninaivu/core/services/app_preferences.dart';
+import 'package:ninaivu/core/services/local_data_change_service.dart';
 import 'package:ninaivu/core/services/sync_service.dart';
 import 'package:intl/intl.dart';
 
@@ -19,6 +22,9 @@ abstract class DashboardController<T> extends GetxController {
   final isSyncing = false.obs;
   final errorMessage = RxnString();
   final lastSyncLabel = 'Never synced'.obs;
+  StreamSubscription<int?>? _lastSyncTimeSubscription;
+  StreamSubscription<void>? _localDataChangeSubscription;
+  Timer? _dashboardReloadDebounce;
 
   Future<void> loadDashboard();
 
@@ -26,6 +32,20 @@ abstract class DashboardController<T> extends GetxController {
   void onInit() {
     super.onInit();
     refreshLastSyncLabel();
+    _lastSyncTimeSubscription = AppPreferences.lastSyncTimeStream.listen((_) {
+      refreshLastSyncLabel();
+    });
+    _localDataChangeSubscription = LocalDataChangeService.changes.listen((_) {
+      _scheduleDashboardReload();
+    });
+  }
+
+  @override
+  void onClose() {
+    _lastSyncTimeSubscription?.cancel();
+    _localDataChangeSubscription?.cancel();
+    _dashboardReloadDebounce?.cancel();
+    super.onClose();
   }
 
   Future<void> signOut() async {
@@ -124,5 +144,12 @@ abstract class DashboardController<T> extends GetxController {
       borderRadius: 14,
       duration: const Duration(seconds: 3),
     );
+  }
+
+  void _scheduleDashboardReload() {
+    _dashboardReloadDebounce?.cancel();
+    _dashboardReloadDebounce = Timer(const Duration(milliseconds: 250), () {
+      loadDashboard();
+    });
   }
 }

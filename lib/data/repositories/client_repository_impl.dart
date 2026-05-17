@@ -1,5 +1,6 @@
 import 'package:ninaivu/core/permissions/permission_helper.dart';
 import 'package:ninaivu/core/permissions/user_role.dart';
+import 'package:ninaivu/core/services/local_data_change_service.dart';
 import 'package:ninaivu/core/services/sync_service.dart';
 import 'package:ninaivu/core/database/database_tables.dart';
 import 'package:ninaivu/data/datasources/local/client_local_data_source.dart';
@@ -113,6 +114,7 @@ class ClientRepositoryImpl implements ClientRepository {
     );
 
     await _localDataSource.insertClient(client);
+    LocalDataChangeService.notifyChanged();
     await _enqueue(client, 'create', 'pending_create');
     await _syncService.syncPendingData();
     return client;
@@ -142,6 +144,7 @@ class ClientRepositoryImpl implements ClientRepository {
       syncStatus: 'pending_update',
     );
     await _localDataSource.updateClient(updatedClient);
+    LocalDataChangeService.notifyChanged();
     await _enqueue(updatedClient, 'update', 'pending_update');
     await _syncService.syncPendingData();
     return updatedClient;
@@ -162,6 +165,7 @@ class ClientRepositoryImpl implements ClientRepository {
     }
 
     await _localDataSource.softDeleteClient(clientId);
+    LocalDataChangeService.notifyChanged();
     final deletedClient = existing.copyWith(
       isDeleted: true,
       updatedAt: DateTime.now().millisecondsSinceEpoch,

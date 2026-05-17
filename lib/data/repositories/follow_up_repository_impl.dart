@@ -1,5 +1,6 @@
 import 'package:ninaivu/core/permissions/permission_helper.dart';
 import 'package:ninaivu/core/permissions/user_role.dart';
+import 'package:ninaivu/core/services/local_data_change_service.dart';
 import 'package:ninaivu/core/services/sync_service.dart';
 import 'package:ninaivu/core/database/database_tables.dart';
 import 'package:ninaivu/data/datasources/local/follow_up_local_data_source.dart';
@@ -52,6 +53,7 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
       syncStatus: 'pending_create',
     );
     await _localDataSource.insertFollowUp(model);
+    LocalDataChangeService.notifyChanged();
     await _enqueue(model, 'create', 'pending_create');
     await _syncService.syncPendingData();
     return model;
@@ -76,6 +78,7 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
       syncStatus: 'pending_update',
     );
     await _localDataSource.updateFollowUp(model);
+    LocalDataChangeService.notifyChanged();
     await _enqueue(model, 'update', 'pending_update');
     await _syncService.syncPendingData();
     return model;
@@ -90,6 +93,7 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
     }
     _ensureFollowUpAccess(currentUser, existing);
     await _localDataSource.softDeleteFollowUp(followUpId);
+    LocalDataChangeService.notifyChanged();
     final deleted = existing.copyWith(
       isDeleted: true,
       status: 'Cancelled',
@@ -109,6 +113,7 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
     }
     _ensureFollowUpAccess(currentUser, existing);
     await _localDataSource.markFollowUpCompleted(followUpId);
+    LocalDataChangeService.notifyChanged();
     final updated = existing.copyWith(
       status: 'Completed',
       updatedAt: DateTime.now().millisecondsSinceEpoch,

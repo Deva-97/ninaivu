@@ -1,8 +1,9 @@
 import 'package:ninaivu/core/permissions/permission_helper.dart';
 import 'package:ninaivu/core/permissions/user_role.dart';
-import 'package:ninaivu/core/services/sync_service.dart';
 import 'package:ninaivu/core/database/database_tables.dart';
+import 'package:ninaivu/core/services/local_data_change_service.dart';
 import 'package:ninaivu/core/services/notification_service.dart';
+import 'package:ninaivu/core/services/sync_service.dart';
 import 'package:ninaivu/data/datasources/local/reminder_local_data_source.dart';
 import 'package:ninaivu/data/datasources/local/sync_queue_local_data_source.dart';
 import 'package:ninaivu/data/datasources/local/user_local_data_source.dart';
@@ -72,6 +73,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
       await _notificationService.cancelReminder(reminder.notificationId!);
     }
     await _localDataSource.markReminderCompleted(reminderId);
+    LocalDataChangeService.notifyChanged();
     final updatedReminder = reminder.copyWith(
       status: 'completed',
       updatedAt: DateTime.now().millisecondsSinceEpoch,

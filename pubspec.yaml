@@ -10,19 +10,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-  cupertino_icons: ^1.0.8
   
   firebase_auth: ^6.4.0
   firebase_core: ^4.7.0
   cloud_firestore: ^6.3.0
   firebase_crashlytics: ^5.2.0
-  firebase_analytics: ^12.3.0
   google_sign_in: ^7.2.0
 
   sqflite: ^2.4.2+1
   path: ^1.9.1
-  path_provider: ^2.1.5
 
   shared_preferences: ^2.5.5
   flutter_local_notifications: ^21.0.0
@@ -32,6 +28,7 @@ dependencies:
   uuid: ^4.5.3
   url_launcher: ^6.3.2
   get: ^4.7.3
+  workmanager: ^0.9.0+3
 
 
 dev_dependencies:
@@ -42,4 +39,6 @@ dev_dependencies:
 flutter:
 
   uses-material-design: true
+  assets:
+    - assets/app_identity/ninaivu_appicon.png
 

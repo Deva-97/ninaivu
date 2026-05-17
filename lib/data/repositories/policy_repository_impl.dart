@@ -1,6 +1,7 @@
 import 'package:ninaivu/core/database/database_tables.dart';
 import 'package:ninaivu/core/permissions/permission_helper.dart';
 import 'package:ninaivu/core/permissions/user_role.dart';
+import 'package:ninaivu/core/services/local_data_change_service.dart';
 import 'package:ninaivu/core/services/reminder_generator_service.dart';
 import 'package:ninaivu/core/services/reminder_scheduler_service.dart';
 import 'package:ninaivu/core/services/sync_service.dart';
@@ -141,6 +142,7 @@ class PolicyRepositoryImpl implements PolicyRepository {
     );
     await _localDataSource.insertPolicy(model);
     await _refreshRemindersForPolicy(model);
+    LocalDataChangeService.notifyChanged();
     await _enqueue(model, 'create', 'pending_create');
     await _syncService.syncPendingData();
     return model;
@@ -165,6 +167,7 @@ class PolicyRepositoryImpl implements PolicyRepository {
     );
     await _localDataSource.updatePolicy(model);
     await _refreshRemindersForPolicy(model);
+    LocalDataChangeService.notifyChanged();
     await _enqueue(model, 'update', 'pending_update');
     await _syncService.syncPendingData();
     return model;
@@ -186,6 +189,7 @@ class PolicyRepositoryImpl implements PolicyRepository {
 
     await _cancelAndSoftDeleteReminders(existing.id);
     await _localDataSource.softDeletePolicy(policyId);
+    LocalDataChangeService.notifyChanged();
     final deletedModel = existing.copyWith(
       isDeleted: true,
       updatedAt: DateTime.now().millisecondsSinceEpoch,

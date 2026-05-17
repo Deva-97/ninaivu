@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ninaivu/core/database/database_tables.dart';
+import 'package:ninaivu/core/services/background_sync_service.dart';
 import 'package:ninaivu/core/services/app_preferences.dart';
 import 'package:ninaivu/core/services/sync_service.dart';
 import 'package:ninaivu/data/datasources/local/sync_queue_local_data_source.dart';
@@ -57,6 +58,7 @@ class AuthService {
     if (user == null) {
       final preferences = await AppPreferences.getInstance();
       await preferences.clearSession();
+      await BackgroundSyncService.instance.cancelAllTasks();
       Get.offAllNamed(AppRoutes.login);
       return;
     }
@@ -66,6 +68,7 @@ class AuthService {
 
   Future<void> signInWithGoogle() async {
     try {
+      await _resetGoogleAuthorization();
       final googleUser = await GoogleSignIn.instance.authenticate();
       final googleAuth = googleUser.authentication;
       final idToken = googleAuth.idToken;
@@ -84,6 +87,16 @@ class AuthService {
     } catch (e) {
       throw Exception(e.toString().replaceFirst('Exception: ', ''));
     }
+  }
+
+  Future<void> _resetGoogleAuthorization() async {
+    try {
+      await GoogleSignIn.instance.signOut();
+    } catch (_) {}
+
+    try {
+      await GoogleSignIn.instance.disconnect();
+    } catch (_) {}
   }
 
   Future<void> sendOtp({required String mobileNumber}) async {
@@ -238,6 +251,7 @@ class AuthService {
         role: localUser.role,
         businessId: localUser.businessId,
       );
+      await BackgroundSyncService.instance.ensureRegistered();
       _navigateByRole(localUser.role);
       return;
     }
@@ -252,6 +266,7 @@ class AuthService {
           role: remoteUser.role,
           businessId: remoteUser.businessId,
         );
+        await BackgroundSyncService.instance.ensureRegistered();
         _navigateByRole(remoteUser.role);
         return;
       }
@@ -266,6 +281,7 @@ class AuthService {
           role: localUser.role,
           businessId: localUser.businessId,
         );
+        await BackgroundSyncService.instance.ensureRegistered();
         Get.offAllNamed(AppRoutes.profileSetup);
         return;
       }
@@ -346,7 +362,13 @@ class AuthService {
         syncStatus: 'pending_create',
       ),
     );
-    await _syncService.syncPendingData();
+    final syncedCount = await _syncService.syncPendingData();
+    if (syncedCount == 0) {
+      throw Exception(
+        'Your profile was saved only on this device. Firebase backup did not complete yet. '
+        'Please check your connection and try again.',
+      );
+    }
 
     final preferences = await AppPreferences.getInstance();
     await preferences.saveSession(
@@ -354,6 +376,7 @@ class AuthService {
       role: user.role,
       businessId: user.businessId,
     );
+    await BackgroundSyncService.instance.ensureRegistered();
 
     _navigateByRole(role);
   }
@@ -363,6 +386,7 @@ class AuthService {
     await GoogleSignIn.instance.signOut();
     final preferences = await AppPreferences.getInstance();
     await preferences.clearSession();
+    await BackgroundSyncService.instance.cancelAllTasks();
     Get.offAllNamed(AppRoutes.login);
   }
 

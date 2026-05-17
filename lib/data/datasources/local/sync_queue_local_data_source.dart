@@ -7,6 +7,8 @@ class SyncQueueLocalDataSource {
   SyncQueueLocalDataSource({DatabaseHelper? databaseHelper})
     : _databaseHelper = databaseHelper ?? DatabaseHelper.instance;
 
+  static Future<void> Function()? onItemEnqueued;
+
   final DatabaseHelper _databaseHelper;
 
   Future<void> enqueue(SyncQueueModel item) async {
@@ -16,6 +18,7 @@ class SyncQueueLocalDataSource {
       item.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    await onItemEnqueued?.call();
   }
 
   Future<List<SyncQueueModel>> getPendingItems({

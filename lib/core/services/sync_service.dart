@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:ninaivu/core/database/database_tables.dart';
 import 'package:ninaivu/core/services/app_preferences.dart';
+import 'package:ninaivu/core/permissions/user_role.dart';
 import 'package:ninaivu/data/datasources/local/client_local_data_source.dart';
 import 'package:ninaivu/data/datasources/local/follow_up_local_data_source.dart';
 import 'package:ninaivu/data/datasources/local/policy_local_data_source.dart';
@@ -14,6 +16,15 @@ import 'package:ninaivu/data/datasources/remote/policy_remote_data_source.dart';
 import 'package:ninaivu/data/datasources/remote/reminder_remote_data_source.dart';
 import 'package:ninaivu/data/datasources/remote/user_remote_data_source.dart';
 import 'package:ninaivu/data/models/sync_queue_model.dart';
+
+class SyncFailureException implements Exception {
+  const SyncFailureException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
 
 class SyncService {
   SyncService({
@@ -65,6 +76,7 @@ class SyncService {
   final Connectivity _connectivity;
 
   static const int retryThreshold = 5;
+  static Future<int>? _activeSyncOperation;
 
   Future<bool> isOnline() async {
     final results = await _connectivity.checkConnectivity();
@@ -72,14 +84,39 @@ class SyncService {
   }
 
   Future<int> syncPendingData({bool removeSyncedQueueItems = true}) async {
+    final activeOperation = _activeSyncOperation;
+    if (activeOperation != null) {
+      return activeOperation;
+    }
+
+    final operation = _performSyncPendingData(
+      removeSyncedQueueItems: removeSyncedQueueItems,
+    );
+    _activeSyncOperation = operation;
+
+    try {
+      return await operation;
+    } finally {
+      if (identical(_activeSyncOperation, operation)) {
+        _activeSyncOperation = null;
+      }
+    }
+  }
+
+  Future<int> _performSyncPendingData({
+    required bool removeSyncedQueueItems,
+  }) async {
     if (!await isOnline()) {
       return 0;
     }
+
+    await _ensureCurrentUserRemoteAccess();
 
     final items = await _syncQueueLocalDataSource.getPendingItems(
       retryThreshold: retryThreshold,
     );
     var syncedCount = 0;
+    final failures = <String>[];
 
     for (final item in items) {
       try {
@@ -113,6 +150,7 @@ class SyncService {
           lastError: errorMessage,
           syncStatus: nextStatus,
         );
+        failures.add(errorMessage);
       }
     }
 
@@ -121,7 +159,41 @@ class SyncService {
       await preferences.setLastSyncTime(DateTime.now().millisecondsSinceEpoch);
     }
 
+    if (failures.isNotEmpty) {
+      final firstError = failures.first;
+      throw SyncFailureException(
+        failures.length == 1
+            ? 'Firebase sync failed: $firstError'
+            : 'Firebase sync failed for ${failures.length} item(s). First error: $firstError',
+      );
+    }
+
     return syncedCount;
+  }
+
+  Future<void> _ensureCurrentUserRemoteAccess() async {
+    final currentUser = await _userLocalDataSource.getCurrentUser();
+    if (currentUser == null || !currentUser.profileCompleted || currentUser.isDeleted) {
+      return;
+    }
+
+    final role = currentUser.role.toAppRole();
+    if (role != AppRole.admin && role != AppRole.agent) {
+      return;
+    }
+
+    try {
+      await _userRemoteDataSource.upsertUser(currentUser);
+      await _userLocalDataSource.markUserSynced(currentUser.id);
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        throw Exception(
+          'Firebase rejected this account for business sync. '
+          'Please sign out and sign in again, then retry.',
+        );
+      }
+      rethrow;
+    }
   }
 
   Future<void> _syncQueueItem(SyncQueueModel item) async {

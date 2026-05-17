@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ninaivu/core/widgets/responsive_layout.dart';
+import 'package:ninaivu/core/constants/app_constants.dart';
+import 'package:ninaivu/core/constants/app_strings.dart';
 import 'package:ninaivu/core/services/auth_service.dart';
+import 'package:ninaivu/core/widgets/app_logo.dart';
+import 'package:ninaivu/core/widgets/responsive_layout.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({
@@ -99,14 +102,13 @@ class _LoginScreenState extends State<LoginScreen> {
               padding: EdgeInsets.all(responsive.pagePadding),
               children: [
                 SizedBox(height: responsive.scaled(48, min: 28)),
-                Icon(
-                  Icons.shield_outlined,
-                  size: responsive.heroIconSize,
-                  color: colorScheme.primary,
+                AppLogo(
+                  size: responsive.scaled(164, min: 124),
+                  semanticLabel: AppConstants.appName,
                 ),
                 SizedBox(height: responsive.scaled(20, min: 16)),
                 Text(
-                  'Welcome to Ninaivu',
+                  AppStrings.loginTitle,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: responsive.headlineSize,
@@ -115,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: responsive.scaled(8, min: 6)),
                 Text(
-                  'Manage clients, policies, renewals and follow-ups in one place.',
+                  AppStrings.loginSubtitle,
                   textAlign: TextAlign.center,
                   style: TextStyle(color: colorScheme.onSurfaceVariant),
                 ),
@@ -168,6 +170,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       size: responsive.scaled(32, min: 24),
                     ),
                     label: const Text('Continue with Google'),
+                  ),
+                ),
+                SizedBox(height: responsive.scaled(12, min: 10)),
+                Text(
+                  AppStrings.googleConsentNote,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: responsive.helperTextSize,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
                 SizedBox(height: responsive.scaled(28, min: 20)),

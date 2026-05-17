@@ -28,6 +28,7 @@ subprojects {
         options.compilerArgs.addAll(
             listOf(
                 "-nowarn",
+                "-Xlint:none",
                 "-Xlint:-unchecked",
                 "-Xlint:-deprecation",
             )

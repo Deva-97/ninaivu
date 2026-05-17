@@ -1,6 +1,7 @@
 import 'package:ninaivu/core/permissions/permission_helper.dart';
 import 'package:ninaivu/core/permissions/user_role.dart';
 import 'package:ninaivu/core/database/database_tables.dart';
+import 'package:ninaivu/core/services/local_data_change_service.dart';
 import 'package:ninaivu/core/services/sync_service.dart';
 import 'package:ninaivu/data/datasources/local/sync_queue_local_data_source.dart';
 import 'package:ninaivu/data/datasources/local/user_local_data_source.dart';
@@ -93,6 +94,7 @@ class UserRepositoryImpl implements UserRepository {
     );
 
     await _localDataSource.insertOrUpdateUser(updatedUser);
+    LocalDataChangeService.notifyChanged();
     await _enqueue(updatedUser, 'update', 'pending_update');
     await _syncService.syncPendingData();
     return updatedUser;
@@ -113,6 +115,7 @@ class UserRepositoryImpl implements UserRepository {
     );
 
     await _localDataSource.insertOrUpdateUser(deletedUser);
+    LocalDataChangeService.notifyChanged();
     await _enqueue(deletedUser, 'delete', 'pending_delete');
     await _syncService.syncPendingData();
   }
@@ -144,6 +147,7 @@ class UserRepositoryImpl implements UserRepository {
     );
 
     await _localDataSource.insertOrUpdateUser(user);
+    LocalDataChangeService.notifyChanged();
     await _enqueue(user, 'create', 'pending_create');
     await _syncService.syncPendingData();
     return user;
