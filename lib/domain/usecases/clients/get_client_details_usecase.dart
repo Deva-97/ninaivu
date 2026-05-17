@@ -1,5 +1,5 @@
-import 'package:insurance_reminders/domain/entities/client.dart';
-import 'package:insurance_reminders/domain/repositories/client_repository.dart';
+import 'package:ninaivu/domain/entities/client.dart';
+import 'package:ninaivu/domain/repositories/client_repository.dart';
 
 class GetClientDetailsUseCase {
   GetClientDetailsUseCase(this._repository);

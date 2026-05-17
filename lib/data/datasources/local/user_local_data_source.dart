@@ -1,7 +1,7 @@
-import 'package:insurance_reminders/core/database/database_helper.dart';
-import 'package:insurance_reminders/core/database/database_tables.dart';
-import 'package:insurance_reminders/core/services/app_preferences.dart';
-import 'package:insurance_reminders/data/models/app_user_model.dart';
+import 'package:ninaivu/core/database/database_helper.dart';
+import 'package:ninaivu/core/database/database_tables.dart';
+import 'package:ninaivu/core/services/app_preferences.dart';
+import 'package:ninaivu/data/models/app_user_model.dart';
 import 'package:sqflite/sqflite.dart';
 
 class UserLocalDataSource {

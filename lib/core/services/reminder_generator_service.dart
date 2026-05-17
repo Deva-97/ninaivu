@@ -1,5 +1,5 @@
-import 'package:insurance_reminders/data/models/policy_model.dart';
-import 'package:insurance_reminders/data/models/reminder_model.dart';
+import 'package:ninaivu/data/models/policy_model.dart';
+import 'package:ninaivu/data/models/reminder_model.dart';
 import 'package:uuid/uuid.dart';
 
 class ReminderGeneratorService {

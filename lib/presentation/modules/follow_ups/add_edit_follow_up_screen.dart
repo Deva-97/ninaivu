@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:insurance_reminders/core/widgets.dart';
-import 'package:insurance_reminders/presentation/controllers/follow_up_form_controller.dart';
+import 'package:ninaivu/core/widgets.dart';
+import 'package:ninaivu/presentation/controllers/follow_up_form_controller.dart';
 
 class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
   const AddEditFollowUpScreen({super.key});

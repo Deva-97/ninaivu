@@ -1,6 +1,6 @@
-import 'package:insurance_reminders/core/database/database_helper.dart';
-import 'package:insurance_reminders/core/database/database_tables.dart';
-import 'package:insurance_reminders/data/models/sync_queue_model.dart';
+import 'package:ninaivu/core/database/database_helper.dart';
+import 'package:ninaivu/core/database/database_tables.dart';
+import 'package:ninaivu/data/models/sync_queue_model.dart';
 import 'package:sqflite/sqflite.dart';
 
 class SyncQueueLocalDataSource {

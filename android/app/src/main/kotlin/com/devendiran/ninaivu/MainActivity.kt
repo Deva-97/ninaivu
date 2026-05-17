@@ -1,4 +1,4 @@
-package com.devendiran.insurance_reminders
+package com.devendiran.ninaivu
 
 import io.flutter.embedding.android.FlutterActivity
 

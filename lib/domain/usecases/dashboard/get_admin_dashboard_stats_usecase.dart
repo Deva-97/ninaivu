@@ -1,5 +1,5 @@
-import 'package:insurance_reminders/domain/entities/dashboard_stats.dart';
-import 'package:insurance_reminders/domain/repositories/dashboard_repository.dart';
+import 'package:ninaivu/domain/entities/dashboard_stats.dart';
+import 'package:ninaivu/domain/repositories/dashboard_repository.dart';
 
 class GetAdminDashboardStatsUseCase {
   GetAdminDashboardStatsUseCase(this._repository);

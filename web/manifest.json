@@ -1,6 +1,6 @@
 {
-    "name": "insurance_reminders",
-    "short_name": "insurance_reminders",
+    "name": "Ninaivu",
+    "short_name": "Ninaivu",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

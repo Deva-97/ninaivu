@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:insurance_reminders/core/widgets/responsive_layout.dart';
+import 'package:ninaivu/core/widgets/responsive_layout.dart';
 
 class AppButton extends StatelessWidget {
   const AppButton({

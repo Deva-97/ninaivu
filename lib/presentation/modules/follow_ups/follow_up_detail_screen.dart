@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:insurance_reminders/core/widgets.dart';
-import 'package:insurance_reminders/presentation/controllers/follow_up_detail_controller.dart';
-import 'package:insurance_reminders/presentation/routes/app_routes.dart';
+import 'package:ninaivu/core/widgets.dart';
+import 'package:ninaivu/presentation/controllers/follow_up_detail_controller.dart';
+import 'package:ninaivu/presentation/routes/app_routes.dart';
 
 class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
   const FollowUpDetailScreen({super.key});

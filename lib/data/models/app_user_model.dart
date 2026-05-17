@@ -1,4 +1,4 @@
-import 'package:insurance_reminders/domain/entities/app_user.dart';
+import 'package:ninaivu/domain/entities/app_user.dart';
 
 class AppUserModel extends AppUser {
   const AppUserModel({

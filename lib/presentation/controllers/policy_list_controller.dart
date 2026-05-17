@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:insurance_reminders/domain/entities/policy.dart';
-import 'package:insurance_reminders/domain/usecases/policies/delete_policy_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/policies/get_policies_by_client_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/policies/get_policies_usecase.dart';
+import 'package:ninaivu/domain/entities/policy.dart';
+import 'package:ninaivu/domain/usecases/policies/delete_policy_usecase.dart';
+import 'package:ninaivu/domain/usecases/policies/get_policies_by_client_usecase.dart';
+import 'package:ninaivu/domain/usecases/policies/get_policies_usecase.dart';
 
 class PolicyListController extends GetxController {
   PolicyListController({

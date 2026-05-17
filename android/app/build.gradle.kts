@@ -1,4 +1,6 @@
 import java.util.Properties
+import org.gradle.api.GradleException
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
@@ -10,14 +12,36 @@ plugins {
 
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
-val hasReleaseKeystore = keystorePropertiesFile.exists()
+val hasReleaseKeystoreFile = keystorePropertiesFile.exists()
 
-if (hasReleaseKeystore) {
+if (hasReleaseKeystoreFile) {
     keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
 }
 
+fun Properties.requireValue(key: String): String? =
+    getProperty(key)?.takeIf { it.isNotBlank() }
+
+val releaseStoreFile =
+    keystoreProperties.requireValue("storeFile")?.let(::file)
+
+val hasReleaseKeystore =
+    listOf("keyAlias", "keyPassword", "storePassword", "storeFile").all {
+        keystoreProperties.requireValue(it) != null
+    } && releaseStoreFile?.exists() == true
+
+val isReleaseTaskRequested = gradle.startParameter.taskNames.any {
+    it.contains("release", ignoreCase = true)
+}
+
+if (isReleaseTaskRequested && !hasReleaseKeystore) {
+    throw GradleException(
+        "Release signing is not configured correctly. " +
+            "Update android/key.properties with a valid keystore path and credentials before building a release."
+    )
+}
+
 android {
-    namespace = "com.devendiran.insurance_reminders"
+    namespace = "com.devendiran.ninaivu"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -27,12 +51,8 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-    }
-
     defaultConfig {
-        applicationId = "com.devendiran.insurance_reminders"
+        applicationId = "com.devendiran.ninaivu"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -44,7 +64,7 @@ android {
             create("release") {
                 keyAlias = keystoreProperties["keyAlias"] as String
                 keyPassword = keystoreProperties["keyPassword"] as String
-                storeFile = file(keystoreProperties["storeFile"] as String)
+                storeFile = releaseStoreFile
                 storePassword = keystoreProperties["storePassword"] as String
             }
         }
@@ -57,14 +77,16 @@ android {
         release {
             isMinifyEnabled = false
             isShrinkResources = false
-            signingConfig = if (hasReleaseKeystore) {
-                signingConfigs.getByName("release")
-            } else {
-                // TODO(dev): Generate an Android release keystore and add
-                // android/key.properties locally before publishing Ninaivu.
-                signingConfigs.getByName("debug")
+            if (hasReleaseKeystore) {
+                signingConfig = signingConfigs.getByName("release")
             }
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 

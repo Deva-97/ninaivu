@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:insurance_reminders/presentation/modules/common/auth/login_screen.dart';
+import 'package:ninaivu/presentation/modules/common/auth/login_screen.dart';
 
 void main() {
   testWidgets('login screen renders primary actions', (tester) async {

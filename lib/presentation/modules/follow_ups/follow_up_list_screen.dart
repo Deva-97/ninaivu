@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:insurance_reminders/core/widgets.dart';
-import 'package:insurance_reminders/presentation/controllers/follow_up_list_controller.dart';
-import 'package:insurance_reminders/presentation/routes/app_routes.dart';
+import 'package:ninaivu/core/widgets.dart';
+import 'package:ninaivu/presentation/controllers/follow_up_list_controller.dart';
+import 'package:ninaivu/presentation/routes/app_routes.dart';
 
 class FollowUpListScreen extends GetView<FollowUpListController> {
   const FollowUpListScreen({super.key});

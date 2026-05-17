@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:insurance_reminders/domain/entities/app_user.dart';
-import 'package:insurance_reminders/domain/usecases/users/delete_user_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/users/get_agents_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/users/get_customers_usecase.dart';
+import 'package:ninaivu/domain/entities/app_user.dart';
+import 'package:ninaivu/domain/usecases/users/delete_user_usecase.dart';
+import 'package:ninaivu/domain/usecases/users/get_agents_usecase.dart';
+import 'package:ninaivu/domain/usecases/users/get_customers_usecase.dart';
 
 class AdminUserListController extends GetxController {
   AdminUserListController({

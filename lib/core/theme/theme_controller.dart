@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:insurance_reminders/core/services/app_preferences.dart';
+import 'package:ninaivu/core/services/app_preferences.dart';
 
 enum AppThemeMode { system, light, dark }
 

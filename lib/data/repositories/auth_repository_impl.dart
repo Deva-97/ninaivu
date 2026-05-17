@@ -1,5 +1,5 @@
-import 'package:insurance_reminders/core/services/auth_service.dart';
-import 'package:insurance_reminders/domain/repositories/auth_repository.dart';
+import 'package:ninaivu/core/services/auth_service.dart';
+import 'package:ninaivu/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({AuthService? authService})

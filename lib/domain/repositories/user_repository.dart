@@ -1,4 +1,4 @@
-import 'package:insurance_reminders/domain/entities/app_user.dart';
+import 'package:ninaivu/domain/entities/app_user.dart';
 
 abstract class UserRepository {
   Future<AppUser?> getCurrentUser();

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:insurance_reminders/core/permissions/permission_helper.dart';
-import 'package:insurance_reminders/core/permissions/user_role.dart';
+import 'package:ninaivu/core/permissions/permission_helper.dart';
+import 'package:ninaivu/core/permissions/user_role.dart';
 
 void main() {
   group('PermissionHelper', () {

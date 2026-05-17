@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CLIENT_ID</key>
+	<string>302492772767-sia4ikp13r3uukts9713q1q76jbr2hcs.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.302492772767-sia4ikp13r3uukts9713q1q76jbr2hcs</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>302492772767-3vo5u7sdqs71q6odt984ptrkqj1np3j9.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyDJsmhLiB5tUH8BiqRI_iuVB1n_aCpEgnw</string>
 	<key>GCM_SENDER_ID</key>
@@ -9,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.devendiran.insuranceReminders</string>
+	<string>com.devendiran.ninaivu</string>
 	<key>PROJECT_ID</key>
 	<string>insurance-reminder-6899c</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:302492772767:ios:49e786b43836cca97c35aa</string>
+	<string>1:302492772767:ios:c270474564c4be097c35aa</string>
 </dict>
 </plist>

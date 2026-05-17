@@ -1,5 +1,5 @@
-import 'package:insurance_reminders/core/services/notification_service.dart';
-import 'package:insurance_reminders/data/models/reminder_model.dart';
+import 'package:ninaivu/core/services/notification_service.dart';
+import 'package:ninaivu/data/models/reminder_model.dart';
 
 class ReminderSchedulerService {
   ReminderSchedulerService({NotificationService? notificationService})

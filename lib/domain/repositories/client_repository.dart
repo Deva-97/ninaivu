@@ -1,4 +1,4 @@
-import 'package:insurance_reminders/domain/entities/client.dart';
+import 'package:ninaivu/domain/entities/client.dart';
 
 abstract class ClientRepository {
   Future<List<Client>> getClients({

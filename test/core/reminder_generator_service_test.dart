@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:insurance_reminders/core/services/reminder_generator_service.dart';
-import 'package:insurance_reminders/data/models/policy_model.dart';
+import 'package:ninaivu/core/services/reminder_generator_service.dart';
+import 'package:ninaivu/data/models/policy_model.dart';
 
 void main() {
   group('ReminderGeneratorService', () {

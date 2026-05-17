@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:insurance_reminders/core/widgets.dart';
-import 'package:insurance_reminders/presentation/controllers/reminder_detail_controller.dart';
+import 'package:ninaivu/core/widgets.dart';
+import 'package:ninaivu/presentation/controllers/reminder_detail_controller.dart';
 
 class ReminderDetailScreen extends GetView<ReminderDetailController> {
   const ReminderDetailScreen({super.key});

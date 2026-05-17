@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:insurance_reminders/core/constants/app_colors.dart';
+import 'package:ninaivu/core/constants/app_colors.dart';
 
 class StatusBadge extends StatelessWidget {
   const StatusBadge({

@@ -1,13 +1,13 @@
 import 'package:get/get.dart';
-import 'package:insurance_reminders/data/repositories/user_repository_impl.dart';
-import 'package:insurance_reminders/domain/usecases/users/create_agent_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/users/create_customer_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/users/delete_user_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/users/get_agents_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/users/get_customers_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/users/update_user_status_usecase.dart';
-import 'package:insurance_reminders/presentation/controllers/admin_user_form_controller.dart';
-import 'package:insurance_reminders/presentation/controllers/admin_user_list_controller.dart';
+import 'package:ninaivu/data/repositories/user_repository_impl.dart';
+import 'package:ninaivu/domain/usecases/users/create_agent_usecase.dart';
+import 'package:ninaivu/domain/usecases/users/create_customer_usecase.dart';
+import 'package:ninaivu/domain/usecases/users/delete_user_usecase.dart';
+import 'package:ninaivu/domain/usecases/users/get_agents_usecase.dart';
+import 'package:ninaivu/domain/usecases/users/get_customers_usecase.dart';
+import 'package:ninaivu/domain/usecases/users/update_user_status_usecase.dart';
+import 'package:ninaivu/presentation/controllers/admin_user_form_controller.dart';
+import 'package:ninaivu/presentation/controllers/admin_user_list_controller.dart';
 
 class AgentListBinding extends Bindings {
   @override

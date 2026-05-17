@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:insurance_reminders/domain/entities/app_user.dart';
-import 'package:insurance_reminders/domain/usecases/users/create_agent_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/users/create_customer_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/users/get_agents_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/users/update_user_status_usecase.dart';
+import 'package:ninaivu/domain/entities/app_user.dart';
+import 'package:ninaivu/domain/usecases/users/create_agent_usecase.dart';
+import 'package:ninaivu/domain/usecases/users/create_customer_usecase.dart';
+import 'package:ninaivu/domain/usecases/users/get_agents_usecase.dart';
+import 'package:ninaivu/domain/usecases/users/update_user_status_usecase.dart';
 
 class AdminUserFormController extends GetxController {
   AdminUserFormController({

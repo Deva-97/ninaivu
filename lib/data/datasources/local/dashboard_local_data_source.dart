@@ -1,6 +1,6 @@
-import 'package:insurance_reminders/core/database/database_helper.dart';
-import 'package:insurance_reminders/core/database/database_tables.dart';
-import 'package:insurance_reminders/domain/entities/dashboard_stats.dart';
+import 'package:ninaivu/core/database/database_helper.dart';
+import 'package:ninaivu/core/database/database_tables.dart';
+import 'package:ninaivu/domain/entities/dashboard_stats.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DashboardLocalDataSource {

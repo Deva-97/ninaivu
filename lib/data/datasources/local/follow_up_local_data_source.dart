@@ -1,7 +1,7 @@
-import 'package:insurance_reminders/core/database/database_helper.dart';
-import 'package:insurance_reminders/core/database/database_tables.dart';
-import 'package:insurance_reminders/core/utils/follow_up_status_helper.dart';
-import 'package:insurance_reminders/data/models/follow_up_model.dart';
+import 'package:ninaivu/core/database/database_helper.dart';
+import 'package:ninaivu/core/database/database_tables.dart';
+import 'package:ninaivu/core/utils/follow_up_status_helper.dart';
+import 'package:ninaivu/data/models/follow_up_model.dart';
 import 'package:sqflite/sqflite.dart';
 
 class FollowUpLocalDataSource {

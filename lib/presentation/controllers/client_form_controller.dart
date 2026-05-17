@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:insurance_reminders/data/models/client_model.dart';
-import 'package:insurance_reminders/domain/entities/client.dart';
-import 'package:insurance_reminders/domain/usecases/clients/add_client_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/clients/update_client_usecase.dart';
+import 'package:ninaivu/data/models/client_model.dart';
+import 'package:ninaivu/domain/entities/client.dart';
+import 'package:ninaivu/domain/usecases/clients/add_client_usecase.dart';
+import 'package:ninaivu/domain/usecases/clients/update_client_usecase.dart';
 
 class ClientFormController extends GetxController {
   ClientFormController({

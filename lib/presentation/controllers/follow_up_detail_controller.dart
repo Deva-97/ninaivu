@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
-import 'package:insurance_reminders/domain/entities/follow_up.dart';
-import 'package:insurance_reminders/domain/usecases/follow_ups/delete_follow_up_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/follow_ups/get_follow_up_by_id_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/follow_ups/mark_follow_up_completed_usecase.dart';
+import 'package:ninaivu/domain/entities/follow_up.dart';
+import 'package:ninaivu/domain/usecases/follow_ups/delete_follow_up_usecase.dart';
+import 'package:ninaivu/domain/usecases/follow_ups/get_follow_up_by_id_usecase.dart';
+import 'package:ninaivu/domain/usecases/follow_ups/mark_follow_up_completed_usecase.dart';
 
 class FollowUpDetailController extends GetxController {
   FollowUpDetailController({

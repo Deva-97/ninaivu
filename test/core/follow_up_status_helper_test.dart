@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:insurance_reminders/core/utils/follow_up_status_helper.dart';
+import 'package:ninaivu/core/utils/follow_up_status_helper.dart';
 
 void main() {
   group('FollowUpStatusHelper', () {

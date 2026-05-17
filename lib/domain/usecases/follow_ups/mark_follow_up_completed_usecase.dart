@@ -1,4 +1,4 @@
-import 'package:insurance_reminders/domain/repositories/follow_up_repository.dart';
+import 'package:ninaivu/domain/repositories/follow_up_repository.dart';
 
 class MarkFollowUpCompletedUseCase {
   MarkFollowUpCompletedUseCase(this._repository);

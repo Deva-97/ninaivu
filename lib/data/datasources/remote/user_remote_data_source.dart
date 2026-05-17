@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:insurance_reminders/data/models/app_user_model.dart';
+import 'package:ninaivu/data/models/app_user_model.dart';
 
 class UserFetchUnavailableException implements Exception {
   const UserFetchUnavailableException();

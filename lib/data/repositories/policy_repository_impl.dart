@@ -1,20 +1,20 @@
-import 'package:insurance_reminders/core/database/database_tables.dart';
-import 'package:insurance_reminders/core/permissions/permission_helper.dart';
-import 'package:insurance_reminders/core/permissions/user_role.dart';
-import 'package:insurance_reminders/core/services/reminder_generator_service.dart';
-import 'package:insurance_reminders/core/services/reminder_scheduler_service.dart';
-import 'package:insurance_reminders/core/services/sync_service.dart';
-import 'package:insurance_reminders/data/datasources/local/client_local_data_source.dart';
-import 'package:insurance_reminders/data/datasources/local/policy_local_data_source.dart';
-import 'package:insurance_reminders/data/datasources/local/reminder_local_data_source.dart';
-import 'package:insurance_reminders/data/datasources/local/sync_queue_local_data_source.dart';
-import 'package:insurance_reminders/data/datasources/local/user_local_data_source.dart';
-import 'package:insurance_reminders/data/models/app_user_model.dart';
-import 'package:insurance_reminders/data/models/policy_model.dart';
-import 'package:insurance_reminders/data/models/reminder_model.dart';
-import 'package:insurance_reminders/data/models/sync_queue_model.dart';
-import 'package:insurance_reminders/domain/entities/policy.dart';
-import 'package:insurance_reminders/domain/repositories/policy_repository.dart';
+import 'package:ninaivu/core/database/database_tables.dart';
+import 'package:ninaivu/core/permissions/permission_helper.dart';
+import 'package:ninaivu/core/permissions/user_role.dart';
+import 'package:ninaivu/core/services/reminder_generator_service.dart';
+import 'package:ninaivu/core/services/reminder_scheduler_service.dart';
+import 'package:ninaivu/core/services/sync_service.dart';
+import 'package:ninaivu/data/datasources/local/client_local_data_source.dart';
+import 'package:ninaivu/data/datasources/local/policy_local_data_source.dart';
+import 'package:ninaivu/data/datasources/local/reminder_local_data_source.dart';
+import 'package:ninaivu/data/datasources/local/sync_queue_local_data_source.dart';
+import 'package:ninaivu/data/datasources/local/user_local_data_source.dart';
+import 'package:ninaivu/data/models/app_user_model.dart';
+import 'package:ninaivu/data/models/policy_model.dart';
+import 'package:ninaivu/data/models/reminder_model.dart';
+import 'package:ninaivu/data/models/sync_queue_model.dart';
+import 'package:ninaivu/domain/entities/policy.dart';
+import 'package:ninaivu/domain/repositories/policy_repository.dart';
 import 'package:uuid/uuid.dart';
 
 class PolicyRepositoryImpl implements PolicyRepository {

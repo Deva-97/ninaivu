@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
-import 'package:insurance_reminders/domain/entities/dashboard_stats.dart';
-import 'package:insurance_reminders/domain/usecases/dashboard/get_admin_dashboard_stats_usecase.dart';
-import 'package:insurance_reminders/presentation/controllers/dashboard_controller.dart';
+import 'package:ninaivu/domain/entities/dashboard_stats.dart';
+import 'package:ninaivu/domain/usecases/dashboard/get_admin_dashboard_stats_usecase.dart';
+import 'package:ninaivu/presentation/controllers/dashboard_controller.dart';
 
 class AdminDashboardController extends DashboardController<AdminDashboardStats> {
   AdminDashboardController({

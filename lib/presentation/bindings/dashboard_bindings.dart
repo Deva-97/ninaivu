@@ -1,9 +1,9 @@
 import 'package:get/get.dart';
-import 'package:insurance_reminders/data/repositories/dashboard_repository_impl.dart';
-import 'package:insurance_reminders/domain/usecases/dashboard/get_admin_dashboard_stats_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/dashboard/get_agent_dashboard_stats_usecase.dart';
-import 'package:insurance_reminders/presentation/controllers/admin_dashboard_controller.dart';
-import 'package:insurance_reminders/presentation/controllers/agent_dashboard_controller.dart';
+import 'package:ninaivu/data/repositories/dashboard_repository_impl.dart';
+import 'package:ninaivu/domain/usecases/dashboard/get_admin_dashboard_stats_usecase.dart';
+import 'package:ninaivu/domain/usecases/dashboard/get_agent_dashboard_stats_usecase.dart';
+import 'package:ninaivu/presentation/controllers/admin_dashboard_controller.dart';
+import 'package:ninaivu/presentation/controllers/agent_dashboard_controller.dart';
 
 class AdminDashboardBinding extends Bindings {
   @override

@@ -1,10 +1,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:insurance_reminders/core/permissions/permission_helper.dart';
-import 'package:insurance_reminders/core/permissions/user_role.dart';
-import 'package:insurance_reminders/core/services/auth_service.dart';
-import 'package:insurance_reminders/core/services/app_preferences.dart';
-import 'package:insurance_reminders/presentation/routes/app_routes.dart';
+import 'package:ninaivu/core/permissions/permission_helper.dart';
+import 'package:ninaivu/core/permissions/user_role.dart';
+import 'package:ninaivu/core/services/auth_service.dart';
+import 'package:ninaivu/core/services/app_preferences.dart';
+import 'package:ninaivu/presentation/routes/app_routes.dart';
 
 class AuthMiddleware extends GetMiddleware {
   AuthMiddleware({int priority = 0}) : _priority = priority;

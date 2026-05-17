@@ -1,13 +1,13 @@
 import 'package:get/get.dart';
-import 'package:insurance_reminders/data/repositories/policy_repository_impl.dart';
-import 'package:insurance_reminders/domain/usecases/policies/add_policy_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/policies/delete_policy_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/policies/get_policies_by_client_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/policies/get_policies_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/policies/update_policy_usecase.dart';
-import 'package:insurance_reminders/presentation/controllers/policy_detail_controller.dart';
-import 'package:insurance_reminders/presentation/controllers/policy_form_controller.dart';
-import 'package:insurance_reminders/presentation/controllers/policy_list_controller.dart';
+import 'package:ninaivu/data/repositories/policy_repository_impl.dart';
+import 'package:ninaivu/domain/usecases/policies/add_policy_usecase.dart';
+import 'package:ninaivu/domain/usecases/policies/delete_policy_usecase.dart';
+import 'package:ninaivu/domain/usecases/policies/get_policies_by_client_usecase.dart';
+import 'package:ninaivu/domain/usecases/policies/get_policies_usecase.dart';
+import 'package:ninaivu/domain/usecases/policies/update_policy_usecase.dart';
+import 'package:ninaivu/presentation/controllers/policy_detail_controller.dart';
+import 'package:ninaivu/presentation/controllers/policy_form_controller.dart';
+import 'package:ninaivu/presentation/controllers/policy_list_controller.dart';
 
 class PolicyListBinding extends Bindings {
   @override

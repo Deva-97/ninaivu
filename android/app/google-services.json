@@ -7,17 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:302492772767:android:e0fca0496402659a7c35aa",
+        "mobilesdk_app_id": "1:302492772767:android:41175e1564d87e507c35aa",
         "android_client_info": {
-          "package_name": "com.devendiran.insurance_reminders"
+          "package_name": "com.devendiran.ninaivu"
         }
       },
       "oauth_client": [
         {
-          "client_id": "302492772767-3vo5u7sdqs71q6odt984ptrkqj1np3j9.apps.googleusercontent.com",
+          "client_id": "302492772767-hjan688r55ubaljbgorlg7rhohfmb9d0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.devendiran.insurance_reminders",
+            "package_name": "com.devendiran.ninaivu",
             "certificate_hash": "2ed3b8bc00ef8b614ecb5530fca9a68d1821faff"
           }
         },

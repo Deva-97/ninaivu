@@ -1,10 +1,10 @@
-import 'package:insurance_reminders/core/permissions/permission_helper.dart';
-import 'package:insurance_reminders/core/permissions/user_role.dart';
-import 'package:insurance_reminders/data/datasources/local/dashboard_local_data_source.dart';
-import 'package:insurance_reminders/data/datasources/local/user_local_data_source.dart';
-import 'package:insurance_reminders/data/models/app_user_model.dart';
-import 'package:insurance_reminders/domain/entities/dashboard_stats.dart';
-import 'package:insurance_reminders/domain/repositories/dashboard_repository.dart';
+import 'package:ninaivu/core/permissions/permission_helper.dart';
+import 'package:ninaivu/core/permissions/user_role.dart';
+import 'package:ninaivu/data/datasources/local/dashboard_local_data_source.dart';
+import 'package:ninaivu/data/datasources/local/user_local_data_source.dart';
+import 'package:ninaivu/data/models/app_user_model.dart';
+import 'package:ninaivu/domain/entities/dashboard_stats.dart';
+import 'package:ninaivu/domain/repositories/dashboard_repository.dart';
 
 class DashboardRepositoryImpl implements DashboardRepository {
   DashboardRepositoryImpl({

@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:insurance_reminders/core/services/auth_service.dart';
-import 'package:insurance_reminders/core/widgets/responsive_layout.dart';
+import 'package:ninaivu/core/services/auth_service.dart';
+import 'package:ninaivu/core/widgets/responsive_layout.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   const ProfileSetupScreen({super.key});

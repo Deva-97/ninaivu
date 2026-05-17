@@ -1,4 +1,4 @@
-import 'package:insurance_reminders/domain/repositories/user_repository.dart';
+import 'package:ninaivu/domain/repositories/user_repository.dart';
 
 class DeleteUserUseCase {
   DeleteUserUseCase(this._repository);

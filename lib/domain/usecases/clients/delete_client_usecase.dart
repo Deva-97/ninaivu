@@ -1,4 +1,4 @@
-import 'package:insurance_reminders/domain/repositories/client_repository.dart';
+import 'package:ninaivu/domain/repositories/client_repository.dart';
 
 class DeleteClientUseCase {
   DeleteClientUseCase(this._repository);

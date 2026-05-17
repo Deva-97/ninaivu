@@ -4,15 +4,15 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:insurance_reminders/core/database/database_tables.dart';
-import 'package:insurance_reminders/core/services/app_preferences.dart';
-import 'package:insurance_reminders/core/services/sync_service.dart';
-import 'package:insurance_reminders/data/datasources/local/sync_queue_local_data_source.dart';
-import 'package:insurance_reminders/data/datasources/local/user_local_data_source.dart';
-import 'package:insurance_reminders/data/datasources/remote/user_remote_data_source.dart';
-import 'package:insurance_reminders/data/models/app_user_model.dart';
-import 'package:insurance_reminders/data/models/sync_queue_model.dart';
-import 'package:insurance_reminders/presentation/routes/app_routes.dart';
+import 'package:ninaivu/core/database/database_tables.dart';
+import 'package:ninaivu/core/services/app_preferences.dart';
+import 'package:ninaivu/core/services/sync_service.dart';
+import 'package:ninaivu/data/datasources/local/sync_queue_local_data_source.dart';
+import 'package:ninaivu/data/datasources/local/user_local_data_source.dart';
+import 'package:ninaivu/data/datasources/remote/user_remote_data_source.dart';
+import 'package:ninaivu/data/models/app_user_model.dart';
+import 'package:ninaivu/data/models/sync_queue_model.dart';
+import 'package:ninaivu/presentation/routes/app_routes.dart';
 import 'package:uuid/uuid.dart';
 
 class OtpSendResult {

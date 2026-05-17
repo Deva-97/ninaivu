@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:insurance_reminders/data/models/follow_up_model.dart';
-import 'package:insurance_reminders/domain/entities/follow_up.dart';
-import 'package:insurance_reminders/domain/usecases/follow_ups/add_follow_up_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/follow_ups/update_follow_up_usecase.dart';
+import 'package:ninaivu/data/models/follow_up_model.dart';
+import 'package:ninaivu/domain/entities/follow_up.dart';
+import 'package:ninaivu/domain/usecases/follow_ups/add_follow_up_usecase.dart';
+import 'package:ninaivu/domain/usecases/follow_ups/update_follow_up_usecase.dart';
 import 'package:uuid/uuid.dart';
 
 class FollowUpFormController extends GetxController {

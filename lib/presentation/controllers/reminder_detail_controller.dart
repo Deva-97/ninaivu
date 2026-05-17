@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
-import 'package:insurance_reminders/domain/entities/reminder.dart';
-import 'package:insurance_reminders/domain/usecases/reminders/get_reminder_by_id_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/reminders/mark_reminder_completed_usecase.dart';
+import 'package:ninaivu/domain/entities/reminder.dart';
+import 'package:ninaivu/domain/usecases/reminders/get_reminder_by_id_usecase.dart';
+import 'package:ninaivu/domain/usecases/reminders/mark_reminder_completed_usecase.dart';
 
 class ReminderDetailController extends GetxController {
   ReminderDetailController({

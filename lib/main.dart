@@ -6,11 +6,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:insurance_reminders/app.dart';
-import 'package:insurance_reminders/core/services/app_preferences.dart';
-import 'package:insurance_reminders/core/services/notification_service.dart';
-import 'package:insurance_reminders/core/theme/theme_controller.dart';
-import 'package:insurance_reminders/firebase_options.dart';
+import 'package:ninaivu/app.dart';
+import 'package:ninaivu/core/services/app_preferences.dart';
+import 'package:ninaivu/core/services/notification_service.dart';
+import 'package:ninaivu/core/theme/theme_controller.dart';
+import 'package:ninaivu/firebase_options.dart';
 
 const String _googleServerClientId =
     '302492772767-kjt4v9mmk9dh3n447alcadrumhi2qlq2.apps.googleusercontent.com';

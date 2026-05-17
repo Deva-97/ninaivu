@@ -8,10 +8,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -42,7 +39,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCd6-6KR2lgJ67bmbQKmSt1EXP6RB7KoxE',
-    appId: '1:302492772767:android:e0fca0496402659a7c35aa',
+    appId: '1:302492772767:android:41175e1564d87e507c35aa',
     messagingSenderId: '302492772767',
     projectId: 'insurance-reminder-6899c',
     storageBucket: 'insurance-reminder-6899c.firebasestorage.app',
@@ -50,14 +47,23 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDJsmhLiB5tUH8BiqRI_iuVB1n_aCpEgnw',
-    appId: '1:302492772767:ios:49e786b43836cca97c35aa',
+    appId: '1:302492772767:ios:c270474564c4be097c35aa',
     messagingSenderId: '302492772767',
     projectId: 'insurance-reminder-6899c',
     storageBucket: 'insurance-reminder-6899c.firebasestorage.app',
-    androidClientId:
-        '302492772767-3vo5u7sdqs71q6odt984ptrkqj1np3j9.apps.googleusercontent.com',
-    iosClientId:
-        '302492772767-d72pnkslnf3fs8547deh5fv0u7sd86gb.apps.googleusercontent.com',
-    iosBundleId: 'com.devendiran.insuranceReminders',
+    androidClientId: '302492772767-3vo5u7sdqs71q6odt984ptrkqj1np3j9.apps.googleusercontent.com',
+    iosClientId: '302492772767-sia4ikp13r3uukts9713q1q76jbr2hcs.apps.googleusercontent.com',
+    iosBundleId: 'com.devendiran.ninaivu',
   );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyCvstfkxTOhfLuoXd6mCOt9t2KXPVEKxHo',
+    appId: '1:302492772767:web:23f5e7d83b462bc47c35aa',
+    messagingSenderId: '302492772767',
+    projectId: 'insurance-reminder-6899c',
+    authDomain: 'insurance-reminder-6899c.firebaseapp.com',
+    storageBucket: 'insurance-reminder-6899c.firebasestorage.app',
+    measurementId: 'G-BH5QQSZ673',
+  );
+
 }

@@ -1,4 +1,4 @@
-import 'package:insurance_reminders/domain/entities/policy.dart';
+import 'package:ninaivu/domain/entities/policy.dart';
 
 abstract class PolicyRepository {
   Future<List<Policy>> getPolicies({

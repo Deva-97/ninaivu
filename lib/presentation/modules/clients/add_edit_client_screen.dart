@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:insurance_reminders/core/widgets.dart';
-import 'package:insurance_reminders/presentation/controllers/client_form_controller.dart';
+import 'package:ninaivu/core/widgets.dart';
+import 'package:ninaivu/presentation/controllers/client_form_controller.dart';
 
 class AddEditClientScreen extends GetView<ClientFormController> {
   const AddEditClientScreen({super.key});

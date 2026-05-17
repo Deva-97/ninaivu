@@ -1,4 +1,4 @@
-import 'package:insurance_reminders/domain/entities/follow_up.dart';
+import 'package:ninaivu/domain/entities/follow_up.dart';
 
 abstract class FollowUpRepository {
   Future<FollowUp> addFollowUp(FollowUp followUp);

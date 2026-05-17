@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:insurance_reminders/core/validation/policy_validator.dart';
+import 'package:ninaivu/core/validation/policy_validator.dart';
 
 void main() {
   group('PolicyValidator', () {

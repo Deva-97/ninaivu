@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:insurance_reminders/domain/entities/client.dart';
-import 'package:insurance_reminders/domain/usecases/clients/delete_client_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/clients/get_clients_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/clients/search_clients_usecase.dart';
+import 'package:ninaivu/domain/entities/client.dart';
+import 'package:ninaivu/domain/usecases/clients/delete_client_usecase.dart';
+import 'package:ninaivu/domain/usecases/clients/get_clients_usecase.dart';
+import 'package:ninaivu/domain/usecases/clients/search_clients_usecase.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ClientListController extends GetxController {

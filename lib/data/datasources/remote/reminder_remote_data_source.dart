@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:insurance_reminders/data/models/reminder_model.dart';
+import 'package:ninaivu/data/models/reminder_model.dart';
 
 class ReminderRemoteDataSource {
   ReminderRemoteDataSource({FirebaseFirestore? firestore})

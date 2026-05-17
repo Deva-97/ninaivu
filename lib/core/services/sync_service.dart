@@ -1,19 +1,19 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:insurance_reminders/core/database/database_tables.dart';
-import 'package:insurance_reminders/core/services/app_preferences.dart';
-import 'package:insurance_reminders/data/datasources/local/client_local_data_source.dart';
-import 'package:insurance_reminders/data/datasources/local/follow_up_local_data_source.dart';
-import 'package:insurance_reminders/data/datasources/local/policy_local_data_source.dart';
-import 'package:insurance_reminders/data/datasources/local/reminder_local_data_source.dart';
-import 'package:insurance_reminders/data/datasources/local/sync_queue_local_data_source.dart';
-import 'package:insurance_reminders/data/datasources/local/user_local_data_source.dart';
-import 'package:insurance_reminders/data/datasources/remote/client_remote_data_source.dart';
-import 'package:insurance_reminders/data/datasources/remote/follow_up_remote_data_source.dart';
-import 'package:insurance_reminders/data/datasources/remote/policy_remote_data_source.dart';
-import 'package:insurance_reminders/data/datasources/remote/reminder_remote_data_source.dart';
-import 'package:insurance_reminders/data/datasources/remote/user_remote_data_source.dart';
-import 'package:insurance_reminders/data/models/sync_queue_model.dart';
+import 'package:ninaivu/core/database/database_tables.dart';
+import 'package:ninaivu/core/services/app_preferences.dart';
+import 'package:ninaivu/data/datasources/local/client_local_data_source.dart';
+import 'package:ninaivu/data/datasources/local/follow_up_local_data_source.dart';
+import 'package:ninaivu/data/datasources/local/policy_local_data_source.dart';
+import 'package:ninaivu/data/datasources/local/reminder_local_data_source.dart';
+import 'package:ninaivu/data/datasources/local/sync_queue_local_data_source.dart';
+import 'package:ninaivu/data/datasources/local/user_local_data_source.dart';
+import 'package:ninaivu/data/datasources/remote/client_remote_data_source.dart';
+import 'package:ninaivu/data/datasources/remote/follow_up_remote_data_source.dart';
+import 'package:ninaivu/data/datasources/remote/policy_remote_data_source.dart';
+import 'package:ninaivu/data/datasources/remote/reminder_remote_data_source.dart';
+import 'package:ninaivu/data/datasources/remote/user_remote_data_source.dart';
+import 'package:ninaivu/data/models/sync_queue_model.dart';
 
 class SyncService {
   SyncService({

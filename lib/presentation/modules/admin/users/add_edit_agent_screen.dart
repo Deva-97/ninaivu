@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:insurance_reminders/core/widgets.dart';
-import 'package:insurance_reminders/presentation/controllers/admin_user_form_controller.dart';
+import 'package:ninaivu/core/widgets.dart';
+import 'package:ninaivu/presentation/controllers/admin_user_form_controller.dart';
 
 class AddEditAgentScreen extends GetView<AdminUserFormController> {
   const AddEditAgentScreen({super.key});

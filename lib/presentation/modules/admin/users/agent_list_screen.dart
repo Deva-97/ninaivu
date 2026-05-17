@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:insurance_reminders/core/widgets.dart';
-import 'package:insurance_reminders/presentation/controllers/admin_user_list_controller.dart';
-import 'package:insurance_reminders/presentation/routes/app_routes.dart';
+import 'package:ninaivu/core/widgets.dart';
+import 'package:ninaivu/presentation/controllers/admin_user_list_controller.dart';
+import 'package:ninaivu/presentation/routes/app_routes.dart';
 
 class AgentListScreen extends GetView<AdminUserListController> {
   const AgentListScreen({super.key});

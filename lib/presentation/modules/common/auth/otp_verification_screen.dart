@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:insurance_reminders/core/services/auth_service.dart';
-import 'package:insurance_reminders/core/widgets/responsive_layout.dart';
+import 'package:ninaivu/core/services/auth_service.dart';
+import 'package:ninaivu/core/widgets/responsive_layout.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   const OtpVerificationScreen({super.key});

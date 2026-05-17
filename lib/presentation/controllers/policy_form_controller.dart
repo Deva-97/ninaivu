@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:insurance_reminders/core/validation/policy_validator.dart';
-import 'package:insurance_reminders/data/models/policy_model.dart';
-import 'package:insurance_reminders/domain/entities/policy.dart';
-import 'package:insurance_reminders/domain/usecases/policies/add_policy_usecase.dart';
-import 'package:insurance_reminders/domain/usecases/policies/update_policy_usecase.dart';
+import 'package:ninaivu/core/validation/policy_validator.dart';
+import 'package:ninaivu/data/models/policy_model.dart';
+import 'package:ninaivu/domain/entities/policy.dart';
+import 'package:ninaivu/domain/usecases/policies/add_policy_usecase.dart';
+import 'package:ninaivu/domain/usecases/policies/update_policy_usecase.dart';
 import 'package:uuid/uuid.dart';
 
 class PolicyFormController extends GetxController {

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:insurance_reminders/presentation/routes/app_routes.dart';
+import 'package:ninaivu/presentation/routes/app_routes.dart';
 import 'package:get/get.dart';
-import 'package:insurance_reminders/core/widgets.dart';
-import 'package:insurance_reminders/presentation/controllers/admin_dashboard_controller.dart';
-import 'package:insurance_reminders/presentation/modules/common/widgets/dashboard_widgets.dart';
+import 'package:ninaivu/core/widgets.dart';
+import 'package:ninaivu/presentation/controllers/admin_dashboard_controller.dart';
+import 'package:ninaivu/presentation/modules/common/widgets/dashboard_widgets.dart';
 
 class AdminDashboardScreen extends GetView<AdminDashboardController> {
   const AdminDashboardScreen({super.key});

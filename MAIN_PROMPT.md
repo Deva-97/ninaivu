@@ -1,6 +1,6 @@
 You are working on my Flutter app repository:
 
-Repo: Deva-97/insurance_reminders
+Repo: Deva-97/ninaivu
 Branch: master
 App name: Ninaivu
 Target: Complete Version 1 MVP for Android release, keeping iOS-ready code where possible.
@@ -800,7 +800,7 @@ Before modifying:
 - Inspect existing files and preserve working auth flow.
 - Do not delete working Firebase/Google/mobile login code.
 - Do not break current package name:
-  com.devendiran.insurance_reminders
+  com.devendiran.ninaivu
 - Keep existing Firebase options intact unless correction is required.
 - Keep app title Ninaivu.
 - Keep code Android-first but iOS-ready.

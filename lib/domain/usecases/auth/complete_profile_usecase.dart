@@ -1,4 +1,4 @@
-import 'package:insurance_reminders/domain/repositories/auth_repository.dart';
+import 'package:ninaivu/domain/repositories/auth_repository.dart';
 
 class CompleteProfileUseCase {
   CompleteProfileUseCase(this._repository);

@@ -1,4 +1,4 @@
-import 'package:insurance_reminders/domain/repositories/policy_repository.dart';
+import 'package:ninaivu/domain/repositories/policy_repository.dart';
 
 class DeletePolicyUseCase {
   DeletePolicyUseCase(this._repository);

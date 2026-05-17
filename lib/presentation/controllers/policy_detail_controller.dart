@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
-import 'package:insurance_reminders/domain/entities/policy.dart';
-import 'package:insurance_reminders/domain/usecases/policies/delete_policy_usecase.dart';
-import 'package:insurance_reminders/domain/repositories/policy_repository.dart';
+import 'package:ninaivu/domain/entities/policy.dart';
+import 'package:ninaivu/domain/usecases/policies/delete_policy_usecase.dart';
+import 'package:ninaivu/domain/repositories/policy_repository.dart';
 
 class PolicyDetailController extends GetxController {
   PolicyDetailController({

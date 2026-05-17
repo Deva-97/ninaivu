@@ -1,4 +1,4 @@
-import 'package:insurance_reminders/domain/entities/reminder.dart';
+import 'package:ninaivu/domain/entities/reminder.dart';
 
 class ReminderModel extends Reminder {
   const ReminderModel({

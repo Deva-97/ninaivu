@@ -1,6 +1,6 @@
-import 'package:insurance_reminders/core/database/database_helper.dart';
-import 'package:insurance_reminders/core/database/database_tables.dart';
-import 'package:insurance_reminders/data/models/client_model.dart';
+import 'package:ninaivu/core/database/database_helper.dart';
+import 'package:ninaivu/core/database/database_tables.dart';
+import 'package:ninaivu/data/models/client_model.dart';
 import 'package:sqflite/sqflite.dart';
 
 class ClientLocalDataSource {

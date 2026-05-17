@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:insurance_reminders/core/constants/app_colors.dart';
-import 'package:insurance_reminders/core/services/auth_service.dart';
-import 'package:insurance_reminders/core/services/app_preferences.dart';
-import 'package:insurance_reminders/core/services/sync_service.dart';
+import 'package:ninaivu/core/constants/app_colors.dart';
+import 'package:ninaivu/core/services/auth_service.dart';
+import 'package:ninaivu/core/services/app_preferences.dart';
+import 'package:ninaivu/core/services/sync_service.dart';
 import 'package:intl/intl.dart';
 
 abstract class DashboardController<T> extends GetxController {

@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:insurance_reminders/data/models/policy_model.dart';
+import 'package:ninaivu/data/models/policy_model.dart';
 
 class PolicyRemoteDataSource {
   PolicyRemoteDataSource({FirebaseFirestore? firestore})
