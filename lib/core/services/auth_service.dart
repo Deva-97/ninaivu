@@ -68,7 +68,6 @@ class AuthService {
 
   Future<void> signInWithGoogle() async {
     try {
-      await _resetGoogleAuthorization();
       final googleUser = await GoogleSignIn.instance.authenticate();
       final googleAuth = googleUser.authentication;
       final idToken = googleAuth.idToken;
@@ -85,23 +84,40 @@ class AuthService {
     } on FirebaseAuthException catch (e) {
       throw Exception(_friendlyAuthError(e, fallback: 'Google login failed'));
     } catch (e) {
-      throw Exception(e.toString().replaceFirst('Exception: ', ''));
+      final message = _errorMessage(e);
+      if (_looksLikeGoogleReauthIssue(message)) {
+        try {
+          await GoogleSignIn.instance.signOut();
+          final googleUser = await GoogleSignIn.instance.authenticate();
+          final googleAuth = googleUser.authentication;
+          final idToken = googleAuth.idToken;
+
+          if (idToken == null || idToken.isEmpty) {
+            throw Exception('Google sign-in did not return an ID token');
+          }
+
+          final credential = GoogleAuthProvider.credential(idToken: idToken);
+          await firebaseAuth.signInWithCredential(credential);
+          await checkUserAfterLogin();
+          return;
+        } on GoogleSignInException catch (retryError) {
+          throw Exception(retryError.description ?? 'Google login failed');
+        } on FirebaseAuthException catch (retryError) {
+          throw Exception(
+            _friendlyAuthError(retryError, fallback: 'Google login failed'),
+          );
+        } catch (retryError) {
+          throw Exception(_errorMessage(retryError));
+        }
+      }
+
+      throw Exception(message);
     }
-  }
-
-  Future<void> _resetGoogleAuthorization() async {
-    try {
-      await GoogleSignIn.instance.signOut();
-    } catch (_) {}
-
-    try {
-      await GoogleSignIn.instance.disconnect();
-    } catch (_) {}
   }
 
   Future<void> sendOtp({required String mobileNumber}) async {
     final completer = Completer<void>();
-    final formattedNumber = '+91$mobileNumber';
+    final formattedNumber = _formatIndianPhoneNumber(mobileNumber);
 
     await firebaseAuth.verifyPhoneNumber(
       phoneNumber: formattedNumber,
@@ -121,11 +137,9 @@ class AuthService {
               ),
             );
           }
-        } catch (_) {
+        } catch (e) {
           if (!completer.isCompleted) {
-            completer.completeError(
-              Exception('OTP verification failed. Please try again.'),
-            );
+            completer.completeError(Exception(_errorMessage(e)));
           }
         }
       },
@@ -160,7 +174,7 @@ class AuthService {
     required int? resendToken,
   }) async {
     final completer = Completer<OtpSendResult>();
-    final formattedNumber = '+91$mobileNumber';
+    final formattedNumber = _formatIndianPhoneNumber(mobileNumber);
 
     await firebaseAuth.verifyPhoneNumber(
       phoneNumber: formattedNumber,
@@ -183,11 +197,9 @@ class AuthService {
               ),
             );
           }
-        } catch (_) {
+        } catch (e) {
           if (!completer.isCompleted) {
-            completer.completeError(
-              Exception('OTP verification failed. Please try again.'),
-            );
+            completer.completeError(Exception(_errorMessage(e)));
           }
         }
       },
@@ -228,8 +240,8 @@ class AuthService {
       await checkUserAfterLogin();
     } on FirebaseAuthException catch (e) {
       throw Exception(_friendlyAuthError(e, fallback: 'Invalid OTP'));
-    } catch (_) {
-      throw Exception('OTP verification failed. Please try again.');
+    } catch (e) {
+      throw Exception(_errorMessage(e));
     }
   }
 
@@ -447,5 +459,40 @@ class AuthService {
     }
 
     return e.message ?? fallback;
+  }
+
+  String _formatIndianPhoneNumber(String mobileNumber) {
+    final digitsOnly = mobileNumber.replaceAll(RegExp(r'\D'), '');
+
+    if (digitsOnly.length == 10) {
+      return '+91$digitsOnly';
+    }
+
+    if (digitsOnly.length == 12 && digitsOnly.startsWith('91')) {
+      return '+$digitsOnly';
+    }
+
+    if (mobileNumber.trim().startsWith('+')) {
+      return mobileNumber.trim();
+    }
+
+    return '+$digitsOnly';
+  }
+
+  String _errorMessage(Object error) {
+    if (error is Exception) {
+      return error.toString().replaceFirst('Exception: ', '');
+    }
+
+    return error.toString();
+  }
+
+  bool _looksLikeGoogleReauthIssue(String message) {
+    final normalized = message.toLowerCase();
+    return normalized.contains('sign_in_failed') ||
+        normalized.contains('user did not grant permission') ||
+        normalized.contains('failed to recover auth') ||
+        normalized.contains('canceled') ||
+        normalized.contains('cancelled');
   }
 }

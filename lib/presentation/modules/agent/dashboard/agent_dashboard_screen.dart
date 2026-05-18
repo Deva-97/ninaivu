@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ninaivu/core/constants/app_strings.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/agent_dashboard_controller.dart';
+import 'package:ninaivu/presentation/modules/common/widgets/account_actions_menu.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/dashboard_widgets.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
 
@@ -14,10 +16,11 @@ class AgentDashboardScreen extends GetView<AgentDashboardController> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agent Dashboard'),
+        title: const Text(AppStrings.agentDashboard),
         actions: [
           Obx(
-            () => TextButton.icon(
+            () => IconButton(
+              tooltip: controller.isSyncing.value ? 'Syncing' : 'Sync now',
               onPressed: controller.isSyncing.value ? null : controller.syncNow,
               icon: controller.isSyncing.value
                   ? SizedBox(
@@ -26,25 +29,15 @@ class AgentDashboardScreen extends GetView<AgentDashboardController> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.sync_rounded),
-              label: Text(controller.isSyncing.value ? 'Syncing...' : 'Sync now'),
             ),
           ),
           Obx(
-            () => TextButton.icon(
-              onPressed: controller.isSigningOut.value ? null : controller.signOut,
-              icon: controller.isSigningOut.value
-                  ? SizedBox(
-                      width: responsive.scaled(18, min: 16),
-                      height: responsive.scaled(18, min: 16),
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.logout_rounded),
-              label: Text(
-                controller.isSigningOut.value ? 'Signing out...' : 'Sign out',
-              ),
+            () => AccountActionsMenu(
+              onSignOut: controller.signOut,
+              isSigningOut: controller.isSigningOut.value,
             ),
           ),
-          SizedBox(width: responsive.scaled(8, min: 6)),
+          SizedBox(width: responsive.scaled(4, min: 2)),
         ],
       ),
       body: Obx(() {

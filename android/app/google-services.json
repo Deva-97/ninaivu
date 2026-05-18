@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "302492772767-d9ffht7cqt710mhb2nae3jcp8kkf843o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.devendiran.ninaivu",
+            "certificate_hash": "28ecc22fd7e3f9e54bf1530f25c125e86e12560a"
+          }
+        },
+        {
           "client_id": "302492772767-hjan688r55ubaljbgorlg7rhohfmb9d0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

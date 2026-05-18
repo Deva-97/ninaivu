@@ -44,7 +44,8 @@ service cloud.firestore {
       allow read: if isAdmin();
 
       match /users/{userId} {
-        allow read: if isActiveUser() && (isAdmin() || request.auth.uid == userId);
+        allow read: if isSignedIn() && request.auth.uid == userId
+          || isAdmin();
         allow create, update: if isAdmin()
           || (request.auth.uid == userId
             && request.resource.data.role in ['admin', 'agent']
