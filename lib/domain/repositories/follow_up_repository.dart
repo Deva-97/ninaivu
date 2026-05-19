@@ -12,4 +12,12 @@ abstract class FollowUpRepository {
     String filter = 'today',
   });
   Future<FollowUp?> getFollowUpById(String followUpId);
+  Future<void> rescheduleFollowUp({
+    required String followUpId,
+    required int scheduledAt,
+  });
+  Future<List<FollowUp>> getFollowUpsByClient(
+    String clientId, {
+    String? filter,
+  });
 }

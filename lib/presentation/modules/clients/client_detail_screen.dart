@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:ninaivu/core/utils/whatsapp_template_builder.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/client_detail_controller.dart';
+import 'package:ninaivu/presentation/modules/common/widgets/whatsapp_template_selector.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
 
 class ClientDetailScreen extends GetView<ClientDetailController> {
@@ -9,6 +12,7 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
 
   @override
   Widget build(BuildContext context) {
+    final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
     final responsive = context.responsive;
 
     return Scaffold(
@@ -21,7 +25,10 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
               if (client == null) {
                 return;
               }
-              final refreshed = await Get.toNamed(AppRoutes.clientForm, arguments: client);
+              final refreshed = await Get.toNamed(
+                AppRoutes.clientForm,
+                arguments: client,
+              );
               if (refreshed == true) {
                 await controller.loadClient();
               }
@@ -57,93 +64,147 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
           child: ListView(
             padding: EdgeInsets.all(responsive.pagePadding),
             children: [
-            Card(
-              child: Padding(
-                padding: EdgeInsets.all(responsive.pagePadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      client.name,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    SizedBox(height: responsive.itemGap),
-                    _DetailRow(label: 'Mobile', value: client.mobile),
-                    _DetailRow(
-                      label: 'Alternate',
-                      value: client.alternateMobile ?? 'Not provided',
-                    ),
-                    _DetailRow(label: 'Email', value: client.email ?? 'Not provided'),
-                    _DetailRow(label: 'Area / City', value: client.areaCity ?? 'Not set'),
-                    _DetailRow(label: 'Address', value: client.address ?? 'Not provided'),
-                    _DetailRow(label: 'Notes', value: client.notes ?? 'No notes'),
-                    _DetailRow(
-                      label: 'Policy Count',
-                      value: client.policyCount.toString(),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: responsive.itemGap),
-            Wrap(
-              spacing: responsive.scaled(12, min: 10),
-              runSpacing: responsive.scaled(12, min: 10),
-              children: [
-                FilledButton.icon(
-                  onPressed: () => controller.callClient().catchError(_showError),
-                  icon: const Icon(Icons.call_outlined),
-                  label: const Text('Call'),
-                ),
-                OutlinedButton.icon(
-                  onPressed: () => controller.whatsappClient().catchError(_showError),
-                  icon: const Icon(Icons.chat_outlined),
-                  label: const Text('WhatsApp'),
-                ),
-                OutlinedButton.icon(
-                  onPressed: () => Get.toNamed(
-                    AppRoutes.policies,
-                    arguments: {'clientId': client.id},
-                  ),
-                  icon: const Icon(Icons.description_outlined),
-                  label: const Text('Policies'),
-                ),
-                OutlinedButton.icon(
-                  onPressed: () => Get.toNamed(
-                    AppRoutes.policyForm,
-                    arguments: {'clientId': client.id},
-                  ),
-                  icon: const Icon(Icons.add_card_outlined),
-                  label: const Text('Add Policy'),
-                ),
-              ],
-            ),
-            SizedBox(height: responsive.sectionGap),
-            TextButton.icon(
-              onPressed: () async {
-                final confirmed = await Get.dialog<bool>(
-                  AlertDialog(
-                    title: const Text('Delete client'),
-                    content: Text('Soft-delete ${client.name}?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Get.back(result: false),
-                        child: const Text('Cancel'),
+              Card(
+                child: Padding(
+                  padding: EdgeInsets.all(responsive.pagePadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        client.name,
+                        style: Theme.of(context).textTheme.headlineSmall,
                       ),
-                      ElevatedButton(
-                        onPressed: () => Get.back(result: true),
-                        child: const Text('Delete'),
+                      SizedBox(height: responsive.itemGap),
+                      _DetailRow(label: 'Mobile', value: client.mobile),
+                      _DetailRow(
+                        label: 'Alternate',
+                        value: client.alternateMobile ?? 'Not provided',
+                      ),
+                      _DetailRow(
+                        label: 'Email',
+                        value: client.email ?? 'Not provided',
+                      ),
+                      _DetailRow(
+                        label: 'Area / City',
+                        value: client.areaCity ?? 'Not set',
+                      ),
+                      _DetailRow(
+                        label: 'Address',
+                        value: client.address ?? 'Not provided',
+                      ),
+                      _DetailRow(
+                        label: 'Notes',
+                        value: client.notes ?? 'No notes',
+                      ),
+                      _DetailRow(
+                        label: 'Policy Count',
+                        value: client.policyCount.toString(),
                       ),
                     ],
                   ),
-                );
-                if (confirmed == true) {
-                  await controller.deleteClient();
+                ),
+              ),
+              SizedBox(height: responsive.itemGap),
+              Wrap(
+                spacing: responsive.scaled(12, min: 10),
+                runSpacing: responsive.scaled(12, min: 10),
+                children: [
+                  FilledButton.icon(
+                    onPressed: () =>
+                        controller.callClient().catchError(_showError),
+                    icon: const Icon(Icons.call_outlined),
+                    label: const Text('Call'),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () => showWhatsAppTemplateSelector(
+                      context: context,
+                      mobile: client.mobile,
+                      data: WhatsAppTemplateData(
+                        clientName: client.name,
+                        mobile: client.mobile,
+                      ),
+                    ),
+                    icon: const Icon(Icons.chat_outlined),
+                    label: const Text('WhatsApp'),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () => Get.toNamed(
+                      AppRoutes.policies,
+                      arguments: {'clientId': client.id},
+                    ),
+                    icon: const Icon(Icons.description_outlined),
+                    label: const Text('Policies'),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () => Get.toNamed(
+                      AppRoutes.policyForm,
+                      arguments: {'clientId': client.id},
+                    ),
+                    icon: const Icon(Icons.add_card_outlined),
+                    label: const Text('Add Policy'),
+                  ),
+                ],
+              ),
+              SizedBox(height: responsive.sectionGap),
+              Text('Timeline', style: Theme.of(context).textTheme.titleLarge),
+              SizedBox(height: responsive.itemGap),
+              Obx(() {
+                if (controller.timelineItems.isEmpty) {
+                  return const AppEmptyState(
+                    icon: Icons.timeline_outlined,
+                    title: 'No timeline items yet',
+                    subtitle:
+                        'Policies, reminders, and follow-ups will appear here.',
+                  );
                 }
-              },
-              icon: const Icon(Icons.delete_outline),
-              label: const Text('Delete Client'),
-            ),
+                return Column(
+                  children: controller.timelineItems
+                      .map(
+                        (item) => Card(
+                          child: ListTile(
+                            leading: Icon(_timelineIcon(item.type)),
+                            title: Text(item.title),
+                            subtitle: Text(
+                              '${item.subtitle}\n${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(item.dateTimeMillis))}',
+                            ),
+                            isThreeLine: true,
+                            trailing: StatusBadge(label: item.status),
+                            onTap: () => Get.toNamed(
+                              item.routeName,
+                              arguments: item.routeArgument,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              }),
+              SizedBox(height: responsive.sectionGap),
+              TextButton.icon(
+                onPressed: () async {
+                  final confirmed = await Get.dialog<bool>(
+                    AlertDialog(
+                      title: const Text('Delete client'),
+                      content: Text('Soft-delete ${client.name}?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Get.back(result: false),
+                          child: const Text('Cancel'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Get.back(result: true),
+                          child: const Text('Delete'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirmed == true) {
+                    await controller.deleteClient();
+                  }
+                },
+                icon: const Icon(Icons.delete_outline),
+                label: const Text('Delete Client'),
+              ),
             ],
           ),
         );
@@ -152,7 +213,21 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
   }
 
   void _showError(Object error) {
-    Get.snackbar('Action failed', error.toString().replaceFirst('Exception: ', ''));
+    Get.snackbar(
+      'Action failed',
+      error.toString().replaceFirst('Exception: ', ''),
+    );
+  }
+
+  IconData _timelineIcon(String type) {
+    switch (type) {
+      case 'policy':
+        return Icons.description_outlined;
+      case 'reminder':
+        return Icons.notifications_active_outlined;
+      default:
+        return Icons.pending_actions_outlined;
+    }
   }
 }
 

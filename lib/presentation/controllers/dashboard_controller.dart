@@ -7,14 +7,22 @@ import 'package:ninaivu/core/services/auth_service.dart';
 import 'package:ninaivu/core/services/app_preferences.dart';
 import 'package:ninaivu/core/services/local_data_change_service.dart';
 import 'package:ninaivu/core/services/sync_service.dart';
+import 'package:ninaivu/data/datasources/local/sync_queue_local_data_source.dart';
 import 'package:intl/intl.dart';
 
 abstract class DashboardController<T> extends GetxController {
-  DashboardController({AuthService? authService, SyncService? syncService})
+  DashboardController({
+    AuthService? authService,
+    SyncQueueLocalDataSource? syncQueueLocalDataSource,
+    SyncService? syncService,
+  })
     : _authService = authService ?? AuthService(),
+      _syncQueueLocalDataSource =
+          syncQueueLocalDataSource ?? SyncQueueLocalDataSource(),
       _syncService = syncService ?? SyncService();
 
   final AuthService _authService;
+  final SyncQueueLocalDataSource _syncQueueLocalDataSource;
   final SyncService _syncService;
 
   final isLoading = false.obs;
@@ -22,6 +30,7 @@ abstract class DashboardController<T> extends GetxController {
   final isSyncing = false.obs;
   final errorMessage = RxnString();
   final lastSyncLabel = 'Never synced'.obs;
+  final backupStatusLabel = 'Saved offline'.obs;
   StreamSubscription<int?>? _lastSyncTimeSubscription;
   StreamSubscription<void>? _localDataChangeSubscription;
   Timer? _dashboardReloadDebounce;
@@ -118,6 +127,12 @@ abstract class DashboardController<T> extends GetxController {
   Future<void> refreshLastSyncLabel() async {
     final preferences = await AppPreferences.getInstance();
     final lastSyncTime = preferences.lastSyncTime;
+    final pendingCount = await _syncQueueLocalDataSource.countPendingItems();
+    if (pendingCount > 0) {
+      backupStatusLabel.value = 'Backup pending';
+    } else {
+      backupStatusLabel.value = lastSyncTime == null ? 'Saved offline' : 'Backed up';
+    }
     if (lastSyncTime == null) {
       lastSyncLabel.value = 'Never synced';
       return;

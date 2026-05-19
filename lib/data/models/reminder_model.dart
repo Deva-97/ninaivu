@@ -20,6 +20,7 @@ class ReminderModel extends Reminder {
     required super.isDeleted,
     required super.syncStatus,
     super.clientName,
+    super.clientMobile,
     super.policyNumber,
     super.companyName,
   });
@@ -44,6 +45,7 @@ class ReminderModel extends Reminder {
       isDeleted: entity.isDeleted,
       syncStatus: entity.syncStatus,
       clientName: entity.clientName,
+      clientMobile: entity.clientMobile,
       policyNumber: entity.policyNumber,
       companyName: entity.companyName,
     );
@@ -69,6 +71,7 @@ class ReminderModel extends Reminder {
     bool? isDeleted,
     String? syncStatus,
     String? clientName,
+    String? clientMobile,
     String? policyNumber,
     String? companyName,
   }) {
@@ -93,6 +96,7 @@ class ReminderModel extends Reminder {
       isDeleted: isDeleted ?? this.isDeleted,
       syncStatus: syncStatus ?? this.syncStatus,
       clientName: clientName ?? this.clientName,
+      clientMobile: clientMobile ?? this.clientMobile,
       policyNumber: policyNumber ?? this.policyNumber,
       companyName: companyName ?? this.companyName,
     );
@@ -140,6 +144,7 @@ class ReminderModel extends Reminder {
       isDeleted: (map['is_deleted'] as int? ?? 0) == 1,
       syncStatus: map['sync_status'] as String? ?? 'synced',
       clientName: map['client_name'] as String?,
+      clientMobile: map['client_mobile'] as String?,
       policyNumber: map['policy_number'] as String?,
       companyName: map['company_name'] as String?,
     );
@@ -165,6 +170,7 @@ class ReminderModel extends Reminder {
       'isDeleted': isDeleted,
       'syncStatus': syncStatus,
       'clientName': clientName,
+      'clientMobile': clientMobile,
       'policyNumber': policyNumber,
       'companyName': companyName,
     };
@@ -190,6 +196,7 @@ class ReminderModel extends Reminder {
       isDeleted: map['isDeleted'] as bool? ?? false,
       syncStatus: map['syncStatus'] as String? ?? 'synced',
       clientName: map['clientName'] as String?,
+      clientMobile: map['clientMobile'] as String?,
       policyNumber: map['policyNumber'] as String?,
       companyName: map['companyName'] as String?,
     );

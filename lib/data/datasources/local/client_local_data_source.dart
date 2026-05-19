@@ -136,6 +136,38 @@ class ClientLocalDataSource {
           );
   }
 
+  Future<bool> hasDuplicateMobile({
+    required String businessId,
+    required String mobile,
+    required bool isAdmin,
+    required String userId,
+    String? excludingClientId,
+  }) async {
+    final db = await _databaseHelper.database;
+    final whereClauses = <String>[
+      '${DatabaseColumns.businessId} = ?',
+      'mobile = ?',
+      '${DatabaseColumns.isDeleted} = 0',
+    ];
+    final whereArgs = <Object?>[businessId, mobile];
+    if (!isAdmin) {
+      whereClauses.add(
+        '(${DatabaseColumns.createdBy} = ? OR ${DatabaseColumns.agentId} = ? OR ${DatabaseColumns.assignedTo} = ?)',
+      );
+      whereArgs.addAll([userId, userId, userId]);
+    }
+    if (excludingClientId != null && excludingClientId.isNotEmpty) {
+      whereClauses.add('${DatabaseColumns.id} != ?');
+      whereArgs.add(excludingClientId);
+    }
+
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) AS total FROM ${DatabaseTables.clients} WHERE ${whereClauses.join(' AND ')}',
+      whereArgs,
+    );
+    return (Sqflite.firstIntValue(result) ?? 0) > 0;
+  }
+
   Future<int> countClientsForAdmin(String businessId) async {
     final db = await _databaseHelper.database;
     final result = await db.rawQuery(

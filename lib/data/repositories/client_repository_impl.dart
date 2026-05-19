@@ -84,6 +84,22 @@ class ClientRepositoryImpl implements ClientRepository {
   }
 
   @override
+  Future<bool> hasDuplicateMobile({
+    required String mobile,
+    String? excludingClientId,
+  }) async {
+    final currentUser = await _requireCurrentUser();
+    final role = currentUser.role.toAppRole();
+    return _localDataSource.hasDuplicateMobile(
+      businessId: currentUser.businessId,
+      mobile: mobile,
+      isAdmin: PermissionHelper.canManageAllClients(role),
+      userId: currentUser.id,
+      excludingClientId: excludingClientId,
+    );
+  }
+
+  @override
   Future<Client> addClient({
     required String name,
     required String mobile,

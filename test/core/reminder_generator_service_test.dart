@@ -18,6 +18,7 @@ void main() {
         endDate: endDate,
         premiumAmount: 1000,
         status: 'Active',
+        renewalStatus: 'Not Contacted',
         createdBy: 'agent-1',
         createdAt: DateTime(2026, 1, 1).millisecondsSinceEpoch,
         updatedAt: DateTime(2026, 1, 1).millisecondsSinceEpoch,

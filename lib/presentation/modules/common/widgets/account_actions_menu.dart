@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:ninaivu/presentation/modules/common/widgets/app_lock_settings_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-enum AccountAction { deleteAccount, signOut }
+enum AccountAction { appLock, deleteAccount, signOut }
 
 class AccountActionsMenu extends StatelessWidget {
   const AccountActionsMenu({
@@ -26,6 +27,12 @@ class AccountActionsMenu extends StatelessWidget {
       enabled: !isSigningOut,
       onSelected: (value) async {
         switch (value) {
+          case AccountAction.appLock:
+            await showDialog<void>(
+              context: context,
+              builder: (_) => const AppLockSettingsDialog(),
+            );
+            break;
           case AccountAction.deleteAccount:
             await _openDeleteAccountFlow(context);
             break;
@@ -35,6 +42,15 @@ class AccountActionsMenu extends StatelessWidget {
         }
       },
       itemBuilder: (context) => const [
+        PopupMenuItem<AccountAction>(
+          value: AccountAction.appLock,
+          child: ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(Icons.lock_outline_rounded),
+            title: Text('App lock'),
+          ),
+        ),
         PopupMenuItem<AccountAction>(
           value: AccountAction.deleteAccount,
           child: ListTile(

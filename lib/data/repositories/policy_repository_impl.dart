@@ -114,6 +114,22 @@ class PolicyRepositoryImpl implements PolicyRepository {
   }
 
   @override
+  Future<List<Policy>> searchPolicies({
+    required String query,
+    String? clientId,
+  }) async {
+    final currentUser = await _requireCurrentUser();
+    final role = currentUser.role.toAppRole();
+    return _localDataSource.searchPolicies(
+      businessId: currentUser.businessId,
+      isAdmin: PermissionHelper.canManageAllClients(role),
+      userId: currentUser.id,
+      query: query,
+      clientId: clientId,
+    );
+  }
+
+  @override
   Future<Policy?> getPolicyById(String policyId) async {
     final currentUser = await _requireCurrentUser();
     final policy = await _localDataSource.getPolicyById(policyId);
@@ -171,6 +187,40 @@ class PolicyRepositoryImpl implements PolicyRepository {
     await _enqueue(model, 'update', 'pending_update');
     await _syncService.syncPendingData();
     return model;
+  }
+
+  @override
+  Future<void> updateRenewalStatus({
+    required String policyId,
+    required String renewalStatus,
+  }) async {
+    final currentUser = await _requirePolicyManager();
+    final existing = await _localDataSource.getPolicyById(policyId);
+    if (existing == null) {
+      throw Exception('Policy not found');
+    }
+    _ensurePolicyAccess(
+      currentUser,
+      createdBy: existing.createdBy,
+      agentId: existing.agentId,
+      assignedTo: existing.assignedTo,
+    );
+
+    final nextPolicyStatus = renewalStatus == 'Renewed' ? 'Renewed' : null;
+    await _localDataSource.updateRenewalStatus(
+      policyId: policyId,
+      renewalStatus: renewalStatus,
+      policyStatus: nextPolicyStatus,
+    );
+    final updatedModel = existing.copyWith(
+      renewalStatus: renewalStatus,
+      status: nextPolicyStatus ?? existing.status,
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
+      syncStatus: 'pending_update',
+    );
+    LocalDataChangeService.notifyChanged();
+    await _enqueue(updatedModel, 'update', 'pending_update');
+    await _syncService.syncPendingData();
   }
 
   @override

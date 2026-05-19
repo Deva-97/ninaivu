@@ -15,6 +15,7 @@ class PolicyModel extends Policy {
     super.vehicleNumber,
     super.vehicleModel,
     required super.status,
+    required super.renewalStatus,
     super.notes,
     required super.createdBy,
     super.agentId,
@@ -42,6 +43,7 @@ class PolicyModel extends Policy {
       vehicleNumber: entity.vehicleNumber,
       vehicleModel: entity.vehicleModel,
       status: entity.status,
+      renewalStatus: entity.renewalStatus,
       notes: entity.notes,
       createdBy: entity.createdBy,
       agentId: entity.agentId,
@@ -69,6 +71,7 @@ class PolicyModel extends Policy {
     String? vehicleNumber,
     String? vehicleModel,
     String? status,
+    String? renewalStatus,
     String? notes,
     String? createdBy,
     String? agentId,
@@ -94,6 +97,7 @@ class PolicyModel extends Policy {
       vehicleNumber: vehicleNumber ?? this.vehicleNumber,
       vehicleModel: vehicleModel ?? this.vehicleModel,
       status: status ?? this.status,
+      renewalStatus: renewalStatus ?? this.renewalStatus,
       notes: notes ?? this.notes,
       createdBy: createdBy ?? this.createdBy,
       agentId: agentId ?? this.agentId,
@@ -122,6 +126,7 @@ class PolicyModel extends Policy {
       'vehicle_number': vehicleNumber,
       'vehicle_model': vehicleModel,
       'status': status,
+      'renewal_status': renewalStatus,
       'notes': notes,
       'created_by': createdBy,
       'agent_id': agentId,
@@ -150,6 +155,8 @@ class PolicyModel extends Policy {
       vehicleNumber: map['vehicle_number'] as String?,
       vehicleModel: map['vehicle_model'] as String?,
       status: map['status'] as String,
+      renewalStatus:
+          map['renewal_status'] as String? ?? _defaultRenewalStatus(map['status'] as String?),
       notes: map['notes'] as String?,
       createdBy: map['created_by'] as String,
       agentId: map['agent_id'] as String?,
@@ -178,6 +185,7 @@ class PolicyModel extends Policy {
       'vehicleNumber': vehicleNumber,
       'vehicleModel': vehicleModel,
       'status': status,
+      'renewalStatus': renewalStatus,
       'notes': notes,
       'createdBy': createdBy,
       'agentId': agentId,
@@ -206,6 +214,8 @@ class PolicyModel extends Policy {
       vehicleNumber: map['vehicleNumber'] as String?,
       vehicleModel: map['vehicleModel'] as String?,
       status: map['status'] as String,
+      renewalStatus:
+          map['renewalStatus'] as String? ?? _defaultRenewalStatus(map['status'] as String?),
       notes: map['notes'] as String?,
       createdBy: map['createdBy'] as String,
       agentId: map['agentId'] as String?,
@@ -217,5 +227,13 @@ class PolicyModel extends Policy {
       isDeleted: map['isDeleted'] as bool? ?? false,
       syncStatus: map['syncStatus'] as String? ?? 'synced',
     );
+  }
+
+  // Default renewal stage for older records that do not have the new column yet.
+  static String _defaultRenewalStatus(String? policyStatus) {
+    if ((policyStatus ?? '').trim().toLowerCase() == 'renewed') {
+      return 'Renewed';
+    }
+    return 'Not Contacted';
   }
 }

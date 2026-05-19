@@ -11,6 +11,9 @@ class AppPreferences {
   static const String _roleKey = 'role';
   static const String _businessIdKey = 'business_id';
   static const String _lastSyncTimeKey = 'last_sync_time';
+  static const String _appLockEnabledKey = 'app_lock_enabled';
+  static const String _appLockPinHashKey = 'app_lock_pin_hash';
+  static const String _biometricUnlockEnabledKey = 'biometric_unlock_enabled';
 
   static AppPreferences? _instance;
   static final StreamController<int?> _lastSyncTimeController =
@@ -33,6 +36,11 @@ class AppPreferences {
   String? get role => _sharedPreferences.getString(_roleKey);
   String? get businessId => _sharedPreferences.getString(_businessIdKey);
   int? get lastSyncTime => _sharedPreferences.getInt(_lastSyncTimeKey);
+  bool get isAppLockEnabled =>
+      _sharedPreferences.getBool(_appLockEnabledKey) ?? false;
+  String? get appLockPinHash => _sharedPreferences.getString(_appLockPinHashKey);
+  bool get isBiometricUnlockEnabled =>
+      _sharedPreferences.getBool(_biometricUnlockEnabledKey) ?? false;
 
   Future<void> setUserId(String? value) async {
     await _setOrRemoveString(_userIdKey, value);
@@ -55,6 +63,18 @@ class AppPreferences {
 
     await _sharedPreferences.setInt(_lastSyncTimeKey, value);
     _lastSyncTimeController.add(value);
+  }
+
+  Future<void> setAppLockEnabled(bool value) async {
+    await _sharedPreferences.setBool(_appLockEnabledKey, value);
+  }
+
+  Future<void> setAppLockPinHash(String? value) async {
+    await _setOrRemoveString(_appLockPinHashKey, value);
+  }
+
+  Future<void> setBiometricUnlockEnabled(bool value) async {
+    await _sharedPreferences.setBool(_biometricUnlockEnabledKey, value);
   }
 
   Future<void> saveSession({

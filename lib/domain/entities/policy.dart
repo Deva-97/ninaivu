@@ -13,6 +13,7 @@ class Policy {
     this.vehicleNumber,
     this.vehicleModel,
     required this.status,
+    required this.renewalStatus,
     this.notes,
     required this.createdBy,
     this.agentId,
@@ -38,6 +39,7 @@ class Policy {
   final String? vehicleNumber;
   final String? vehicleModel;
   final String status;
+  final String renewalStatus;
   final String? notes;
   final String createdBy;
   final String? agentId;

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:ninaivu/core/utils/whatsapp_template_builder.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/policy_detail_controller.dart';
+import 'package:ninaivu/presentation/modules/common/widgets/whatsapp_template_selector.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PolicyDetailScreen extends GetView<PolicyDetailController> {
   const PolicyDetailScreen({super.key});
@@ -24,7 +27,10 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
               if (policy == null) {
                 return;
               }
-              final refreshed = await Get.toNamed(AppRoutes.policyForm, arguments: policy);
+              final refreshed = await Get.toNamed(
+                AppRoutes.policyForm,
+                arguments: policy,
+              );
               if (refreshed == true) {
                 await controller.loadPolicy();
               }
@@ -60,72 +66,114 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
           child: ListView(
             padding: EdgeInsets.all(responsive.pagePadding),
             children: [
-            Card(
-              child: Padding(
-                padding: EdgeInsets.all(responsive.pagePadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      policy.policyNumber,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    SizedBox(height: responsive.itemGap),
-                    _DetailRow(label: 'Company', value: policy.companyName),
-                    _DetailRow(label: 'Type', value: policy.insuranceType),
-                    _DetailRow(label: 'Client ID', value: policy.clientId),
-                    _DetailRow(
-                      label: 'Premium',
-                      value: currency.format(policy.premiumAmount),
-                    ),
-                    _DetailRow(
-                      label: 'Start Date',
-                      value: dateFormat.format(
-                        DateTime.fromMillisecondsSinceEpoch(policy.startDate),
+              Card(
+                child: Padding(
+                  padding: EdgeInsets.all(responsive.pagePadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        policy.policyNumber,
+                        style: Theme.of(context).textTheme.headlineSmall,
                       ),
-                    ),
-                    _DetailRow(
-                      label: 'End Date',
-                      value: dateFormat.format(
-                        DateTime.fromMillisecondsSinceEpoch(policy.endDate),
+                      SizedBox(height: responsive.itemGap),
+                      _DetailRow(label: 'Company', value: policy.companyName),
+                      _DetailRow(label: 'Type', value: policy.insuranceType),
+                      _DetailRow(label: 'Client ID', value: policy.clientId),
+                      _DetailRow(
+                        label: 'Premium',
+                        value: currency.format(policy.premiumAmount),
                       ),
-                    ),
-                    _DetailRow(label: 'Status', value: policy.status),
-                    _DetailRow(
-                      label: 'Vehicle',
-                      value: policy.vehicleNumber ?? policy.vehicleModel ?? 'Not applicable',
-                    ),
-                    _DetailRow(label: 'Notes', value: policy.notes ?? 'No notes'),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: responsive.sectionGap),
-            TextButton.icon(
-              onPressed: () async {
-                final confirmed = await Get.dialog<bool>(
-                  AlertDialog(
-                    title: const Text('Delete policy'),
-                    content: Text('Soft-delete ${policy.policyNumber}?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Get.back(result: false),
-                        child: const Text('Cancel'),
+                      _DetailRow(
+                        label: 'Start Date',
+                        value: dateFormat.format(
+                          DateTime.fromMillisecondsSinceEpoch(policy.startDate),
+                        ),
                       ),
-                      ElevatedButton(
-                        onPressed: () => Get.back(result: true),
-                        child: const Text('Delete'),
+                      _DetailRow(
+                        label: 'End Date',
+                        value: dateFormat.format(
+                          DateTime.fromMillisecondsSinceEpoch(policy.endDate),
+                        ),
+                      ),
+                      _DetailRow(label: 'Status', value: policy.status),
+                      _DetailRow(
+                        label: 'Renewal Status',
+                        value: policy.renewalStatus,
+                      ),
+                      _DetailRow(
+                        label: 'Vehicle',
+                        value:
+                            policy.vehicleNumber ??
+                            policy.vehicleModel ??
+                            'Not applicable',
+                      ),
+                      _DetailRow(
+                        label: 'Notes',
+                        value: policy.notes ?? 'No notes',
                       ),
                     ],
                   ),
-                );
-                if (confirmed == true) {
-                  await controller.deletePolicy();
-                }
-              },
-              icon: const Icon(Icons.delete_outline),
-              label: const Text('Delete Policy'),
-            ),
+                ),
+              ),
+              SizedBox(height: responsive.sectionGap),
+              if (controller.client.value?.mobile != null)
+                Wrap(
+                  spacing: responsive.scaled(12, min: 10),
+                  runSpacing: responsive.scaled(12, min: 10),
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: () => launchUrl(
+                        Uri.parse('tel:${controller.client.value!.mobile}'),
+                      ),
+                      icon: const Icon(Icons.call_outlined),
+                      label: const Text('Call'),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: () => showWhatsAppTemplateSelector(
+                        context: context,
+                        mobile: controller.client.value!.mobile,
+                        data: WhatsAppTemplateData(
+                          clientName: controller.client.value!.name,
+                          mobile: controller.client.value!.mobile,
+                          policyNumber: policy.policyNumber,
+                          companyName: policy.companyName,
+                          insuranceType: policy.insuranceType,
+                          expiryDateMillis: policy.endDate,
+                          premiumAmount: policy.premiumAmount,
+                        ),
+                      ),
+                      icon: const Icon(Icons.chat_outlined),
+                      label: const Text('WhatsApp'),
+                    ),
+                  ],
+                ),
+              SizedBox(height: responsive.scaled(12, min: 10)),
+              TextButton.icon(
+                onPressed: () async {
+                  final confirmed = await Get.dialog<bool>(
+                    AlertDialog(
+                      title: const Text('Delete policy'),
+                      content: Text('Soft-delete ${policy.policyNumber}?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Get.back(result: false),
+                          child: const Text('Cancel'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Get.back(result: true),
+                          child: const Text('Delete'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirmed == true) {
+                    await controller.deletePolicy();
+                  }
+                },
+                icon: const Icon(Icons.delete_outline),
+                label: const Text('Delete Policy'),
+              ),
             ],
           ),
         );

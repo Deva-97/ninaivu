@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/policy_list_controller.dart';
+import 'package:ninaivu/presentation/modules/common/widgets/export_format_picker.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
 
 class PolicyListScreen extends GetView<PolicyListController> {
@@ -14,7 +15,21 @@ class PolicyListScreen extends GetView<PolicyListController> {
     final responsive = context.responsive;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Policies')),
+      appBar: AppBar(
+        title: const Text('Policies'),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              final format = await showExportFormatPicker(title: 'Export policies');
+              if (format != null) {
+                await controller.exportPolicies(format);
+              }
+            },
+            icon: const Icon(Icons.ios_share_outlined),
+            tooltip: 'Export policies',
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final refreshed = await Get.toNamed(
@@ -103,6 +118,7 @@ class PolicyListScreen extends GetView<PolicyListController> {
                             'Valid till ${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(policy.endDate))}',
                           ),
                           isThreeLine: true,
+                          leading: StatusBadge(label: policy.renewalStatus),
                           trailing: PopupMenuButton<String>(
                             onSelected: (value) async {
                               if (value == 'edit') {

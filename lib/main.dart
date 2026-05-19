@@ -3,9 +3,11 @@ import 'dart:ui';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ninaivu/app.dart';
 import 'package:ninaivu/core/services/app_lifecycle_service.dart';
+import 'package:ninaivu/core/services/app_lock_service.dart';
 import 'package:ninaivu/core/services/app_preferences.dart';
 import 'package:ninaivu/core/services/auto_sync_service.dart';
 import 'package:ninaivu/core/services/background_sync_service.dart';
@@ -17,8 +19,14 @@ const String _googleServerClientId =
 final AutoSyncService _autoSyncService = AutoSyncService();
 final BackgroundSyncService _backgroundSyncService =
     BackgroundSyncService.instance;
+final AppLockService _appLockService = Get.put(
+  AppLockService(),
+  permanent: true,
+);
 final AppLifecycleService _appLifecycleService = AppLifecycleService(
+  onBackground: _appLockService.markAppBackgrounded,
   onResume: () async {
+    _appLockService.handleAppResumed();
     await NotificationService.instance.init();
     await _backgroundSyncService.scheduleQueuedSync();
     await _autoSyncService.triggerSyncNow();
@@ -37,6 +45,7 @@ Future<void> main() async {
   await NotificationService.instance.init();
   await GoogleSignIn.instance.initialize(serverClientId: _googleServerClientId);
   await AppPreferences.getInstance();
+  await _appLockService.init();
   await _autoSyncService.start();
   await _backgroundSyncService.ensureRegistered();
   _appLifecycleService.start();

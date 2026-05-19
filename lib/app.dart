@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ninaivu/core/constants/app_constants.dart';
+import 'package:ninaivu/presentation/modules/common/widgets/app_lock_overlay.dart';
 import 'package:ninaivu/core/theme/app_theme.dart';
 import 'package:ninaivu/core/widgets/responsive_layout.dart';
 import 'package:ninaivu/presentation/routes/app_pages.dart';
@@ -25,7 +26,7 @@ class InsuranceRemindersApp extends StatelessWidget {
 
         return Theme(
           data: scaledTheme,
-          child: child ?? const SizedBox.shrink(),
+          child: AppLockOverlay(child: child ?? const SizedBox.shrink()),
         );
       },
     );

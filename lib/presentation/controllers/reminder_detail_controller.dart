@@ -2,16 +2,20 @@ import 'package:get/get.dart';
 import 'package:ninaivu/domain/entities/reminder.dart';
 import 'package:ninaivu/domain/usecases/reminders/get_reminder_by_id_usecase.dart';
 import 'package:ninaivu/domain/usecases/reminders/mark_reminder_completed_usecase.dart';
+import 'package:ninaivu/domain/usecases/reminders/mark_reminder_renewed_usecase.dart';
 
 class ReminderDetailController extends GetxController {
   ReminderDetailController({
     required GetReminderByIdUseCase getReminderByIdUseCase,
     required MarkReminderCompletedUseCase markReminderCompletedUseCase,
+    required MarkReminderRenewedUseCase markReminderRenewedUseCase,
   }) : _getReminderByIdUseCase = getReminderByIdUseCase,
-       _markReminderCompletedUseCase = markReminderCompletedUseCase;
+       _markReminderCompletedUseCase = markReminderCompletedUseCase,
+       _markReminderRenewedUseCase = markReminderRenewedUseCase;
 
   final GetReminderByIdUseCase _getReminderByIdUseCase;
   final MarkReminderCompletedUseCase _markReminderCompletedUseCase;
+  final MarkReminderRenewedUseCase _markReminderRenewedUseCase;
 
   final reminder = Rxn<Reminder>();
   final isLoading = false.obs;
@@ -43,6 +47,22 @@ class ReminderDetailController extends GetxController {
     isUpdating.value = true;
     try {
       await _markReminderCompletedUseCase(reminderId);
+      await loadReminder();
+      Get.back(result: true);
+    } catch (e) {
+      Get.snackbar(
+        'Unable to update',
+        e.toString().replaceFirst('Exception: ', ''),
+      );
+    } finally {
+      isUpdating.value = false;
+    }
+  }
+
+  Future<void> markRenewed() async {
+    isUpdating.value = true;
+    try {
+      await _markReminderRenewedUseCase(reminderId);
       await loadReminder();
       Get.back(result: true);
     } catch (e) {

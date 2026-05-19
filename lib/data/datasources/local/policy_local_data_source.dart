@@ -125,6 +125,62 @@ class PolicyLocalDataSource {
     return result.map(PolicyModel.fromMap).toList();
   }
 
+  Future<List<PolicyModel>> searchPolicies({
+    required String businessId,
+    required bool isAdmin,
+    required String userId,
+    required String query,
+    String? clientId,
+    int limit = 50,
+  }) {
+    final clauses = <String>[
+      '${DatabaseColumns.businessId} = ?',
+      '${DatabaseColumns.isDeleted} = 0',
+      '(policy_number LIKE ? OR company_name LIKE ? OR insurance_type LIKE ?)',
+    ];
+    final pattern = '%${query.trim()}%';
+    final args = <Object?>[businessId, pattern, pattern, pattern];
+    if (clientId != null && clientId.isNotEmpty) {
+      clauses.add('client_id = ?');
+      args.add(clientId);
+    }
+    if (!isAdmin) {
+      clauses.add(
+        '(${DatabaseColumns.createdBy} = ? OR ${DatabaseColumns.agentId} = ? OR ${DatabaseColumns.assignedTo} = ?)',
+      );
+      args.addAll([userId, userId, userId]);
+    }
+
+    return _getPolicies(
+      whereClauses: clauses,
+      whereArgs: args,
+      limit: limit,
+      offset: 0,
+    );
+  }
+
+  Future<void> updateRenewalStatus({
+    required String policyId,
+    required String renewalStatus,
+    String? policyStatus,
+  }) async {
+    final db = await _databaseHelper.database;
+    final values = <String, Object?>{
+      'renewal_status': renewalStatus,
+      DatabaseColumns.updatedAt: DateTime.now().millisecondsSinceEpoch,
+      DatabaseColumns.syncStatus: 'pending_update',
+    };
+    if (policyStatus != null && policyStatus.isNotEmpty) {
+      values['status'] = policyStatus;
+    }
+    await db.update(
+      DatabaseTables.policies,
+      values,
+      where: '${DatabaseColumns.id} = ?',
+      whereArgs: [policyId],
+    );
+  }
+
   Future<List<PolicyModel>> getExpiringPolicies({
     required String businessId,
     required bool isAdmin,

@@ -5,6 +5,7 @@ import 'package:ninaivu/presentation/bindings/dashboard_bindings.dart';
 import 'package:ninaivu/presentation/bindings/follow_up_bindings.dart';
 import 'package:ninaivu/presentation/bindings/policy_bindings.dart';
 import 'package:ninaivu/presentation/bindings/reminder_bindings.dart';
+import 'package:ninaivu/presentation/bindings/todays_work_binding.dart';
 import 'package:ninaivu/presentation/modules/admin/dashboard/admin_dashboard_screen.dart';
 import 'package:ninaivu/presentation/modules/admin/users/add_edit_agent_screen.dart';
 import 'package:ninaivu/presentation/modules/admin/users/agent_list_screen.dart';
@@ -16,6 +17,7 @@ import 'package:ninaivu/presentation/modules/common/auth/login_screen.dart';
 import 'package:ninaivu/presentation/modules/common/auth/otp_verification_screen.dart';
 import 'package:ninaivu/presentation/modules/common/auth/profile_setup_screen.dart';
 import 'package:ninaivu/presentation/modules/common/splash/splash_screen.dart';
+import 'package:ninaivu/presentation/modules/common/todays_work/todays_work_screen.dart';
 import 'package:ninaivu/presentation/modules/follow_ups/add_edit_follow_up_screen.dart';
 import 'package:ninaivu/presentation/modules/follow_ups/follow_up_detail_screen.dart';
 import 'package:ninaivu/presentation/modules/follow_ups/follow_up_list_screen.dart';
@@ -144,6 +146,15 @@ class AppPages {
       name: AppRoutes.policyDetails,
       page: () => const PolicyDetailScreen(),
       binding: PolicyDetailBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin', 'agent']),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.todaysWork,
+      page: () => const TodaysWorkScreen(),
+      binding: TodaysWorkBinding(),
       middlewares: [
         AuthMiddleware(),
         RoleMiddleware(allowedRoles: const ['admin', 'agent']),

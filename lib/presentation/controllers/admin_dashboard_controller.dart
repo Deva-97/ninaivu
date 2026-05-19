@@ -1,13 +1,22 @@
 import 'package:get/get.dart';
+import 'package:ninaivu/core/models/export_format.dart';
 import 'package:ninaivu/domain/entities/dashboard_stats.dart';
+import 'package:ninaivu/domain/usecases/clients/export_clients_usecase.dart';
 import 'package:ninaivu/domain/usecases/dashboard/get_admin_dashboard_stats_usecase.dart';
+import 'package:ninaivu/domain/usecases/policies/export_policies_usecase.dart';
 import 'package:ninaivu/presentation/controllers/dashboard_controller.dart';
 
 class AdminDashboardController extends DashboardController<AdminDashboardStats> {
   AdminDashboardController({
+    required ExportClientsUseCase exportClientsUseCase,
+    required ExportPoliciesUseCase exportPoliciesUseCase,
     required GetAdminDashboardStatsUseCase getAdminDashboardStatsUseCase,
-  }) : _getAdminDashboardStatsUseCase = getAdminDashboardStatsUseCase;
+  }) : _exportClientsUseCase = exportClientsUseCase,
+       _exportPoliciesUseCase = exportPoliciesUseCase,
+       _getAdminDashboardStatsUseCase = getAdminDashboardStatsUseCase;
 
+  final ExportClientsUseCase _exportClientsUseCase;
+  final ExportPoliciesUseCase _exportPoliciesUseCase;
   final GetAdminDashboardStatsUseCase _getAdminDashboardStatsUseCase;
 
   final stats = Rxn<AdminDashboardStats>();
@@ -30,4 +39,10 @@ class AdminDashboardController extends DashboardController<AdminDashboardStats> 
       isLoading.value = false;
     }
   }
+
+  Future<void> exportClients(ExportFormat format) =>
+      _exportClientsUseCase(format: format);
+
+  Future<void> exportPolicies(ExportFormat format) =>
+      _exportPoliciesUseCase(format: format);
 }

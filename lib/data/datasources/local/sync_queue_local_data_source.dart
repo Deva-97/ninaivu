@@ -85,4 +85,14 @@ class SyncQueueLocalDataSource {
       whereArgs: [queueId],
     );
   }
+
+  Future<int> countPendingItems() async {
+    final db = await _databaseHelper.database;
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) AS total FROM ${DatabaseTables.syncQueue} '
+      'WHERE ${DatabaseColumns.syncStatus} IN (?, ?, ?, ?)',
+      ['pending_create', 'pending_update', 'pending_delete', 'failed'],
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
 }

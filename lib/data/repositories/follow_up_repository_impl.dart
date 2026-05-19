@@ -165,6 +165,56 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
     return followUp;
   }
 
+  @override
+  Future<void> rescheduleFollowUp({
+    required String followUpId,
+    required int scheduledAt,
+  }) async {
+    final currentUser = await _requireCurrentUser();
+    final existing = await _localDataSource.getFollowUpById(followUpId);
+    if (existing == null) {
+      throw Exception('Follow-up not found');
+    }
+    _ensureFollowUpAccess(currentUser, existing);
+
+    await _localDataSource.rescheduleFollowUp(
+      followUpId: followUpId,
+      scheduledAt: scheduledAt,
+    );
+    LocalDataChangeService.notifyChanged();
+    await _enqueue(
+      existing.copyWith(
+        followUpDateTime: scheduledAt,
+        status: 'Pending',
+        updatedAt: DateTime.now().millisecondsSinceEpoch,
+        syncStatus: 'pending_update',
+      ),
+      'update',
+      'pending_update',
+    );
+    await _syncService.syncPendingData();
+  }
+
+  @override
+  Future<List<FollowUp>> getFollowUpsByClient(
+    String clientId, {
+    String? filter,
+  }) async {
+    final currentUser = await _requireCurrentUser();
+    final items = await _localDataSource.getFollowUpsByClient(
+      clientId,
+      filter: filter,
+    );
+    return items.where((item) {
+      try {
+        _ensureFollowUpAccess(currentUser, item);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }).toList();
+  }
+
   Future<AppUserModel> _requireCurrentUser() async {
     final currentUser = await _userLocalDataSource.getCurrentUser();
     if (currentUser == null) {

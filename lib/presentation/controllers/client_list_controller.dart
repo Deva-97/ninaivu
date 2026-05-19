@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ninaivu/core/models/export_format.dart';
 import 'package:ninaivu/domain/entities/client.dart';
 import 'package:ninaivu/domain/usecases/clients/delete_client_usecase.dart';
+import 'package:ninaivu/domain/usecases/clients/export_clients_usecase.dart';
 import 'package:ninaivu/domain/usecases/clients/get_clients_usecase.dart';
 import 'package:ninaivu/domain/usecases/clients/search_clients_usecase.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -13,13 +15,16 @@ class ClientListController extends GetxController {
     required GetClientsUseCase getClientsUseCase,
     required SearchClientsUseCase searchClientsUseCase,
     required DeleteClientUseCase deleteClientUseCase,
+    required ExportClientsUseCase exportClientsUseCase,
   }) : _getClientsUseCase = getClientsUseCase,
        _searchClientsUseCase = searchClientsUseCase,
-       _deleteClientUseCase = deleteClientUseCase;
+       _deleteClientUseCase = deleteClientUseCase,
+       _exportClientsUseCase = exportClientsUseCase;
 
   final GetClientsUseCase _getClientsUseCase;
   final SearchClientsUseCase _searchClientsUseCase;
   final DeleteClientUseCase _deleteClientUseCase;
+  final ExportClientsUseCase _exportClientsUseCase;
 
   final searchController = TextEditingController();
   final clients = <Client>[].obs;
@@ -63,6 +68,9 @@ class ClientListController extends GetxController {
     await _deleteClientUseCase(clientId);
     await loadClients();
   }
+
+  Future<void> exportClients(ExportFormat format) =>
+      _exportClientsUseCase(format: format);
 
   Future<void> callClient(String mobile) async {
     final uri = Uri.parse('tel:$mobile');

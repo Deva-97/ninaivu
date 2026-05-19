@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/client_list_controller.dart';
+import 'package:ninaivu/presentation/modules/common/widgets/export_format_picker.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
 
 class ClientListScreen extends GetView<ClientListController> {
@@ -12,7 +13,21 @@ class ClientListScreen extends GetView<ClientListController> {
     final responsive = context.responsive;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Clients')),
+      appBar: AppBar(
+        title: const Text('Clients'),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              final format = await showExportFormatPicker(title: 'Export clients');
+              if (format != null) {
+                await controller.exportClients(format);
+              }
+            },
+            icon: const Icon(Icons.ios_share_outlined),
+            tooltip: 'Export clients',
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final refreshed = await Get.toNamed(AppRoutes.clientForm);

@@ -18,6 +18,7 @@ class Reminder {
     required this.isDeleted,
     required this.syncStatus,
     this.clientName,
+    this.clientMobile,
     this.policyNumber,
     this.companyName,
   });
@@ -40,6 +41,7 @@ class Reminder {
   final bool isDeleted;
   final String syncStatus;
   final String? clientName;
+  final String? clientMobile;
   final String? policyNumber;
   final String? companyName;
 }

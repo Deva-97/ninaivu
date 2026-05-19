@@ -1,33 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ninaivu/domain/entities/client.dart';
+import 'package:ninaivu/domain/entities/policy.dart';
 import 'package:ninaivu/data/models/follow_up_model.dart';
 import 'package:ninaivu/domain/entities/follow_up.dart';
 import 'package:ninaivu/domain/usecases/follow_ups/add_follow_up_usecase.dart';
+import 'package:ninaivu/domain/usecases/clients/get_client_details_usecase.dart';
+import 'package:ninaivu/domain/usecases/clients/search_clients_usecase.dart';
+import 'package:ninaivu/domain/usecases/policies/get_policies_by_client_usecase.dart';
+import 'package:ninaivu/domain/usecases/policies/get_policy_by_id_usecase.dart';
+import 'package:ninaivu/domain/usecases/policies/search_policies_usecase.dart';
 import 'package:ninaivu/domain/usecases/follow_ups/update_follow_up_usecase.dart';
 import 'package:uuid/uuid.dart';
 
 class FollowUpFormController extends GetxController {
   FollowUpFormController({
     required AddFollowUpUseCase addFollowUpUseCase,
+    required GetClientDetailsUseCase getClientDetailsUseCase,
+    required GetPoliciesByClientUseCase getPoliciesByClientUseCase,
+    required GetPolicyByIdUseCase getPolicyByIdUseCase,
+    required SearchClientsUseCase searchClientsUseCase,
+    required SearchPoliciesUseCase searchPoliciesUseCase,
     required UpdateFollowUpUseCase updateFollowUpUseCase,
     Uuid? uuid,
   }) : _addFollowUpUseCase = addFollowUpUseCase,
+       _getClientDetailsUseCase = getClientDetailsUseCase,
+       _getPoliciesByClientUseCase = getPoliciesByClientUseCase,
+       _getPolicyByIdUseCase = getPolicyByIdUseCase,
+       _searchClientsUseCase = searchClientsUseCase,
+       _searchPoliciesUseCase = searchPoliciesUseCase,
        _updateFollowUpUseCase = updateFollowUpUseCase,
        _uuid = uuid ?? const Uuid();
 
   final AddFollowUpUseCase _addFollowUpUseCase;
+  final GetClientDetailsUseCase _getClientDetailsUseCase;
+  final GetPoliciesByClientUseCase _getPoliciesByClientUseCase;
+  final GetPolicyByIdUseCase _getPolicyByIdUseCase;
+  final SearchClientsUseCase _searchClientsUseCase;
+  final SearchPoliciesUseCase _searchPoliciesUseCase;
   final UpdateFollowUpUseCase _updateFollowUpUseCase;
   final Uuid _uuid;
 
   final formKey = GlobalKey<FormState>();
-  final clientIdController = TextEditingController();
-  final policyIdController = TextEditingController();
   final remarksController = TextEditingController();
   final selectedType = 'Call'.obs;
   final selectedStatus = 'Pending'.obs;
   final selectedDate = Rx<DateTime>(DateTime.now());
   final selectedTime = Rx<TimeOfDay>(TimeOfDay.now());
   final isSaving = false.obs;
+  final selectedClient = Rxn<Client>();
+  final selectedPolicy = Rxn<Policy>();
+  final clientValidationMessage = RxnString();
 
   FollowUp? editingFollowUp;
 
@@ -55,13 +78,17 @@ class FollowUpFormController extends GetxController {
       editingFollowUp = args;
     } else if (args is Map<String, dynamic>) {
       editingFollowUp = args['followUp'] as FollowUp?;
-      clientIdController.text = args['clientId'] as String? ?? '';
-      policyIdController.text = args['policyId'] as String? ?? '';
+      final initialClientId = args['clientId'] as String?;
+      final initialPolicyId = args['policyId'] as String?;
+      if (initialClientId != null && initialClientId.isNotEmpty) {
+        _loadClient(initialClientId);
+      }
+      if (initialPolicyId != null && initialPolicyId.isNotEmpty) {
+        _loadPolicy(initialPolicyId);
+      }
     }
 
     if (editingFollowUp != null) {
-      clientIdController.text = editingFollowUp!.clientId;
-      policyIdController.text = editingFollowUp!.policyId ?? '';
       remarksController.text = editingFollowUp!.remarks ?? '';
       selectedType.value = editingFollowUp!.type;
       selectedStatus.value = editingFollowUp!.status;
@@ -70,13 +97,15 @@ class FollowUpFormController extends GetxController {
       );
       selectedDate.value = dateTime;
       selectedTime.value = TimeOfDay.fromDateTime(dateTime);
+      _loadClient(editingFollowUp!.clientId);
+      if ((editingFollowUp!.policyId ?? '').isNotEmpty) {
+        _loadPolicy(editingFollowUp!.policyId!);
+      }
     }
   }
 
   @override
   void onClose() {
-    clientIdController.dispose();
-    policyIdController.dispose();
     remarksController.dispose();
     super.onClose();
   }
@@ -107,6 +136,10 @@ class FollowUpFormController extends GetxController {
     if (!(formKey.currentState?.validate() ?? false)) {
       return;
     }
+    if (selectedClient.value == null) {
+      clientValidationMessage.value = 'Select a client before saving';
+      return;
+    }
 
     isSaving.value = true;
     try {
@@ -121,8 +154,8 @@ class FollowUpFormController extends GetxController {
       final model = FollowUpModel(
         id: editingFollowUp?.id ?? _uuid.v4(),
         businessId: editingFollowUp?.businessId ?? '',
-        clientId: clientIdController.text.trim(),
-        policyId: _nullIfEmpty(policyIdController.text),
+        clientId: selectedClient.value!.id,
+        policyId: selectedPolicy.value?.id,
         followUpDateTime: scheduledAt.millisecondsSinceEpoch,
         type: selectedType.value,
         status: selectedStatus.value,
@@ -160,6 +193,47 @@ class FollowUpFormController extends GetxController {
       return 'Enter $fieldName';
     }
     return null;
+  }
+
+  Future<List<Client>> searchClients(String query) => _searchClientsUseCase(query);
+
+  Future<List<Policy>> searchPolicies(String query) async {
+    final clientId = selectedClient.value?.id;
+    if (clientId == null || clientId.isEmpty) {
+      return const [];
+    }
+    if (query.trim().isEmpty) {
+      return _getPoliciesByClientUseCase(clientId);
+    }
+    return _searchPoliciesUseCase(query: query, clientId: clientId);
+  }
+
+  void selectClient(Client client) {
+    selectedClient.value = client;
+    clientValidationMessage.value = null;
+    if (selectedPolicy.value?.clientId != client.id) {
+      selectedPolicy.value = null;
+    }
+  }
+
+  void selectPolicy(Policy policy) {
+    if (selectedClient.value == null || policy.clientId != selectedClient.value!.id) {
+      clientValidationMessage.value = 'Selected policy must belong to the selected client';
+      return;
+    }
+    selectedPolicy.value = policy;
+  }
+
+  void clearPolicy() {
+    selectedPolicy.value = null;
+  }
+
+  Future<void> _loadClient(String clientId) async {
+    selectedClient.value = await _getClientDetailsUseCase(clientId);
+  }
+
+  Future<void> _loadPolicy(String policyId) async {
+    selectedPolicy.value = await _getPolicyByIdUseCase(policyId);
   }
 
   String? _nullIfEmpty(String value) {

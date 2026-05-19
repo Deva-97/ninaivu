@@ -33,6 +33,19 @@ class AddEditClientScreen extends GetView<ClientFormController> {
                 prefixText: '+91 ',
               ),
             ),
+            Obx(() {
+              final warning = controller.duplicateMobileMessage.value;
+              if (warning == null) {
+                return const SizedBox.shrink();
+              }
+              return Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  warning,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              );
+            }),
             SizedBox(height: responsive.itemGap),
             TextFormField(
               controller: controller.alternateMobileController,

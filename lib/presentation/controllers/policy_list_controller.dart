@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ninaivu/core/models/export_format.dart';
 import 'package:ninaivu/domain/entities/policy.dart';
 import 'package:ninaivu/domain/usecases/policies/delete_policy_usecase.dart';
+import 'package:ninaivu/domain/usecases/policies/export_policies_usecase.dart';
 import 'package:ninaivu/domain/usecases/policies/get_policies_by_client_usecase.dart';
 import 'package:ninaivu/domain/usecases/policies/get_policies_usecase.dart';
 
@@ -10,13 +12,16 @@ class PolicyListController extends GetxController {
     required GetPoliciesUseCase getPoliciesUseCase,
     required GetPoliciesByClientUseCase getPoliciesByClientUseCase,
     required DeletePolicyUseCase deletePolicyUseCase,
+    required ExportPoliciesUseCase exportPoliciesUseCase,
   }) : _getPoliciesUseCase = getPoliciesUseCase,
        _getPoliciesByClientUseCase = getPoliciesByClientUseCase,
-       _deletePolicyUseCase = deletePolicyUseCase;
+       _deletePolicyUseCase = deletePolicyUseCase,
+       _exportPoliciesUseCase = exportPoliciesUseCase;
 
   final GetPoliciesUseCase _getPoliciesUseCase;
   final GetPoliciesByClientUseCase _getPoliciesByClientUseCase;
   final DeletePolicyUseCase _deletePolicyUseCase;
+  final ExportPoliciesUseCase _exportPoliciesUseCase;
 
   final searchController = TextEditingController();
   final policies = <Policy>[].obs;
@@ -61,4 +66,7 @@ class PolicyListController extends GetxController {
     await _deletePolicyUseCase(policyId);
     await loadPolicies();
   }
+
+  Future<void> exportPolicies(ExportFormat format) =>
+      _exportPoliciesUseCase(format: format);
 }

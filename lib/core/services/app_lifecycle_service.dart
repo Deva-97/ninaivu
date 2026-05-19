@@ -4,17 +4,21 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/widgets.dart';
 
 typedef LifecycleResumeCallback = Future<void> Function();
+typedef LifecycleBackgroundCallback = void Function();
 typedef LifecycleErrorReporter =
     Future<void> Function(Object error, StackTrace stackTrace, String reason);
 
 class AppLifecycleService with WidgetsBindingObserver {
   AppLifecycleService({
     required LifecycleResumeCallback onResume,
+    LifecycleBackgroundCallback? onBackground,
     LifecycleErrorReporter? errorReporter,
   }) : _onResume = onResume,
+       _onBackground = onBackground,
        _errorReporter = errorReporter ?? _defaultErrorReporter;
 
   final LifecycleResumeCallback _onResume;
+  final LifecycleBackgroundCallback? _onBackground;
   final LifecycleErrorReporter _errorReporter;
 
   bool _started = false;
@@ -42,6 +46,11 @@ class AppLifecycleService with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (!_started) {
       return;
+    }
+
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      _onBackground?.call();
     }
 
     if (state == AppLifecycleState.resumed) {

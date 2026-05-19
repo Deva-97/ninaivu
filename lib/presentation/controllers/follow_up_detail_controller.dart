@@ -3,19 +3,23 @@ import 'package:ninaivu/domain/entities/follow_up.dart';
 import 'package:ninaivu/domain/usecases/follow_ups/delete_follow_up_usecase.dart';
 import 'package:ninaivu/domain/usecases/follow_ups/get_follow_up_by_id_usecase.dart';
 import 'package:ninaivu/domain/usecases/follow_ups/mark_follow_up_completed_usecase.dart';
+import 'package:ninaivu/domain/usecases/follow_ups/reschedule_follow_up_usecase.dart';
 
 class FollowUpDetailController extends GetxController {
   FollowUpDetailController({
     required GetFollowUpByIdUseCase getFollowUpByIdUseCase,
     required DeleteFollowUpUseCase deleteFollowUpUseCase,
     required MarkFollowUpCompletedUseCase markFollowUpCompletedUseCase,
+    required RescheduleFollowUpUseCase rescheduleFollowUpUseCase,
   }) : _getFollowUpByIdUseCase = getFollowUpByIdUseCase,
        _deleteFollowUpUseCase = deleteFollowUpUseCase,
-       _markFollowUpCompletedUseCase = markFollowUpCompletedUseCase;
+       _markFollowUpCompletedUseCase = markFollowUpCompletedUseCase,
+       _rescheduleFollowUpUseCase = rescheduleFollowUpUseCase;
 
   final GetFollowUpByIdUseCase _getFollowUpByIdUseCase;
   final DeleteFollowUpUseCase _deleteFollowUpUseCase;
   final MarkFollowUpCompletedUseCase _markFollowUpCompletedUseCase;
+  final RescheduleFollowUpUseCase _rescheduleFollowUpUseCase;
 
   final followUp = Rxn<FollowUp>();
   final isLoading = false.obs;
@@ -67,6 +71,25 @@ class FollowUpDetailController extends GetxController {
     } catch (e) {
       Get.snackbar(
         'Unable to delete',
+        e.toString().replaceFirst('Exception: ', ''),
+      );
+    } finally {
+      isUpdating.value = false;
+    }
+  }
+
+  Future<void> reschedule(int scheduledAt) async {
+    isUpdating.value = true;
+    try {
+      await _rescheduleFollowUpUseCase(
+        followUpId: followUpId,
+        scheduledAt: scheduledAt,
+      );
+      await loadFollowUp();
+      Get.back(result: true);
+    } catch (e) {
+      Get.snackbar(
+        'Unable to reschedule',
         e.toString().replaceFirst('Exception: ', ''),
       );
     } finally {

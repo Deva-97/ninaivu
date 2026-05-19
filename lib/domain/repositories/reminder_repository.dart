@@ -6,4 +6,6 @@ abstract class ReminderRepository {
   });
   Future<Reminder?> getReminderById(String reminderId);
   Future<void> markReminderCompleted(String reminderId);
+  Future<void> markReminderRenewed(String reminderId);
+  Future<List<Reminder>> getRemindersByClient(String clientId);
 }

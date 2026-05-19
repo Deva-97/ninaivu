@@ -8,6 +8,10 @@ abstract class ClientRepository {
   });
   Future<List<Client>> searchClients(String query);
   Future<Client?> getClientDetails(String clientId);
+  Future<bool> hasDuplicateMobile({
+    required String mobile,
+    String? excludingClientId,
+  });
   Future<Client> addClient({
     required String name,
     required String mobile,

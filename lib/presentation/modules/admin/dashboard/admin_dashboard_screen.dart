@@ -6,6 +6,7 @@ import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/admin_dashboard_controller.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/account_actions_menu.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/dashboard_widgets.dart';
+import 'package:ninaivu/presentation/modules/common/widgets/export_format_picker.dart';
 
 class AdminDashboardScreen extends GetView<AdminDashboardController> {
   const AdminDashboardScreen({super.key});
@@ -91,7 +92,7 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
               SizedBox(height: responsive.scaled(4, min: 4)),
               Obx(
                 () => Text(
-                  'Last backup: ${controller.lastSyncLabel.value}',
+                  '${controller.backupStatusLabel.value} • ${controller.lastSyncLabel.value}',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
@@ -176,6 +177,38 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
                 spacing: responsive.scaled(12, min: 10),
                 runSpacing: responsive.scaled(12, min: 10),
                 children: [
+                  DashboardQuickAction(
+                    label: 'Today’s Work',
+                    icon: Icons.today_outlined,
+                    color: Colors.orange,
+                    onTap: () => Get.toNamed(AppRoutes.todaysWork),
+                  ),
+                  DashboardQuickAction(
+                    label: 'Export Clients',
+                    icon: Icons.file_download_outlined,
+                    color: Colors.blueGrey,
+                    onTap: () async {
+                      final format = await showExportFormatPicker(
+                        title: 'Export clients',
+                      );
+                      if (format != null) {
+                        await controller.exportClients(format);
+                      }
+                    },
+                  ),
+                  DashboardQuickAction(
+                    label: 'Export Policies',
+                    icon: Icons.table_view_outlined,
+                    color: Colors.brown,
+                    onTap: () async {
+                      final format = await showExportFormatPicker(
+                        title: 'Export policies',
+                      );
+                      if (format != null) {
+                        await controller.exportPolicies(format);
+                      }
+                    },
+                  ),
                   DashboardQuickAction(
                     label: 'Add Client',
                     icon: Icons.person_add_alt_1_outlined,

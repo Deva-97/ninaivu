@@ -3,16 +3,20 @@ import 'package:get/get.dart';
 import 'package:ninaivu/data/models/client_model.dart';
 import 'package:ninaivu/domain/entities/client.dart';
 import 'package:ninaivu/domain/usecases/clients/add_client_usecase.dart';
+import 'package:ninaivu/domain/usecases/clients/check_duplicate_client_mobile_usecase.dart';
 import 'package:ninaivu/domain/usecases/clients/update_client_usecase.dart';
 
 class ClientFormController extends GetxController {
   ClientFormController({
     required AddClientUseCase addClientUseCase,
+    required CheckDuplicateClientMobileUseCase checkDuplicateClientMobileUseCase,
     required UpdateClientUseCase updateClientUseCase,
   }) : _addClientUseCase = addClientUseCase,
+       _checkDuplicateClientMobileUseCase = checkDuplicateClientMobileUseCase,
        _updateClientUseCase = updateClientUseCase;
 
   final AddClientUseCase _addClientUseCase;
+  final CheckDuplicateClientMobileUseCase _checkDuplicateClientMobileUseCase;
   final UpdateClientUseCase _updateClientUseCase;
 
   final formKey = GlobalKey<FormState>();
@@ -24,6 +28,7 @@ class ClientFormController extends GetxController {
   final areaCityController = TextEditingController();
   final notesController = TextEditingController();
   final isSaving = false.obs;
+  final duplicateMobileMessage = RxnString();
 
   Client? editingClient;
 
@@ -42,6 +47,7 @@ class ClientFormController extends GetxController {
       areaCityController.text = editingClient!.areaCity ?? '';
       notesController.text = editingClient!.notes ?? '';
     }
+    mobileController.addListener(_checkDuplicateMobile);
   }
 
   @override
@@ -63,6 +69,10 @@ class ClientFormController extends GetxController {
 
     isSaving.value = true;
     try {
+      await _checkDuplicateMobile();
+      if (duplicateMobileMessage.value != null) {
+        throw Exception(duplicateMobileMessage.value!);
+      }
       if (editingClient == null) {
         await _addClientUseCase(
           name: nameController.text.trim(),
@@ -104,7 +114,28 @@ class ClientFormController extends GetxController {
     if (value == null || !RegExp(r'^\d{10}$').hasMatch(value.trim())) {
       return 'Enter a valid 10-digit mobile number';
     }
+    if (duplicateMobileMessage.value != null) {
+      return duplicateMobileMessage.value;
+    }
     return null;
+  }
+
+  // Duplicate mobile detection runs through the repository layer, not the form.
+  Future<void> _checkDuplicateMobile() async {
+    final mobile = mobileController.text.trim();
+    if (!RegExp(r'^\d{10}$').hasMatch(mobile)) {
+      duplicateMobileMessage.value = null;
+      return;
+    }
+
+    final hasDuplicate = await _checkDuplicateClientMobileUseCase(
+      mobile: mobile,
+      excludingClientId: editingClient?.id,
+    );
+    duplicateMobileMessage.value = hasDuplicate
+        ? 'A client with this mobile number already exists.'
+        : null;
+    formKey.currentState?.validate();
   }
 
   String? validateOptionalEmail(String? value) {

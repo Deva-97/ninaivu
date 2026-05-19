@@ -155,6 +155,49 @@ class FollowUpLocalDataSource {
     );
   }
 
+  Future<void> rescheduleFollowUp({
+    required String followUpId,
+    required int scheduledAt,
+  }) async {
+    final db = await _databaseHelper.database;
+    await db.update(
+      DatabaseTables.followUps,
+      {
+        'follow_up_date_time': scheduledAt,
+        'status': 'Pending',
+        DatabaseColumns.updatedAt: DateTime.now().millisecondsSinceEpoch,
+        DatabaseColumns.syncStatus: 'pending_update',
+      },
+      where: '${DatabaseColumns.id} = ?',
+      whereArgs: [followUpId],
+    );
+  }
+
+  Future<List<FollowUpModel>> getFollowUpsByClient(
+    String clientId, {
+    String? filter,
+  }) async {
+    await markPendingPastFollowUpsAsMissed();
+    final db = await _databaseHelper.database;
+    final whereClauses = <String>[
+      'f.client_id = ?',
+      'f.${DatabaseColumns.isDeleted} = 0',
+    ];
+    final args = <Object?>[clientId];
+    final normalizedFilter = filter?.trim().toLowerCase();
+    if (normalizedFilter == 'completed') {
+      whereClauses.add("f.status = 'Completed'");
+    } else if (normalizedFilter == 'missed') {
+      whereClauses.add("f.status = 'Missed'");
+    }
+
+    final result = await db.rawQuery(
+      _baseFollowUpQuery(whereClause: whereClauses.join(' AND ')),
+      args,
+    );
+    return result.map(FollowUpModel.fromMap).toList();
+  }
+
   Future<void> markPendingPastFollowUpsAsMissed() async {
     final db = await _databaseHelper.database;
     await db.update(

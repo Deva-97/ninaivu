@@ -173,12 +173,38 @@ class ReminderLocalDataSource {
     return result.map(ReminderModel.fromMap).toList();
   }
 
+  Future<List<ReminderModel>> getRemindersByClient(String clientId) async {
+    final db = await _databaseHelper.database;
+    final result = await db.rawQuery(
+      _baseReminderQuery(
+        whereClause:
+            'r.client_id = ? AND r.${DatabaseColumns.isDeleted} = 0',
+      ),
+      [clientId],
+    );
+    return result.map(ReminderModel.fromMap).toList();
+  }
+
   Future<void> markReminderCompleted(String reminderId) async {
     final db = await _databaseHelper.database;
     await db.update(
       DatabaseTables.reminders,
       {
         'status': 'completed',
+        DatabaseColumns.updatedAt: DateTime.now().millisecondsSinceEpoch,
+        DatabaseColumns.syncStatus: 'pending_update',
+      },
+      where: '${DatabaseColumns.id} = ?',
+      whereArgs: [reminderId],
+    );
+  }
+
+  Future<void> markReminderRenewed(String reminderId) async {
+    final db = await _databaseHelper.database;
+    await db.update(
+      DatabaseTables.reminders,
+      {
+        'status': 'renewed',
         DatabaseColumns.updatedAt: DateTime.now().millisecondsSinceEpoch,
         DatabaseColumns.syncStatus: 'pending_update',
       },
@@ -219,7 +245,7 @@ class ReminderLocalDataSource {
 
   String _baseReminderQuery({required String whereClause}) {
     return '''
-      SELECT r.*, c.name AS client_name, p.policy_number, p.company_name
+      SELECT r.*, c.name AS client_name, c.mobile AS client_mobile, p.policy_number, p.company_name
       FROM ${DatabaseTables.reminders} r
       LEFT JOIN ${DatabaseTables.clients} c ON c.id = r.client_id
       LEFT JOIN ${DatabaseTables.policies} p ON p.id = r.policy_id

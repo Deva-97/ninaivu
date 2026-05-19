@@ -24,6 +24,7 @@ abstract class AppRoutes {
 
   static const String reminders = '/reminders';
   static const String reminderDetails = '/reminders/details';
+  static const String todaysWork = '/todays-work';
   static const String followUps = '/follow-ups';
   static const String followUpForm = '/follow-ups/form';
   static const String followUpDetails = '/follow-ups/details';

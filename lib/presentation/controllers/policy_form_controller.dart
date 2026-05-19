@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ninaivu/core/validation/policy_validator.dart';
+import 'package:ninaivu/domain/entities/client.dart';
 import 'package:ninaivu/data/models/policy_model.dart';
 import 'package:ninaivu/domain/entities/policy.dart';
+import 'package:ninaivu/domain/usecases/clients/get_client_details_usecase.dart';
+import 'package:ninaivu/domain/usecases/clients/search_clients_usecase.dart';
 import 'package:ninaivu/domain/usecases/policies/add_policy_usecase.dart';
 import 'package:ninaivu/domain/usecases/policies/update_policy_usecase.dart';
 import 'package:uuid/uuid.dart';
@@ -10,18 +13,23 @@ import 'package:uuid/uuid.dart';
 class PolicyFormController extends GetxController {
   PolicyFormController({
     required AddPolicyUseCase addPolicyUseCase,
+    required GetClientDetailsUseCase getClientDetailsUseCase,
+    required SearchClientsUseCase searchClientsUseCase,
     required UpdatePolicyUseCase updatePolicyUseCase,
     Uuid? uuid,
   }) : _addPolicyUseCase = addPolicyUseCase,
+       _getClientDetailsUseCase = getClientDetailsUseCase,
+       _searchClientsUseCase = searchClientsUseCase,
        _updatePolicyUseCase = updatePolicyUseCase,
        _uuid = uuid ?? const Uuid();
 
   final AddPolicyUseCase _addPolicyUseCase;
+  final GetClientDetailsUseCase _getClientDetailsUseCase;
+  final SearchClientsUseCase _searchClientsUseCase;
   final UpdatePolicyUseCase _updatePolicyUseCase;
   final Uuid _uuid;
 
   final formKey = GlobalKey<FormState>();
-  final clientIdController = TextEditingController();
   final policyNumberController = TextEditingController();
   final companyNameController = TextEditingController();
   final premiumController = TextEditingController();
@@ -31,9 +39,12 @@ class PolicyFormController extends GetxController {
   final selectedInsuranceType = 'Bike'.obs;
   final selectedPaymentFrequency = 'Yearly'.obs;
   final selectedStatus = 'Active'.obs;
+  final selectedRenewalStatus = 'Not Contacted'.obs;
   final startDate = Rx<DateTime>(DateTime.now());
   final endDate = Rx<DateTime>(DateTime.now().add(const Duration(days: 365)));
   final isSaving = false.obs;
+  final selectedClient = Rxn<Client>();
+  final clientValidationMessage = RxnString();
 
   Policy? editingPolicy;
 
@@ -64,6 +75,17 @@ class PolicyFormController extends GetxController {
     'Pending',
   ];
 
+  static const renewalStatuses = <String>[
+    'Not Contacted',
+    'Contacted',
+    'Interested',
+    'Quote Sent',
+    'Payment Pending',
+    'Renewed',
+    'Lost',
+    'Not Reachable',
+  ];
+
   @override
   void onInit() {
     super.onInit();
@@ -72,11 +94,13 @@ class PolicyFormController extends GetxController {
       editingPolicy = args;
     } else if (args is Map<String, dynamic>) {
       editingPolicy = args['policy'] as Policy?;
-      clientIdController.text = args['clientId'] as String? ?? '';
+      final initialClientId = args['clientId'] as String?;
+      if (initialClientId != null && initialClientId.isNotEmpty) {
+        _loadClient(initialClientId);
+      }
     }
 
     if (editingPolicy != null) {
-      clientIdController.text = editingPolicy!.clientId;
       policyNumberController.text = editingPolicy!.policyNumber;
       companyNameController.text = editingPolicy!.companyName;
       premiumController.text = editingPolicy!.premiumAmount.toStringAsFixed(0);
@@ -87,14 +111,15 @@ class PolicyFormController extends GetxController {
       selectedPaymentFrequency.value =
           editingPolicy!.paymentFrequency ?? selectedPaymentFrequency.value;
       selectedStatus.value = editingPolicy!.status;
+      selectedRenewalStatus.value = editingPolicy!.renewalStatus;
       startDate.value = DateTime.fromMillisecondsSinceEpoch(editingPolicy!.startDate);
       endDate.value = DateTime.fromMillisecondsSinceEpoch(editingPolicy!.endDate);
+      _loadClient(editingPolicy!.clientId);
     }
   }
 
   @override
   void onClose() {
-    clientIdController.dispose();
     policyNumberController.dispose();
     companyNameController.dispose();
     premiumController.dispose();
@@ -132,6 +157,10 @@ class PolicyFormController extends GetxController {
     if (!(formKey.currentState?.validate() ?? false)) {
       return;
     }
+    if (selectedClient.value == null) {
+      clientValidationMessage.value = 'Select a client before saving';
+      return;
+    }
 
     final dateError = PolicyValidator.validateDateRange(
       startDate: startDate.value,
@@ -149,7 +178,7 @@ class PolicyFormController extends GetxController {
       final basePolicy = PolicyModel(
         id: editingPolicy?.id ?? _uuid.v4(),
         businessId: editingPolicy?.businessId ?? '',
-        clientId: clientIdController.text.trim(),
+        clientId: selectedClient.value!.id,
         insuranceType: selectedInsuranceType.value,
         policyNumber: policyNumberController.text.trim(),
         companyName: companyNameController.text.trim(),
@@ -160,6 +189,7 @@ class PolicyFormController extends GetxController {
         vehicleNumber: _nullIfEmpty(vehicleNumberController.text),
         vehicleModel: _nullIfEmpty(vehicleModelController.text),
         status: selectedStatus.value,
+        renewalStatus: selectedRenewalStatus.value,
         notes: _nullIfEmpty(notesController.text),
         createdBy: editingPolicy?.createdBy ?? '',
         agentId: editingPolicy?.agentId,
@@ -191,6 +221,17 @@ class PolicyFormController extends GetxController {
       return 'Enter $fieldName';
     }
     return null;
+  }
+
+  Future<List<Client>> searchClients(String query) => _searchClientsUseCase(query);
+
+  void selectClient(Client client) {
+    selectedClient.value = client;
+    clientValidationMessage.value = null;
+  }
+
+  Future<void> _loadClient(String clientId) async {
+    selectedClient.value = await _getClientDetailsUseCase(clientId);
   }
 
   String? validatePremium(String? value) {

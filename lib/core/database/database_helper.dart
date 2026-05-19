@@ -11,7 +11,7 @@ class DatabaseHelper {
   static Database? _database;
 
   static const String databaseName = 'ninaivu.db';
-  static const int databaseVersion = 3;
+  static const int databaseVersion = 4;
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -55,6 +55,15 @@ class DatabaseHelper {
     if (oldVersion < 3) {
       await _addColumnIfMissing(db, DatabaseTables.users, 'created_by TEXT');
       await _addColumnIfMissing(db, DatabaseTables.users, 'agent_id TEXT');
+      await _createAllIndexes(db);
+    }
+
+    if (oldVersion < 4) {
+      await _addColumnIfMissing(
+        db,
+        DatabaseTables.policies,
+        "renewal_status TEXT NOT NULL DEFAULT 'Not Contacted'",
+      );
       await _createAllIndexes(db);
     }
   }
@@ -121,6 +130,7 @@ class DatabaseHelper {
         vehicle_number TEXT,
         vehicle_model TEXT,
         status TEXT NOT NULL,
+        renewal_status TEXT NOT NULL DEFAULT 'Not Contacted',
         notes TEXT,
         ${DatabaseColumns.createdBy} TEXT NOT NULL,
         ${DatabaseColumns.agentId} TEXT,
@@ -277,6 +287,12 @@ class DatabaseHelper {
     );
     await _createIndex(db, 'idx_policies_end_date', DatabaseTables.policies, 'end_date');
     await _createIndex(db, 'idx_policies_status', DatabaseTables.policies, 'status');
+    await _createIndex(
+      db,
+      'idx_policies_renewal_status',
+      DatabaseTables.policies,
+      'renewal_status',
+    );
     await _createIndex(
       db,
       'idx_policies_is_deleted',
