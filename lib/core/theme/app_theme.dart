@@ -49,7 +49,7 @@ class AppTheme {
       filled: true,
       fillColor: AppColors.lightSurfaceSoft,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      hintStyle: const TextStyle(color: AppColors.lightTextMuted, fontSize: 14),
+      hintStyle: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
       labelStyle: const TextStyle(
         color: AppColors.lightTextSecondary,
         fontSize: 14,
@@ -116,6 +116,11 @@ class AppTheme {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       iconColor: AppColors.lightTextSecondary,
       textColor: AppColors.lightTextPrimary,
+      subtitleTextStyle: const TextStyle(
+        color: Color(0xFF9CA3AF),
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
+      ),
     ),
 
     textTheme: const TextTheme(
@@ -206,7 +211,7 @@ class AppTheme {
       filled: true,
       fillColor: AppColors.darkSurfaceSoft,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      hintStyle: const TextStyle(color: AppColors.darkTextMuted, fontSize: 14),
+      hintStyle: const TextStyle(color: Color(0xFF6B7280), fontSize: 14),
       labelStyle: const TextStyle(
         color: AppColors.darkTextSecondary,
         fontSize: 14,
@@ -273,6 +278,11 @@ class AppTheme {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       iconColor: AppColors.darkTextSecondary,
       textColor: AppColors.darkTextPrimary,
+      subtitleTextStyle: const TextStyle(
+        color: Color(0xFF6B7280),
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
+      ),
     ),
 
     textTheme: const TextTheme(

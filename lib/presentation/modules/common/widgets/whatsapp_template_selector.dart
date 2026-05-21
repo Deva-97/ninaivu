@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:ninaivu/core/services/communication_service.dart';
 import 'package:ninaivu/core/utils/whatsapp_template_builder.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+/// Opens a bottom sheet that lets the user choose a prebuilt WhatsApp message
+/// before launching chat with the selected client.
 Future<void> showWhatsAppTemplateSelector({
   required BuildContext context,
   required String mobile,
@@ -30,11 +32,11 @@ Future<void> showWhatsAppTemplateSelector({
     return;
   }
 
+  // Message creation is centralized in the template builder so screens only
+  // need to pass domain data and do not duplicate string composition.
   final message = WhatsAppTemplateBuilder.build(
     template: selectedTemplate,
     data: data,
   );
-  final digits = mobile.replaceAll(RegExp(r'[^0-9]'), '');
-  final uri = Uri.parse('https://wa.me/91$digits?text=${Uri.encodeComponent(message)}');
-  await launchUrl(uri, mode: LaunchMode.externalApplication);
+  await CommunicationService().openWhatsAppChat(mobile, message: message);
 }

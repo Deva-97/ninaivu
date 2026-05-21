@@ -55,7 +55,7 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
     await _localDataSource.insertFollowUp(model);
     LocalDataChangeService.notifyChanged();
     await _enqueue(model, 'create', 'pending_create');
-    await _syncService.syncPendingData();
+    await _syncService.syncPendingDataBestEffort();
     return model;
   }
 
@@ -80,7 +80,7 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
     await _localDataSource.updateFollowUp(model);
     LocalDataChangeService.notifyChanged();
     await _enqueue(model, 'update', 'pending_update');
-    await _syncService.syncPendingData();
+    await _syncService.syncPendingDataBestEffort();
     return model;
   }
 
@@ -101,7 +101,7 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
       syncStatus: 'pending_delete',
     );
     await _enqueue(deleted, 'delete', 'pending_delete');
-    await _syncService.syncPendingData();
+    await _syncService.syncPendingDataBestEffort();
   }
 
   @override
@@ -120,7 +120,7 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
       syncStatus: 'pending_update',
     );
     await _enqueue(updated, 'update', 'pending_update');
-    await _syncService.syncPendingData();
+    await _syncService.syncPendingDataBestEffort();
   }
 
   @override
@@ -192,7 +192,7 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
       'update',
       'pending_update',
     );
-    await _syncService.syncPendingData();
+    await _syncService.syncPendingDataBestEffort();
   }
 
   @override

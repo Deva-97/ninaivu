@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:ninaivu/core/services/communication_service.dart';
 import 'package:ninaivu/domain/entities/follow_up.dart';
 import 'package:ninaivu/domain/usecases/follow_ups/delete_follow_up_usecase.dart';
 import 'package:ninaivu/domain/usecases/follow_ups/get_follow_up_by_id_usecase.dart';
@@ -11,15 +12,18 @@ class FollowUpDetailController extends GetxController {
     required DeleteFollowUpUseCase deleteFollowUpUseCase,
     required MarkFollowUpCompletedUseCase markFollowUpCompletedUseCase,
     required RescheduleFollowUpUseCase rescheduleFollowUpUseCase,
+    required CommunicationService communicationService,
   }) : _getFollowUpByIdUseCase = getFollowUpByIdUseCase,
        _deleteFollowUpUseCase = deleteFollowUpUseCase,
        _markFollowUpCompletedUseCase = markFollowUpCompletedUseCase,
-       _rescheduleFollowUpUseCase = rescheduleFollowUpUseCase;
+       _rescheduleFollowUpUseCase = rescheduleFollowUpUseCase,
+       _communicationService = communicationService;
 
   final GetFollowUpByIdUseCase _getFollowUpByIdUseCase;
   final DeleteFollowUpUseCase _deleteFollowUpUseCase;
   final MarkFollowUpCompletedUseCase _markFollowUpCompletedUseCase;
   final RescheduleFollowUpUseCase _rescheduleFollowUpUseCase;
+  final CommunicationService _communicationService;
 
   final followUp = Rxn<FollowUp>();
   final isLoading = false.obs;
@@ -95,5 +99,13 @@ class FollowUpDetailController extends GetxController {
     } finally {
       isUpdating.value = false;
     }
+  }
+
+  Future<void> callClient() async {
+    await _communicationService.openDialer(followUp.value?.clientMobile);
+  }
+
+  Future<void> whatsappClient() async {
+    await _communicationService.openWhatsAppChat(followUp.value?.clientMobile);
   }
 }

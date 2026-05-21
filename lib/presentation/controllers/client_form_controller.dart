@@ -1,23 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ninaivu/core/services/profile_image_service.dart';
 import 'package:ninaivu/data/models/client_model.dart';
 import 'package:ninaivu/domain/entities/client.dart';
 import 'package:ninaivu/domain/usecases/clients/add_client_usecase.dart';
 import 'package:ninaivu/domain/usecases/clients/check_duplicate_client_mobile_usecase.dart';
+import 'package:ninaivu/domain/usecases/clients/find_client_by_mobile_usecase.dart';
 import 'package:ninaivu/domain/usecases/clients/update_client_usecase.dart';
 
 class ClientFormController extends GetxController {
   ClientFormController({
     required AddClientUseCase addClientUseCase,
     required CheckDuplicateClientMobileUseCase checkDuplicateClientMobileUseCase,
+    required FindClientByMobileUseCase findClientByMobileUseCase,
     required UpdateClientUseCase updateClientUseCase,
+    required ProfileImageService profileImageService,
   }) : _addClientUseCase = addClientUseCase,
        _checkDuplicateClientMobileUseCase = checkDuplicateClientMobileUseCase,
-       _updateClientUseCase = updateClientUseCase;
+       _findClientByMobileUseCase = findClientByMobileUseCase,
+       _updateClientUseCase = updateClientUseCase,
+       _profileImageService = profileImageService;
 
   final AddClientUseCase _addClientUseCase;
   final CheckDuplicateClientMobileUseCase _checkDuplicateClientMobileUseCase;
+  final FindClientByMobileUseCase _findClientByMobileUseCase;
   final UpdateClientUseCase _updateClientUseCase;
+  final ProfileImageService _profileImageService;
 
   final formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
@@ -29,6 +37,10 @@ class ClientFormController extends GetxController {
   final notesController = TextEditingController();
   final isSaving = false.obs;
   final duplicateMobileMessage = RxnString();
+  final profileImagePath = RxnString();
+  final dateOfBirthMs = RxnInt();
+  final specialDateMs = RxnInt();
+  final specialDateLabel = RxnString();
 
   Client? editingClient;
 
@@ -46,6 +58,10 @@ class ClientFormController extends GetxController {
       addressController.text = editingClient!.address ?? '';
       areaCityController.text = editingClient!.areaCity ?? '';
       notesController.text = editingClient!.notes ?? '';
+      profileImagePath.value = editingClient!.profileImagePath;
+      dateOfBirthMs.value = editingClient!.dateOfBirthMs;
+      specialDateMs.value = editingClient!.specialDateMs;
+      specialDateLabel.value = editingClient!.specialDateLabel;
     }
     mobileController.addListener(_checkDuplicateMobile);
   }
@@ -70,8 +86,40 @@ class ClientFormController extends GetxController {
     isSaving.value = true;
     try {
       await _checkDuplicateMobile();
-      if (duplicateMobileMessage.value != null) {
-        throw Exception(duplicateMobileMessage.value!);
+      final duplicateClient = await _findClientByMobileUseCase(
+        mobile: mobileController.text.trim(),
+        excludingClientId: editingClient?.id,
+      );
+      if (duplicateClient != null) {
+        final action = await Get.dialog<String>(
+          AlertDialog(
+            title: const Text('Duplicate mobile number'),
+            content: const Text(
+              'A client with this mobile number already exists. Do you still want to continue?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(result: 'cancel'),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Get.back(result: 'view'),
+                child: const Text('View Existing Client'),
+              ),
+              FilledButton(
+                onPressed: () => Get.back(result: 'continue'),
+                child: const Text('Continue Anyway'),
+              ),
+            ],
+          ),
+        );
+        if (action == 'view') {
+          await Get.toNamed('/clients/details', arguments: duplicateClient.id);
+          return;
+        }
+        if (action != 'continue') {
+          return;
+        }
       }
       if (editingClient == null) {
         await _addClientUseCase(
@@ -82,6 +130,10 @@ class ClientFormController extends GetxController {
           address: _nullIfEmpty(addressController.text),
           areaCity: _nullIfEmpty(areaCityController.text),
           notes: _nullIfEmpty(notesController.text),
+          profileImagePath: profileImagePath.value,
+          dateOfBirthMs: dateOfBirthMs.value,
+          specialDateMs: specialDateMs.value,
+          specialDateLabel: specialDateLabel.value,
         );
       } else {
         final updatedClient = ClientModel.fromEntity(editingClient!).copyWith(
@@ -92,6 +144,10 @@ class ClientFormController extends GetxController {
           address: _nullIfEmpty(addressController.text),
           areaCity: _nullIfEmpty(areaCityController.text),
           notes: _nullIfEmpty(notesController.text),
+          profileImagePath: profileImagePath.value,
+          dateOfBirthMs: dateOfBirthMs.value,
+          specialDateMs: specialDateMs.value,
+          specialDateLabel: specialDateLabel.value,
         );
         await _updateClientUseCase(updatedClient);
       }
@@ -100,6 +156,13 @@ class ClientFormController extends GetxController {
       Get.snackbar('Unable to save', e.toString().replaceFirst('Exception: ', ''));
     } finally {
       isSaving.value = false;
+    }
+  }
+
+  Future<void> pickProfileImage() async {
+    final path = await _profileImageService.pickImagePath();
+    if (path != null) {
+      profileImagePath.value = path;
     }
   }
 

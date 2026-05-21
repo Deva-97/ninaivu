@@ -28,4 +28,6 @@ abstract class AppRoutes {
   static const String followUps = '/follow-ups';
   static const String followUpForm = '/follow-ups/form';
   static const String followUpDetails = '/follow-ups/details';
+  static const String settings = '/settings';
+  static const String globalSearch = '/search';
 }

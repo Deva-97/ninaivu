@@ -57,15 +57,28 @@ class TodaysWorkController extends GetxController {
     isLoading.value = true;
     errorMessage.value = null;
     try {
-      renewalsToday.assignAll(await _getRemindersUseCase(filter: 'today'));
-      final upcomingItems = await _getRemindersUseCase(filter: 'upcoming7days');
+      final results = await Future.wait([
+        _getRemindersUseCase(filter: 'today'),
+        _getRemindersUseCase(filter: 'upcoming7days'),
+        _getTodayFollowUpsUseCase(),
+        _getMissedFollowUpsUseCase(),
+        _syncQueueLocalDataSource.countPendingItems(),
+      ]);
+
+      final todaysReminders = results[0] as List<Reminder>;
+      final upcomingItems = results[1] as List<Reminder>;
+      final todaysFollowUps = results[2] as List<FollowUp>;
+      final missedItems = results[3] as List<FollowUp>;
+      final pendingSyncItems = results[4] as int;
+
+      renewalsToday.assignAll(todaysReminders);
       final todayIds = renewalsToday.map((item) => item.id).toSet();
       upcomingRenewals.assignAll(
         upcomingItems.where((item) => !todayIds.contains(item.id)).toList(),
       );
-      followUpsToday.assignAll(await _getTodayFollowUpsUseCase());
-      missedFollowUps.assignAll(await _getMissedFollowUpsUseCase());
-      pendingSyncCount.value = await _syncQueueLocalDataSource.countPendingItems();
+      followUpsToday.assignAll(todaysFollowUps);
+      missedFollowUps.assignAll(missedItems);
+      pendingSyncCount.value = pendingSyncItems;
     } catch (e) {
       errorMessage.value = e.toString().replaceFirst('Exception: ', '');
     } finally {

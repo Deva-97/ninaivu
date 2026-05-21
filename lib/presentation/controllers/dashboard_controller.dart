@@ -9,26 +9,36 @@ import 'package:ninaivu/core/services/local_data_change_service.dart';
 import 'package:ninaivu/core/services/sync_service.dart';
 import 'package:ninaivu/data/datasources/local/sync_queue_local_data_source.dart';
 import 'package:intl/intl.dart';
+import 'package:ninaivu/data/repositories/user_repository_impl.dart';
+import 'package:ninaivu/domain/entities/app_user.dart';
 
+/// Shared dashboard behavior for admin and agent home screens.
+///
+/// Concrete controllers only provide feature-specific data loading, while this
+/// base class owns session actions, sync feedback, and auto-refresh behavior.
 abstract class DashboardController<T> extends GetxController {
   DashboardController({
     AuthService? authService,
     SyncQueueLocalDataSource? syncQueueLocalDataSource,
     SyncService? syncService,
+    UserRepositoryImpl? userRepository,
   })
     : _authService = authService ?? AuthService(),
       _syncQueueLocalDataSource =
           syncQueueLocalDataSource ?? SyncQueueLocalDataSource(),
-      _syncService = syncService ?? SyncService();
+      _syncService = syncService ?? SyncService(),
+      _userRepository = userRepository ?? UserRepositoryImpl();
 
   final AuthService _authService;
   final SyncQueueLocalDataSource _syncQueueLocalDataSource;
   final SyncService _syncService;
+  final UserRepositoryImpl _userRepository;
 
   final isLoading = false.obs;
   final isSigningOut = false.obs;
   final isSyncing = false.obs;
   final errorMessage = RxnString();
+  final currentUser = Rxn<AppUser>();
   final lastSyncLabel = 'Never synced'.obs;
   final backupStatusLabel = 'Saved offline'.obs;
   StreamSubscription<int?>? _lastSyncTimeSubscription;
@@ -37,9 +47,14 @@ abstract class DashboardController<T> extends GetxController {
 
   Future<void> loadDashboard();
 
+  Future<void> loadCurrentUser() async {
+    currentUser.value = await _userRepository.getCurrentUser();
+  }
+
   @override
   void onInit() {
     super.onInit();
+    loadCurrentUser();
     refreshLastSyncLabel();
     _lastSyncTimeSubscription = AppPreferences.lastSyncTimeStream.listen((_) {
       refreshLastSyncLabel();
@@ -128,6 +143,8 @@ abstract class DashboardController<T> extends GetxController {
     final preferences = await AppPreferences.getInstance();
     final lastSyncTime = preferences.lastSyncTime;
     final pendingCount = await _syncQueueLocalDataSource.countPendingItems();
+    // The dashboard shows both "when was the last backup" and "is anything
+    // still waiting to sync", so we derive two labels from local sync state.
     if (pendingCount > 0) {
       backupStatusLabel.value = 'Backup pending';
     } else {
@@ -163,7 +180,10 @@ abstract class DashboardController<T> extends GetxController {
 
   void _scheduleDashboardReload() {
     _dashboardReloadDebounce?.cancel();
+    // Repository writes can trigger a burst of local change events, so debounce
+    // keeps the dashboard from re-querying on every single record mutation.
     _dashboardReloadDebounce = Timer(const Duration(milliseconds: 250), () {
+      loadCurrentUser();
       loadDashboard();
     });
   }

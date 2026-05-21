@@ -66,9 +66,9 @@ class ResponsiveLayout {
           : 520;
   double get detailLabelWidth => size(120, mobile: 96, tablet: 140);
   double get metricGridSpacing => size(14, mobile: 10, tablet: 16);
-  int get dashboardGridCount => width >= 360 ? 2 : 1;
+  int get dashboardGridCount => width >= 420 ? 2 : 1;
   double get dashboardMetricHeight =>
-      width >= 1440 ? 164 : width >= 960 ? 158 : width >= 600 ? 152 : 146;
+      width >= 1440 ? 188 : width >= 960 ? 182 : width >= 600 ? 176 : 170;
 }
 
 extension ResponsiveLayoutContext on BuildContext {

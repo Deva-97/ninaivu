@@ -14,6 +14,10 @@ class AddClientUseCase {
     String? address,
     String? areaCity,
     String? notes,
+    String? profileImagePath,
+    int? dateOfBirthMs,
+    int? specialDateMs,
+    String? specialDateLabel,
   }) => _repository.addClient(
     name: name,
     mobile: mobile,
@@ -22,5 +26,9 @@ class AddClientUseCase {
     address: address,
     areaCity: areaCity,
     notes: notes,
+    profileImagePath: profileImagePath,
+    dateOfBirthMs: dateOfBirthMs,
+    specialDateMs: specialDateMs,
+    specialDateLabel: specialDateLabel,
   );
 }

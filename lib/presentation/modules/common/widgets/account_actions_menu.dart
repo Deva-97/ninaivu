@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/app_lock_settings_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -23,7 +25,7 @@ class AccountActionsMenu extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return PopupMenuButton<AccountAction>(
-      tooltip: 'Account',
+      tooltip: TranslationKeys.account.tr,
       enabled: !isSigningOut,
       onSelected: (value) async {
         switch (value) {
@@ -41,14 +43,14 @@ class AccountActionsMenu extends StatelessWidget {
             break;
         }
       },
-      itemBuilder: (context) => const [
+      itemBuilder: (context) => [
         PopupMenuItem<AccountAction>(
           value: AccountAction.appLock,
           child: ListTile(
             dense: true,
             contentPadding: EdgeInsets.zero,
-            leading: Icon(Icons.lock_outline_rounded),
-            title: Text('App lock'),
+            leading: const Icon(Icons.lock_outline_rounded),
+            title: Text(TranslationKeys.appLock.tr),
           ),
         ),
         PopupMenuItem<AccountAction>(
@@ -56,8 +58,8 @@ class AccountActionsMenu extends StatelessWidget {
           child: ListTile(
             dense: true,
             contentPadding: EdgeInsets.zero,
-            leading: Icon(Icons.delete_outline_rounded),
-            title: Text('Delete account'),
+            leading: const Icon(Icons.delete_outline_rounded),
+            title: Text(TranslationKeys.deleteAccount.tr),
           ),
         ),
         PopupMenuItem<AccountAction>(
@@ -65,8 +67,8 @@ class AccountActionsMenu extends StatelessWidget {
           child: ListTile(
             dense: true,
             contentPadding: EdgeInsets.zero,
-            leading: Icon(Icons.logout_rounded),
-            title: Text('Sign out'),
+            leading: const Icon(Icons.logout_rounded),
+            title: Text(TranslationKeys.logout.tr),
           ),
         ),
       ],
@@ -85,7 +87,9 @@ class AccountActionsMenu extends StatelessWidget {
               const SizedBox.shrink(),
             if (isSigningOut) const SizedBox(width: 8),
             Text(
-              isSigningOut ? 'Signing out...' : 'Account',
+              isSigningOut
+                  ? TranslationKeys.signingOut.tr
+                  : TranslationKeys.account.tr,
               style: TextStyle(
                 color: colorScheme.onSurface,
                 fontWeight: FontWeight.w600,
@@ -108,19 +112,18 @@ class AccountActionsMenu extends StatelessWidget {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Sign out'),
-          content: const Text(
-            'You are about to sign out of your Ninaivu account on this device. '
-            'Make sure you have finished your work and synced recent changes before continuing.',
+          title: Text(TranslationKeys.logout.tr),
+          content: Text(
+            TranslationKeys.signOutDialogMessage.tr,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
+              child: Text(TranslationKeys.cancel.tr),
             ),
             FilledButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Sign out'),
+              child: Text(TranslationKeys.logout.tr),
             ),
           ],
         );
@@ -137,19 +140,18 @@ class AccountActionsMenu extends StatelessWidget {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Delete account'),
-          content: const Text(
-            'This will open the Ninaivu delete account page in your browser. '
-            'Continue only if you want to request permanent account deletion.',
+          title: Text(TranslationKeys.deleteAccount.tr),
+          content: Text(
+            TranslationKeys.deleteAccountBrowserDialogMessage.tr,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
+              child: Text(TranslationKeys.cancel.tr),
             ),
             FilledButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Continue'),
+              child: Text(TranslationKeys.continueLabel.tr),
             ),
           ],
         );
@@ -166,9 +168,9 @@ class AccountActionsMenu extends StatelessWidget {
     )) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Unable to open the account deletion page right now. Please try again.',
+            TranslationKeys.unableToOpenDeleteAccountPage.tr,
           ),
         ),
       );

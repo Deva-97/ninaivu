@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/models/export_format.dart';
 
 Future<ExportFormat?> showExportFormatPicker({
@@ -19,7 +20,7 @@ Future<ExportFormat?> showExportFormatPicker({
               Text(title, style: Get.textTheme.titleLarge),
               const SizedBox(height: 8),
               Text(
-                'Choose how you want to export this data.',
+                TranslationKeys.exportSheetHint.tr,
                 style: Get.textTheme.bodyMedium,
               ),
               const SizedBox(height: 16),

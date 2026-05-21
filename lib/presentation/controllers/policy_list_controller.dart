@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ninaivu/core/models/export_format.dart';
@@ -18,17 +20,25 @@ class PolicyListController extends GetxController {
        _deletePolicyUseCase = deletePolicyUseCase,
        _exportPoliciesUseCase = exportPoliciesUseCase;
 
+  static const int _pageSize = 50;
+
   final GetPoliciesUseCase _getPoliciesUseCase;
   final GetPoliciesByClientUseCase _getPoliciesByClientUseCase;
   final DeletePolicyUseCase _deletePolicyUseCase;
   final ExportPoliciesUseCase _exportPoliciesUseCase;
 
   final searchController = TextEditingController();
+  final scrollController = ScrollController();
   final policies = <Policy>[].obs;
   final isLoading = false.obs;
+  final isLoadingMore = false.obs;
+  final hasMore = true.obs;
   final errorMessage = RxnString();
 
+  Timer? _debounce;
   String? clientId;
+  int _nextOffset = 0;
+  int _requestVersion = 0;
 
   @override
   void onInit() {
@@ -37,28 +47,76 @@ class PolicyListController extends GetxController {
     if (args is Map<String, dynamic>) {
       clientId = args['clientId'] as String?;
     }
+    searchController.addListener(_onSearchChanged);
+    scrollController.addListener(_onScroll);
     loadPolicies();
   }
 
   @override
   void onClose() {
+    _debounce?.cancel();
+    scrollController.dispose();
     searchController.dispose();
     super.onClose();
   }
 
-  Future<void> loadPolicies() async {
-    isLoading.value = true;
-    errorMessage.value = null;
-    try {
-      if (clientId != null && clientId!.isNotEmpty) {
-        policies.assignAll(await _getPoliciesByClientUseCase(clientId!));
-      } else {
-        policies.assignAll(await _getPoliciesUseCase(query: searchController.text.trim()));
+  Future<void> loadPolicies() => _loadPolicies(reset: true);
+
+  Future<void> loadMorePolicies() => _loadPolicies(reset: false);
+
+  Future<void> _loadPolicies({required bool reset}) async {
+    if (reset) {
+      isLoading.value = true;
+      errorMessage.value = null;
+      hasMore.value = true;
+      _nextOffset = 0;
+    } else {
+      if (isLoading.value || isLoadingMore.value || !hasMore.value) {
+        return;
       }
+      isLoadingMore.value = true;
+    }
+
+    final requestVersion = ++_requestVersion;
+
+    try {
+      List<Policy> result;
+      if (clientId != null && clientId!.isNotEmpty) {
+        if (!reset) {
+          return;
+        }
+        result = await _getPoliciesByClientUseCase(clientId!);
+      } else {
+        final query = searchController.text.trim();
+        result = await _getPoliciesUseCase(
+          query: query.isEmpty ? null : query,
+          limit: _pageSize,
+          offset: _nextOffset,
+        );
+      }
+
+      if (requestVersion != _requestVersion || isClosed) {
+        return;
+      }
+
+      if (reset) {
+        policies.assignAll(result);
+      } else {
+        policies.addAll(result);
+      }
+      _nextOffset = policies.length;
+      hasMore.value = clientId != null && clientId!.isNotEmpty
+          ? false
+          : result.length >= _pageSize;
     } catch (e) {
-      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
+      if (requestVersion == _requestVersion && !isClosed) {
+        errorMessage.value = e.toString().replaceFirst('Exception: ', '');
+      }
     } finally {
-      isLoading.value = false;
+      if (requestVersion == _requestVersion && !isClosed) {
+        isLoading.value = false;
+        isLoadingMore.value = false;
+      }
     }
   }
 
@@ -69,4 +127,23 @@ class PolicyListController extends GetxController {
 
   Future<void> exportPolicies(ExportFormat format) =>
       _exportPoliciesUseCase(format: format);
+
+  void _onSearchChanged() {
+    if (clientId != null && clientId!.isNotEmpty) {
+      return;
+    }
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), loadPolicies);
+  }
+
+  void _onScroll() {
+    if (!scrollController.hasClients || clientId != null && clientId!.isNotEmpty) {
+      return;
+    }
+
+    final position = scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - 240) {
+      loadMorePolicies();
+    }
+  }
 }

@@ -136,10 +136,10 @@ class PolicyLocalDataSource {
     final clauses = <String>[
       '${DatabaseColumns.businessId} = ?',
       '${DatabaseColumns.isDeleted} = 0',
-      '(policy_number LIKE ? OR company_name LIKE ? OR insurance_type LIKE ?)',
+      '(policy_number LIKE ? OR company_name LIKE ? OR insurance_type LIKE ? OR vehicle_number LIKE ?)',
     ];
     final pattern = '%${query.trim()}%';
-    final args = <Object?>[businessId, pattern, pattern, pattern];
+    final args = <Object?>[businessId, pattern, pattern, pattern, pattern];
     if (clientId != null && clientId.isNotEmpty) {
       clauses.add('client_id = ?');
       args.add(clientId);
@@ -157,6 +157,38 @@ class PolicyLocalDataSource {
       limit: limit,
       offset: 0,
     );
+  }
+
+  Future<PolicyModel?> findPolicyByNumber({
+    required String businessId,
+    required String policyNumber,
+    required bool isAdmin,
+    required String userId,
+  }) async {
+    final db = await _databaseHelper.database;
+    final whereClauses = <String>[
+      '${DatabaseColumns.businessId} = ?',
+      'policy_number = ?',
+      '${DatabaseColumns.isDeleted} = 0',
+    ];
+    final args = <Object?>[businessId, policyNumber];
+    if (!isAdmin) {
+      whereClauses.add(
+        '(${DatabaseColumns.createdBy} = ? OR ${DatabaseColumns.agentId} = ? OR ${DatabaseColumns.assignedTo} = ?)',
+      );
+      args.addAll([userId, userId, userId]);
+    }
+
+    final result = await db.query(
+      DatabaseTables.policies,
+      where: whereClauses.join(' AND '),
+      whereArgs: args,
+      limit: 1,
+    );
+    if (result.isEmpty) {
+      return null;
+    }
+    return PolicyModel.fromMap(result.first);
   }
 
   Future<void> updateRenewalStatus({
@@ -253,10 +285,10 @@ class PolicyLocalDataSource {
     final args = [...whereArgs];
     if (query != null && query.trim().isNotEmpty) {
       clauses.add(
-        '(policy_number LIKE ? OR company_name LIKE ? OR insurance_type LIKE ?)',
+        '(policy_number LIKE ? OR company_name LIKE ? OR insurance_type LIKE ? OR vehicle_number LIKE ?)',
       );
       final pattern = '%${query.trim()}%';
-      args.addAll([pattern, pattern, pattern]);
+      args.addAll([pattern, pattern, pattern, pattern]);
     }
 
     final result = await db.query(

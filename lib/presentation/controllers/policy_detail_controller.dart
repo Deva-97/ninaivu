@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:ninaivu/core/services/communication_service.dart';
 import 'package:ninaivu/domain/entities/client.dart';
 import 'package:ninaivu/domain/entities/policy.dart';
 import 'package:ninaivu/domain/usecases/clients/get_client_details_usecase.dart';
@@ -10,13 +11,16 @@ class PolicyDetailController extends GetxController {
     required GetClientDetailsUseCase getClientDetailsUseCase,
     required PolicyRepository policyRepository,
     required DeletePolicyUseCase deletePolicyUseCase,
+    required CommunicationService communicationService,
   }) : _getClientDetailsUseCase = getClientDetailsUseCase,
        _policyRepository = policyRepository,
-       _deletePolicyUseCase = deletePolicyUseCase;
+       _deletePolicyUseCase = deletePolicyUseCase,
+       _communicationService = communicationService;
 
   final GetClientDetailsUseCase _getClientDetailsUseCase;
   final PolicyRepository _policyRepository;
   final DeletePolicyUseCase _deletePolicyUseCase;
+  final CommunicationService _communicationService;
 
   final client = Rxn<Client>();
   final policy = Rxn<Policy>();
@@ -53,5 +57,13 @@ class PolicyDetailController extends GetxController {
   Future<void> deletePolicy() async {
     await _deletePolicyUseCase(policyId);
     Get.back(result: true);
+  }
+
+  Future<void> callClient() async {
+    await _communicationService.openDialer(client.value?.mobile);
+  }
+
+  Future<void> whatsappClient() async {
+    await _communicationService.openWhatsAppChat(client.value?.mobile);
   }
 }

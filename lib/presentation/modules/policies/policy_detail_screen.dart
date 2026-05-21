@@ -6,7 +6,6 @@ import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/policy_detail_controller.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/whatsapp_template_selector.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class PolicyDetailScreen extends GetView<PolicyDetailController> {
   const PolicyDetailScreen({super.key});
@@ -101,6 +100,7 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
                         label: 'Renewal Status',
                         value: policy.renewalStatus,
                       ),
+                      _DetailRow(label: 'Sync Status', value: policy.syncStatus),
                       _DetailRow(
                         label: 'Vehicle',
                         value:
@@ -123,9 +123,7 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
                   runSpacing: responsive.scaled(12, min: 10),
                   children: [
                     OutlinedButton.icon(
-                      onPressed: () => launchUrl(
-                        Uri.parse('tel:${controller.client.value!.mobile}'),
-                      ),
+                      onPressed: () => controller.callClient(),
                       icon: const Icon(Icons.call_outlined),
                       label: const Text('Call'),
                     ),

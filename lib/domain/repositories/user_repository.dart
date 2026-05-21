@@ -3,6 +3,10 @@ import 'package:ninaivu/domain/entities/app_user.dart';
 abstract class UserRepository {
   Future<AppUser?> getCurrentUser();
   Future<AppUser?> getUserById(String id);
+  Future<AppUser> updateCurrentUserProfileImage({
+    String? profileImageData,
+    bool removeImage = false,
+  });
   Future<List<AppUser>> getUsersByRole(String role, {String? query});
   Future<List<AppUser>> getAgents({String? query});
   Future<List<AppUser>> getCustomers({String? query});

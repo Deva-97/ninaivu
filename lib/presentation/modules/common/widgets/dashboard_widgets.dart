@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:ninaivu/core/widgets/status_badge.dart';
 import 'package:ninaivu/core/widgets/responsive_layout.dart';
 
+/// Reusable metric tile used by both admin and agent dashboards.
 class DashboardMetricCard extends StatelessWidget {
   const DashboardMetricCard({
     super.key,
@@ -41,6 +42,7 @@ class DashboardMetricCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 padding: EdgeInsets.all(responsive.scaled(8, min: 7)),
@@ -57,7 +59,17 @@ class DashboardMetricCard extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              if (badgeLabel != null) StatusBadge(label: badgeLabel!),
+              if (badgeLabel != null)
+                Flexible(
+                  child: Align(
+                    alignment: Alignment.topRight,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.topRight,
+                      child: StatusBadge(label: badgeLabel!),
+                    ),
+                  ),
+                ),
             ],
           ),
           const Spacer(),
@@ -74,7 +86,7 @@ class DashboardMetricCard extends StatelessWidget {
           SizedBox(height: responsive.scaled(4, min: 3)),
           Text(
             title,
-            maxLines: 2,
+            maxLines: 3,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -87,6 +99,7 @@ class DashboardMetricCard extends StatelessWidget {
   }
 }
 
+/// Lightweight action button style for dashboard shortcuts.
 class DashboardQuickAction extends StatelessWidget {
   const DashboardQuickAction({
     super.key,

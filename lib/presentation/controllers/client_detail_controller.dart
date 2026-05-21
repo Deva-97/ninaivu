@@ -1,13 +1,16 @@
 import 'package:get/get.dart';
+import 'package:ninaivu/core/services/communication_service.dart';
+import 'package:ninaivu/core/services/profile_image_service.dart';
+import 'package:ninaivu/data/models/client_model.dart';
 import 'package:ninaivu/domain/entities/client.dart';
 import 'package:ninaivu/domain/entities/client_timeline_item.dart';
+import 'package:ninaivu/domain/usecases/clients/update_client_usecase.dart';
 import 'package:ninaivu/domain/usecases/follow_ups/get_follow_ups_by_client_usecase.dart';
 import 'package:ninaivu/domain/usecases/policies/get_policies_by_client_usecase.dart';
 import 'package:ninaivu/domain/usecases/clients/delete_client_usecase.dart';
 import 'package:ninaivu/domain/usecases/clients/get_client_details_usecase.dart';
 import 'package:ninaivu/domain/usecases/reminders/get_reminders_by_client_usecase.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class ClientDetailController extends GetxController {
   ClientDetailController({
@@ -16,17 +19,26 @@ class ClientDetailController extends GetxController {
     required GetFollowUpsByClientUseCase getFollowUpsByClientUseCase,
     required GetPoliciesByClientUseCase getPoliciesByClientUseCase,
     required GetRemindersByClientUseCase getRemindersByClientUseCase,
+    required UpdateClientUseCase updateClientUseCase,
+    required CommunicationService communicationService,
+    required ProfileImageService profileImageService,
   }) : _getClientDetailsUseCase = getClientDetailsUseCase,
        _deleteClientUseCase = deleteClientUseCase,
        _getFollowUpsByClientUseCase = getFollowUpsByClientUseCase,
        _getPoliciesByClientUseCase = getPoliciesByClientUseCase,
-       _getRemindersByClientUseCase = getRemindersByClientUseCase;
+       _getRemindersByClientUseCase = getRemindersByClientUseCase,
+       _updateClientUseCase = updateClientUseCase,
+       _communicationService = communicationService,
+       _profileImageService = profileImageService;
 
   final GetClientDetailsUseCase _getClientDetailsUseCase;
   final DeleteClientUseCase _deleteClientUseCase;
   final GetFollowUpsByClientUseCase _getFollowUpsByClientUseCase;
   final GetPoliciesByClientUseCase _getPoliciesByClientUseCase;
   final GetRemindersByClientUseCase _getRemindersByClientUseCase;
+  final UpdateClientUseCase _updateClientUseCase;
+  final CommunicationService _communicationService;
+  final ProfileImageService _profileImageService;
 
   final client = Rxn<Client>();
   final timelineItems = <ClientTimelineItem>[].obs;
@@ -34,6 +46,7 @@ class ClientDetailController extends GetxController {
   final errorMessage = RxnString();
 
   late final String clientId;
+  int _requestVersion = 0;
 
   @override
   void onInit() {
@@ -44,19 +57,29 @@ class ClientDetailController extends GetxController {
   }
 
   Future<void> loadClient() async {
+    final requestVersion = ++_requestVersion;
     isLoading.value = true;
     errorMessage.value = null;
     try {
-      client.value = await _getClientDetailsUseCase(clientId);
+      final loadedClient = await _getClientDetailsUseCase(clientId);
+      if (requestVersion != _requestVersion || isClosed) {
+        return;
+      }
+
+      client.value = loadedClient;
       if (client.value == null) {
         errorMessage.value = 'Client not found';
       } else {
-        await _loadTimeline();
+        await _loadTimeline(requestVersion: requestVersion);
       }
     } catch (e) {
-      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
+      if (requestVersion == _requestVersion && !isClosed) {
+        errorMessage.value = e.toString().replaceFirst('Exception: ', '');
+      }
     } finally {
-      isLoading.value = false;
+      if (requestVersion == _requestVersion && !isClosed) {
+        isLoading.value = false;
+      }
     }
   }
 
@@ -66,31 +89,42 @@ class ClientDetailController extends GetxController {
   }
 
   Future<void> callClient() async {
-    final mobile = client.value?.mobile;
-    if (mobile == null || mobile.isEmpty) {
-      throw Exception('Mobile number not available');
-    }
-    final uri = Uri.parse('tel:$mobile');
-    if (!await launchUrl(uri)) {
-      throw Exception('Unable to open the dialer');
-    }
+    await _communicationService.openDialer(client.value?.mobile);
   }
 
   Future<void> whatsappClient() async {
-    final mobile = client.value?.mobile;
-    if (mobile == null || mobile.isEmpty) {
-      throw Exception('Mobile number not available');
-    }
-    final uri = Uri.parse('https://wa.me/91$mobile');
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      throw Exception('Unable to open WhatsApp');
-    }
+    await _communicationService.openWhatsAppChat(client.value?.mobile);
   }
 
-  Future<void> _loadTimeline() async {
-    final policies = await _getPoliciesByClientUseCase(clientId);
-    final reminders = await _getRemindersByClientUseCase(clientId);
-    final followUps = await _getFollowUpsByClientUseCase(clientId);
+  Future<void> updateProfileImage() async {
+    final existing = client.value;
+    if (existing == null) {
+      return;
+    }
+    final path = await _profileImageService.pickImagePath();
+    if (path == null) {
+      return;
+    }
+    await _updateClientUseCase(
+      ClientModel.fromEntity(existing).copyWith(profileImagePath: path),
+    );
+    await loadClient();
+  }
+
+  Future<void> _loadTimeline({required int requestVersion}) async {
+    final results = await Future.wait([
+      _getPoliciesByClientUseCase(clientId),
+      _getRemindersByClientUseCase(clientId),
+      _getFollowUpsByClientUseCase(clientId),
+    ]);
+
+    if (requestVersion != _requestVersion || isClosed) {
+      return;
+    }
+
+    final policies = results[0] as List<dynamic>;
+    final reminders = results[1] as List<dynamic>;
+    final followUps = results[2] as List<dynamic>;
     final items = <ClientTimelineItem>[
       ...policies.map(
         (policy) => ClientTimelineItem(

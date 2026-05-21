@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:ninaivu/core/constants/app_constants.dart';
-import 'package:ninaivu/core/constants/app_strings.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/services/auth_service.dart';
 import 'package:ninaivu/core/widgets/app_logo.dart';
 import 'package:ninaivu/core/widgets/responsive_layout.dart';
@@ -57,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final mobile = _mobileController.text.trim();
 
     if (!RegExp(r'^\d{10}$').hasMatch(mobile)) {
-      _showError('Enter a valid 10-digit mobile number');
+      _showError(TranslationKeys.enterValid10DigitMobile.tr);
       return;
     }
 
@@ -108,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: responsive.scaled(20, min: 16)),
                 Text(
-                  AppStrings.loginTitle,
+                  TranslationKeys.loginTitle.tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: responsive.headlineSize,
@@ -117,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: responsive.scaled(8, min: 6)),
                 Text(
-                  AppStrings.loginSubtitle,
+                  TranslationKeys.loginSubtitle.tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(color: colorScheme.onSurfaceVariant),
                 ),
@@ -127,11 +128,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   keyboardType: TextInputType.phone,
                   maxLength: 10,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: const InputDecoration(
-                    labelText: 'Mobile Number',
-                    hintText: 'Enter 10-digit mobile number',
+                  decoration: InputDecoration(
+                    labelText: TranslationKeys.mobileNumber.tr,
+                    hintText: TranslationKeys.enter10DigitMobile.tr,
                     prefixText: '+91 ',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     counterText: '',
                   ),
                 ),
@@ -141,7 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: ElevatedButton.icon(
                     onPressed: _continueWithMobile,
                     icon: const Icon(Icons.phone_android_rounded),
-                    label: const Text('Continue with Mobile Number'),
+                    label: Text(TranslationKeys.continueWithMobile.tr),
                   ),
                 ),
                 SizedBox(height: responsive.itemGap),
@@ -153,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         horizontal: responsive.scaled(12, min: 8),
                       ),
                       child: Text(
-                        'OR',
+                        TranslationKeys.orLabel.tr,
                         style: TextStyle(color: colorScheme.onSurfaceVariant),
                       ),
                     ),
@@ -169,12 +170,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       Icons.g_mobiledata_rounded,
                       size: responsive.scaled(32, min: 24),
                     ),
-                    label: const Text('Continue with Google'),
+                    label: Text(TranslationKeys.continueWithGoogle.tr),
                   ),
                 ),
                 SizedBox(height: responsive.scaled(12, min: 10)),
                 Text(
-                  AppStrings.googleConsentNote,
+                  TranslationKeys.googleConsentNote.tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: responsive.helperTextSize,
@@ -185,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 if (_isLoading) const Center(child: CircularProgressIndicator()),
                 SizedBox(height: responsive.scaled(32, min: 24)),
                 Text(
-                  'By continuing, you agree to use Ninaivu for authorized insurance business access only.',
+                  TranslationKeys.authorizedBusinessUseOnly.tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: responsive.helperTextSize,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:local_auth/local_auth.dart';
@@ -96,8 +97,12 @@ class AppLockService extends GetxService {
     try {
       final authenticated = await _localAuthentication.authenticate(
         localizedReason: 'Unlock Ninaivu',
-        options: const AuthenticationOptions(
-          biometricOnly: false,
+        options: AuthenticationOptions(
+          // Android devices that route device-credential fallback through Play
+          // Services can emit noisy GoogleApiManager broker errors here. The app
+          // already provides its own PIN fallback, so we only request enrolled
+          // biometrics on Android and keep device credential out of this flow.
+          biometricOnly: defaultTargetPlatform == TargetPlatform.android,
           stickyAuth: true,
         ),
       );
@@ -127,9 +132,14 @@ class AppLockService extends GetxService {
 
   Future<bool> _canUseBiometric() async {
     try {
-      final canCheck = await _localAuthentication.canCheckBiometrics;
       final isSupported = await _localAuthentication.isDeviceSupported();
-      return canCheck && isSupported;
+      if (!isSupported) {
+        return false;
+      }
+
+      final availableBiometrics =
+          await _localAuthentication.getAvailableBiometrics();
+      return availableBiometrics.isNotEmpty;
     } catch (_) {
       return false;
     }

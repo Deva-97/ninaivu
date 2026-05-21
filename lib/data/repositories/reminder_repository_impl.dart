@@ -85,7 +85,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
       syncStatus: 'pending_update',
     );
     await _enqueue(updatedReminder, 'update', 'pending_update');
-    await _syncService.syncPendingData();
+    await _syncService.syncPendingDataBestEffort();
   }
 
   @override
@@ -126,7 +126,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
 
     LocalDataChangeService.notifyChanged();
     await _enqueue(updatedReminder, 'update', 'pending_update');
-    await _syncService.syncPendingData();
+    await _syncService.syncPendingDataBestEffort();
   }
 
   @override

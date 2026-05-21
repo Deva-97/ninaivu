@@ -7,6 +7,8 @@ class AppUser {
     this.email,
     required this.role,
     required this.status,
+    this.profileImagePath,
+    this.profileImageData,
     required this.profileCompleted,
     required this.createdAt,
     required this.updatedAt,
@@ -23,6 +25,8 @@ class AppUser {
   final String? email;
   final String role;
   final String status;
+  final String? profileImagePath;
+  final String? profileImageData;
   final bool profileCompleted;
   final int createdAt;
   final int updatedAt;

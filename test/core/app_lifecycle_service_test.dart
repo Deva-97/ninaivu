@@ -67,5 +67,23 @@ void main() {
       expect(reportedError, isA<StateError>());
       expect(reportedReason, 'App resume handling failed');
     });
+
+    test('runs background callback when app is paused or detached', () {
+      var backgroundCalls = 0;
+      final service = AppLifecycleService(
+        onResume: () async {},
+        onBackground: () {
+          backgroundCalls++;
+        },
+      );
+
+      service.start();
+      service.didChangeAppLifecycleState(AppLifecycleState.paused);
+      service.didChangeAppLifecycleState(AppLifecycleState.detached);
+      service.didChangeAppLifecycleState(AppLifecycleState.inactive);
+      service.stop();
+
+      expect(backgroundCalls, 2);
+    });
   });
 }

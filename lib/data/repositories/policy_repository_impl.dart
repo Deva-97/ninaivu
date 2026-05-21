@@ -18,6 +18,10 @@ import 'package:ninaivu/domain/entities/policy.dart';
 import 'package:ninaivu/domain/repositories/policy_repository.dart';
 import 'package:uuid/uuid.dart';
 
+/// Offline-first policy repository.
+///
+/// Policy changes are persisted locally, reminder side effects are updated, a
+/// sync queue entry is created, and then remote sync is attempted opportunistically.
 class PolicyRepositoryImpl implements PolicyRepository {
   PolicyRepositoryImpl({
     PolicyLocalDataSource? localDataSource,
@@ -156,11 +160,13 @@ class PolicyRepositoryImpl implements PolicyRepository {
       updatedAt: DateTime.now().millisecondsSinceEpoch,
       syncStatus: 'pending_create',
     );
+    // Policies own reminder generation, so creation/update always refreshes the
+    // reminder set instead of trying to patch individual reminder rows by hand.
     await _localDataSource.insertPolicy(model);
     await _refreshRemindersForPolicy(model);
     LocalDataChangeService.notifyChanged();
     await _enqueue(model, 'create', 'pending_create');
-    await _syncService.syncPendingData();
+    await _syncService.syncPendingDataBestEffort();
     return model;
   }
 
@@ -185,7 +191,7 @@ class PolicyRepositoryImpl implements PolicyRepository {
     await _refreshRemindersForPolicy(model);
     LocalDataChangeService.notifyChanged();
     await _enqueue(model, 'update', 'pending_update');
-    await _syncService.syncPendingData();
+    await _syncService.syncPendingDataBestEffort();
     return model;
   }
 
@@ -206,6 +212,8 @@ class PolicyRepositoryImpl implements PolicyRepository {
       assignedTo: existing.assignedTo,
     );
 
+    // "Renewed" is the only renewal stage that also changes the canonical
+    // policy lifecycle status used by dashboards and reminder generation.
     final nextPolicyStatus = renewalStatus == 'Renewed' ? 'Renewed' : null;
     await _localDataSource.updateRenewalStatus(
       policyId: policyId,
@@ -220,7 +228,7 @@ class PolicyRepositoryImpl implements PolicyRepository {
     );
     LocalDataChangeService.notifyChanged();
     await _enqueue(updatedModel, 'update', 'pending_update');
-    await _syncService.syncPendingData();
+    await _syncService.syncPendingDataBestEffort();
   }
 
   @override
@@ -246,7 +254,7 @@ class PolicyRepositoryImpl implements PolicyRepository {
       syncStatus: 'pending_delete',
     );
     await _enqueue(deletedModel, 'delete', 'pending_delete');
-    await _syncService.syncPendingData();
+    await _syncService.syncPendingDataBestEffort();
   }
 
   Future<void> _enqueue(
@@ -311,6 +319,8 @@ class PolicyRepositoryImpl implements PolicyRepository {
       policyId,
     );
     if (existingReminders.isNotEmpty) {
+      // Old reminders are soft-deleted and queued for sync so devices and
+      // Firestore stay consistent after policy date changes.
       await _reminderSchedulerService.cancelReminders(existingReminders);
       await _reminderLocalDataSource.softDeleteByPolicy(policyId);
       for (final reminder in existingReminders) {
@@ -331,6 +341,8 @@ class PolicyRepositoryImpl implements PolicyRepository {
     String? agentId,
     String? assignedTo,
   }) {
+    // Access checks stay in the repository so use cases and controllers do not
+    // duplicate role logic for every policy read/write path.
     final role = currentUser.role.toAppRole();
     if (!PermissionHelper.canAccessOwnRecord(
       role: role,

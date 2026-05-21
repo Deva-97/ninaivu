@@ -1,99 +1,101 @@
 # Developer Guide
 
-This guide explains how to contribute to Ninaivu without getting lost in the codebase.
+This guide is the quickest way to understand how Ninaivu is put together and how to change it safely.
 
-## How To Read A Feature
-
-Use this order when you open a feature for the first time:
+## Trace A Feature In This Order
 
 1. Screen in `lib/presentation/modules/...`
 2. Controller in `lib/presentation/controllers/...`
 3. Binding in `lib/presentation/bindings/...`
-4. Use cases in `lib/domain/usecases/...`
-5. Repository implementation in `lib/data/repositories/...`
+4. Use case in `lib/domain/usecases/...`
+5. Repository in `lib/data/repositories/...`
 6. Local and remote data sources in `lib/data/datasources/...`
 
-This mirrors the actual runtime flow and is the fastest way to understand behavior.
+That order mirrors runtime behavior and keeps debugging grounded in the real flow.
 
-## Commenting Standard
+## High-Value Work Areas
 
-The goal is clarity, not noise.
+### Auth and onboarding
 
-- Add one short file-level heading to explain the file's purpose
-- Add section comments only when a block would be hard to understand at a glance
-- Prefer comments that explain intent, workflow, or why a decision exists
-- Avoid repeating what the code already says clearly
+- `lib/core/services/auth_service.dart`
+- `lib/presentation/modules/common/auth/`
 
-Good example:
+Notes:
+- Profile completion saves locally first, then queues backup.
+- Successful sessions persist through `AppPreferences`.
 
-```dart
-/// Splash screen that shows branding while the app restores auth state.
-```
+### Offline save and sync
 
-Avoid low-value comments like:
+- `lib/core/services/sync_service.dart`
+- `lib/core/services/auto_sync_service.dart`
+- `lib/core/services/background_sync_service.dart`
+- `lib/data/datasources/local/sync_queue_local_data_source.dart`
 
-```dart
-// Set variable
-// Call function
-```
+Notes:
+- Mutations should write to SQLite before attempting network work.
+- Queue entries should reflect the same business scope as the local record.
+- Background retry behavior should remain best-effort and OS-managed.
 
-## Naming Guidance
+### Lifecycle, app lock, and resume behavior
 
-- Screens end with `_screen.dart`
-- Controllers end with `_controller.dart`
-- Bindings end with `_bindings.dart`
-- Use cases end with `_usecase.dart`
-- Repository implementations end with `_repository_impl.dart`
-- Local and remote sources end with `_local_data_source.dart` and `_remote_data_source.dart`
+- `lib/core/services/app_lifecycle_service.dart`
+- `lib/core/services/app_lock_service.dart`
+- `lib/main.dart`
 
-## Where To Put New Code
+Notes:
+- Resume should be idempotent.
+- Pause/detach should remain safe for app-lock and background scheduling hooks.
 
-### New UI
+### Settings, search, and imports
 
-Place it in:
+- `lib/presentation/modules/common/settings/`
+- `lib/presentation/modules/common/search/`
+- `lib/core/services/import_export_service.dart`
+- `lib/core/services/global_search_service.dart`
+- `lib/core/services/profile_image_service.dart`
 
-- `lib/presentation/modules/...`
-- `lib/presentation/controllers/...`
-- `lib/presentation/bindings/...` if dependency setup changes
+## File Size Rule
 
-### New business logic
+Keep source files at or below 500 lines where practical. If a file starts drifting past that limit, prefer extracting:
 
-Place it in:
+- repeated specs or constants
+- helpers with a single clear responsibility
+- feature-specific widgets or services
 
-- `lib/domain/usecases/...`
-- `lib/domain/entities/...` if the model changes
-- `lib/core/validation/...` if it is reusable validation logic
+## Firebase and Rules
 
-### New database or sync logic
+- Business data lives under `businesses/{businessId}/...`
+- Firestore writes should always include the matching `businessId`
+- If you add a new synced collection or ownership field, update:
+  - `firestore.rules`
+  - local model mapping
+  - remote model mapping
+  - sync queue handling
 
-Place it in:
+## Platform Permissions
 
-- `lib/data/models/...`
-- `lib/data/datasources/local/...`
-- `lib/data/datasources/remote/...`
-- `lib/data/repositories/...`
-- `lib/core/database/...`
+When you add native-facing features, check the platform files in the same change:
 
-## Pull Request Self-Check
+- `android/app/src/main/AndroidManifest.xml`
+- `ios/Runner/Info.plist`
+- `web/manifest.json`
 
-Before handing work off:
+Current examples:
+
+- notifications
+- boot-completed receivers
+- photo library access for profile image picking
+
+## Before Handing Work Off
 
 1. Run `flutter analyze`
 2. Run `flutter test`
-3. Verify any feature you changed manually
-4. Confirm your file names and folder placement match existing patterns
-5. Add or update file-level headings if you created new custom files
+3. Manually verify the changed flow if it touches routing, sync, auth, or platform behavior
+4. Update `README.md` or `docs/` if the feature surface changed
 
-## Suggestions To Keep The Project Maintainable
+## Good Next Tests To Add
 
-- Keep controllers focused on UI state and interaction flow
-- Keep business decisions inside use cases or validation helpers
-- Keep repository code responsible for orchestration, not UI concerns
-- Avoid mixing Firestore logic directly into screens
-- Keep reusable widgets in `lib/core/widgets/`
-
-## Recommended Future Improvements
-
-- Add `CONTRIBUTING.md` if external contributors will join the project
-- Add architecture decision notes if large design choices evolve
-- Add more tests around sync edge cases and role-based access
+- offline profile completion and later sync recovery
+- sync failure and retry edge cases
+- role-based route protection
+- settings import/export controller behavior

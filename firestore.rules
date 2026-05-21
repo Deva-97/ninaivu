@@ -6,6 +6,10 @@ service cloud.firestore {
         return request.auth != null;
       }
 
+      function isSelf(userId) {
+        return isSignedIn() && request.auth.uid == userId;
+      }
+
       function userDoc() {
         return get(/databases/$(database)/documents/businesses/$(businessId)/users/$(request.auth.uid));
       }
@@ -29,6 +33,15 @@ service cloud.firestore {
         return isActiveUser() && userDoc().data.role == 'agent';
       }
 
+      function isScopedWrite() {
+        return request.resource.data.businessId == businessId;
+      }
+
+      function isScopedUserWrite(userId) {
+        return isScopedWrite()
+          && request.resource.data.id == userId;
+      }
+
       function ownsRecord() {
         return request.resource.data.createdBy == request.auth.uid
           || request.resource.data.agentId == request.auth.uid
@@ -44,10 +57,10 @@ service cloud.firestore {
       allow read: if isAdmin();
 
       match /users/{userId} {
-        allow read: if isSignedIn() && request.auth.uid == userId
-          || isAdmin();
+        allow read: if isSelf(userId) || isAdmin();
         allow create, update: if isAdmin()
-          || (request.auth.uid == userId
+          || (isSelf(userId)
+            && isScopedUserWrite(userId)
             && request.resource.data.role in ['admin', 'agent']
             && request.resource.data.isDeleted != true
             && request.resource.data.status == 'active');
@@ -56,26 +69,30 @@ service cloud.firestore {
 
       match /clients/{clientId} {
         allow read: if isAdmin() || (isAgent() && ownsExistingRecord());
-        allow create: if isAdmin() || (isAgent() && ownsRecord());
-        allow update, delete: if isAdmin() || (isAgent() && ownsExistingRecord());
+        allow create: if (isAdmin() || (isAgent() && ownsRecord())) && isScopedWrite();
+        allow update: if (isAdmin() || (isAgent() && ownsExistingRecord())) && isScopedWrite();
+        allow delete: if isAdmin() || (isAgent() && ownsExistingRecord());
       }
 
       match /policies/{policyId} {
         allow read: if isAdmin() || (isAgent() && ownsExistingRecord());
-        allow create: if isAdmin() || (isAgent() && ownsRecord());
-        allow update, delete: if isAdmin() || (isAgent() && ownsExistingRecord());
+        allow create: if (isAdmin() || (isAgent() && ownsRecord())) && isScopedWrite();
+        allow update: if (isAdmin() || (isAgent() && ownsExistingRecord())) && isScopedWrite();
+        allow delete: if isAdmin() || (isAgent() && ownsExistingRecord());
       }
 
       match /reminders/{reminderId} {
         allow read: if isAdmin() || (isAgent() && ownsExistingRecord());
-        allow create: if isAdmin() || (isAgent() && ownsRecord());
-        allow update, delete: if isAdmin() || (isAgent() && ownsExistingRecord());
+        allow create: if (isAdmin() || (isAgent() && ownsRecord())) && isScopedWrite();
+        allow update: if (isAdmin() || (isAgent() && ownsExistingRecord())) && isScopedWrite();
+        allow delete: if isAdmin() || (isAgent() && ownsExistingRecord());
       }
 
       match /follow_ups/{followUpId} {
         allow read: if isAdmin() || (isAgent() && ownsExistingRecord());
-        allow create: if isAdmin() || (isAgent() && ownsRecord());
-        allow update, delete: if isAdmin() || (isAgent() && ownsExistingRecord());
+        allow create: if (isAdmin() || (isAgent() && ownsRecord())) && isScopedWrite();
+        allow update: if (isAdmin() || (isAgent() && ownsExistingRecord())) && isScopedWrite();
+        allow delete: if isAdmin() || (isAgent() && ownsExistingRecord());
       }
     }
   }

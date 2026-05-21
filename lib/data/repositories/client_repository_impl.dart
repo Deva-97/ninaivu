@@ -10,6 +10,7 @@ import 'package:ninaivu/data/models/app_user_model.dart';
 import 'package:ninaivu/data/models/client_model.dart';
 import 'package:ninaivu/data/models/sync_queue_model.dart';
 import 'package:ninaivu/domain/entities/client.dart';
+import 'package:ninaivu/domain/entities/upcoming_client_event.dart';
 import 'package:ninaivu/domain/repositories/client_repository.dart';
 import 'package:uuid/uuid.dart';
 
@@ -100,6 +101,36 @@ class ClientRepositoryImpl implements ClientRepository {
   }
 
   @override
+  Future<Client?> findClientByMobile({
+    required String mobile,
+    String? excludingClientId,
+  }) async {
+    final currentUser = await _requireCurrentUser();
+    final role = currentUser.role.toAppRole();
+    return _localDataSource.findClientByMobile(
+      businessId: currentUser.businessId,
+      mobile: mobile,
+      isAdmin: PermissionHelper.canManageAllClients(role),
+      userId: currentUser.id,
+      excludingClientId: excludingClientId,
+    );
+  }
+
+  @override
+  Future<List<UpcomingClientEvent>> getUpcomingSpecialDates({
+    int withinDays = 30,
+  }) async {
+    final currentUser = await _requireCurrentUser();
+    final role = currentUser.role.toAppRole();
+    return _localDataSource.getUpcomingSpecialDates(
+      businessId: currentUser.businessId,
+      isAdmin: PermissionHelper.canManageAllClients(role),
+      userId: currentUser.id,
+      withinDays: withinDays,
+    );
+  }
+
+  @override
   Future<Client> addClient({
     required String name,
     required String mobile,
@@ -108,6 +139,10 @@ class ClientRepositoryImpl implements ClientRepository {
     String? address,
     String? areaCity,
     String? notes,
+    String? profileImagePath,
+    int? dateOfBirthMs,
+    int? specialDateMs,
+    String? specialDateLabel,
   }) async {
     final currentUser = await _requireClientManager();
     final now = DateTime.now().millisecondsSinceEpoch;
@@ -121,6 +156,10 @@ class ClientRepositoryImpl implements ClientRepository {
       address: address,
       areaCity: areaCity,
       notes: notes,
+      profileImagePath: profileImagePath,
+      dateOfBirthMs: dateOfBirthMs,
+      specialDateMs: specialDateMs,
+      specialDateLabel: specialDateLabel,
       createdBy: currentUser.id,
       agentId: currentUser.role == AppRole.agent.value ? currentUser.id : null,
       createdAt: now,
@@ -132,7 +171,7 @@ class ClientRepositoryImpl implements ClientRepository {
     await _localDataSource.insertClient(client);
     LocalDataChangeService.notifyChanged();
     await _enqueue(client, 'create', 'pending_create');
-    await _syncService.syncPendingData();
+    await _syncService.syncPendingDataBestEffort();
     return client;
   }
 
@@ -162,7 +201,7 @@ class ClientRepositoryImpl implements ClientRepository {
     await _localDataSource.updateClient(updatedClient);
     LocalDataChangeService.notifyChanged();
     await _enqueue(updatedClient, 'update', 'pending_update');
-    await _syncService.syncPendingData();
+    await _syncService.syncPendingDataBestEffort();
     return updatedClient;
   }
 
@@ -188,7 +227,7 @@ class ClientRepositoryImpl implements ClientRepository {
       syncStatus: 'pending_delete',
     );
     await _enqueue(deletedClient, 'delete', 'pending_delete');
-    await _syncService.syncPendingData();
+    await _syncService.syncPendingDataBestEffort();
   }
 
   Future<AppUserModel> _requireCurrentUser() async {

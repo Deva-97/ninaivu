@@ -14,6 +14,8 @@ class AppPreferences {
   static const String _appLockEnabledKey = 'app_lock_enabled';
   static const String _appLockPinHashKey = 'app_lock_pin_hash';
   static const String _biometricUnlockEnabledKey = 'biometric_unlock_enabled';
+  static const String _languageCodeKey = 'language_code';
+  static const String _themeModeKey = 'theme_mode';
 
   static AppPreferences? _instance;
   static final StreamController<int?> _lastSyncTimeController =
@@ -41,6 +43,8 @@ class AppPreferences {
   String? get appLockPinHash => _sharedPreferences.getString(_appLockPinHashKey);
   bool get isBiometricUnlockEnabled =>
       _sharedPreferences.getBool(_biometricUnlockEnabledKey) ?? false;
+  String? get languageCode => _sharedPreferences.getString(_languageCodeKey);
+  String? get themeMode => _sharedPreferences.getString(_themeModeKey);
 
   Future<void> setUserId(String? value) async {
     await _setOrRemoveString(_userIdKey, value);
@@ -75,6 +79,14 @@ class AppPreferences {
 
   Future<void> setBiometricUnlockEnabled(bool value) async {
     await _sharedPreferences.setBool(_biometricUnlockEnabledKey, value);
+  }
+
+  Future<void> setLanguageCode(String? value) async {
+    await _setOrRemoveString(_languageCodeKey, value);
+  }
+
+  Future<void> setThemeMode(String? value) async {
+    await _setOrRemoveString(_themeModeKey, value);
   }
 
   Future<void> saveSession({

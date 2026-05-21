@@ -9,6 +9,10 @@ class Client {
     this.address,
     this.areaCity,
     this.notes,
+    this.profileImagePath,
+    this.dateOfBirthMs,
+    this.specialDateMs,
+    this.specialDateLabel,
     required this.createdBy,
     this.agentId,
     this.subAgentId,
@@ -30,6 +34,10 @@ class Client {
   final String? address;
   final String? areaCity;
   final String? notes;
+  final String? profileImagePath;
+  final int? dateOfBirthMs;
+  final int? specialDateMs;
+  final String? specialDateLabel;
   final String createdBy;
   final String? agentId;
   final String? subAgentId;

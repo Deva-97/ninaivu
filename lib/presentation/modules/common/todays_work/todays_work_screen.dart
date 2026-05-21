@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/utils/whatsapp_template_builder.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/domain/entities/follow_up.dart';
@@ -18,15 +19,15 @@ class TodaysWorkScreen extends GetView<TodaysWorkController> {
     final responsive = context.responsive;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Today's Work")),
+      appBar: AppBar(title: Text(TranslationKeys.todaysWork.tr)),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const AppLoadingView(message: 'Loading today’s work...');
+          return AppLoadingView(message: TranslationKeys.loadingTodaysWork.tr);
         }
         final error = controller.errorMessage.value;
         if (error != null) {
           return AppErrorView(
-            title: 'Unable to load today’s work',
+            title: TranslationKeys.unableToLoadTodaysWork.tr,
             message: error,
             onRetry: controller.loadData,
           );
@@ -39,34 +40,44 @@ class TodaysWorkScreen extends GetView<TodaysWorkController> {
               padding: EdgeInsets.all(responsive.pagePadding),
               children: [
                 _SectionHeader(
-                  title: 'Renewals Today',
+                  title: TranslationKeys.renewalsToday.tr,
                   count: controller.renewalsToday.length,
                 ),
-                ...controller.renewalsToday.map((item) => _ReminderCard(item: item)),
+                ...controller.renewalsToday.map(
+                  (item) => _ReminderCard(item: item),
+                ),
                 SizedBox(height: responsive.sectionGap),
                 _SectionHeader(
-                  title: 'Upcoming Renewals',
+                  title: TranslationKeys.upcomingRenewals.tr,
                   count: controller.upcomingRenewals.length,
                 ),
-                ...controller.upcomingRenewals.map((item) => _ReminderCard(item: item)),
+                ...controller.upcomingRenewals.map(
+                  (item) => _ReminderCard(item: item),
+                ),
                 SizedBox(height: responsive.sectionGap),
                 _SectionHeader(
-                  title: 'Follow-ups Today',
+                  title: TranslationKeys.followUpsToday.tr,
                   count: controller.followUpsToday.length,
                 ),
-                ...controller.followUpsToday.map((item) => _FollowUpCard(item: item)),
+                ...controller.followUpsToday.map(
+                  (item) => _FollowUpCard(item: item),
+                ),
                 SizedBox(height: responsive.sectionGap),
                 _SectionHeader(
-                  title: 'Missed Follow-ups',
+                  title: TranslationKeys.missedFollowUps.tr,
                   count: controller.missedFollowUps.length,
                 ),
-                ...controller.missedFollowUps.map((item) => _FollowUpCard(item: item)),
+                ...controller.missedFollowUps.map(
+                  (item) => _FollowUpCard(item: item),
+                ),
                 SizedBox(height: responsive.sectionGap),
                 Card(
                   child: ListTile(
                     leading: const Icon(Icons.sync_problem_outlined),
-                    title: const Text('Backup / Sync Pending'),
-                    subtitle: Text('${controller.pendingSyncCount.value} item(s) waiting'),
+                    title: Text(TranslationKeys.backupSyncPending.tr),
+                    subtitle: Text(
+                      '${controller.pendingSyncCount.value} ${TranslationKeys.itemsWaiting.tr}',
+                    ),
                   ),
                 ),
               ],
@@ -90,7 +101,9 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Expanded(child: Text(title, style: Theme.of(context).textTheme.titleLarge)),
+          Expanded(
+            child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+          ),
           StatusBadge(label: count.toString()),
         ],
       ),
@@ -115,7 +128,7 @@ class _ReminderCard extends GetView<TodaysWorkController> {
             Text(item.clientName ?? 'Client ${item.clientId}'),
             const SizedBox(height: 6),
             Text(
-              '${item.policyNumber ?? 'Policy'} • ${item.companyName ?? 'Insurance'}\n'
+              '${item.policyNumber ?? 'Policy'} - ${item.companyName ?? 'Insurance'}\n'
               '${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(item.reminderDateTime))}',
             ),
             const SizedBox(height: 12),
@@ -127,7 +140,7 @@ class _ReminderCard extends GetView<TodaysWorkController> {
                   OutlinedButton.icon(
                     onPressed: () => launchUrl(Uri.parse('tel:${item.clientMobile}')),
                     icon: const Icon(Icons.call_outlined),
-                    label: const Text('Call'),
+                    label: Text(TranslationKeys.call.tr),
                   ),
                 if ((item.clientMobile ?? '').isNotEmpty)
                   OutlinedButton.icon(
@@ -142,22 +155,22 @@ class _ReminderCard extends GetView<TodaysWorkController> {
                       ),
                     ),
                     icon: const Icon(Icons.chat_outlined),
-                    label: const Text('WhatsApp'),
+                    label: Text(TranslationKeys.whatsapp.tr),
                   ),
                 OutlinedButton(
                   onPressed: () => Get.toNamed(
                     AppRoutes.reminderDetails,
                     arguments: item.id,
                   ),
-                  child: const Text('View Details'),
+                  child: Text(TranslationKeys.viewDetails.tr),
                 ),
                 FilledButton(
                   onPressed: () => controller.markReminderCompleted(item.id),
-                  child: const Text('Mark Completed'),
+                  child: Text(TranslationKeys.markCompleted.tr),
                 ),
                 FilledButton.tonal(
                   onPressed: () => controller.markReminderRenewed(item.id),
-                  child: const Text('Mark Renewed'),
+                  child: Text(TranslationKeys.markRenewed.tr),
                 ),
               ],
             ),
@@ -185,8 +198,8 @@ class _FollowUpCard extends GetView<TodaysWorkController> {
             Text(item.clientName ?? 'Client ${item.clientId}'),
             const SizedBox(height: 6),
             Text(
-              '${item.type} • ${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(item.followUpDateTime))}\n'
-              '${item.policyNumber ?? 'No policy linked'}',
+              '${item.type} - ${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(item.followUpDateTime))}\n'
+              '${item.policyNumber ?? TranslationKeys.noPolicyLinked.tr}',
             ),
             const SizedBox(height: 12),
             Wrap(
@@ -197,7 +210,7 @@ class _FollowUpCard extends GetView<TodaysWorkController> {
                   OutlinedButton.icon(
                     onPressed: () => launchUrl(Uri.parse('tel:${item.clientMobile}')),
                     icon: const Icon(Icons.call_outlined),
-                    label: const Text('Call'),
+                    label: Text(TranslationKeys.call.tr),
                   ),
                 if ((item.clientMobile ?? '').isNotEmpty)
                   OutlinedButton.icon(
@@ -212,22 +225,22 @@ class _FollowUpCard extends GetView<TodaysWorkController> {
                       ),
                     ),
                     icon: const Icon(Icons.chat_outlined),
-                    label: const Text('WhatsApp'),
+                    label: Text(TranslationKeys.whatsapp.tr),
                   ),
                 OutlinedButton(
                   onPressed: () => Get.toNamed(
                     AppRoutes.followUpDetails,
                     arguments: item.id,
                   ),
-                  child: const Text('View Details'),
+                  child: Text(TranslationKeys.viewDetails.tr),
                 ),
                 FilledButton(
                   onPressed: () => controller.markFollowUpCompleted(item.id),
-                  child: const Text('Mark Completed'),
+                  child: Text(TranslationKeys.markCompleted.tr),
                 ),
                 FilledButton.tonal(
                   onPressed: () => _showRescheduleDialog(context),
-                  child: const Text('Reschedule'),
+                  child: Text(TranslationKeys.reschedule.tr),
                 ),
               ],
             ),
@@ -247,19 +260,22 @@ class _FollowUpCard extends GetView<TodaysWorkController> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: const Text('Tomorrow'),
-                onTap: () => Navigator.of(context).pop(now.add(const Duration(days: 1))),
+                title: Text(TranslationKeys.tomorrow.tr),
+                onTap: () =>
+                    Navigator.of(context).pop(now.add(const Duration(days: 1))),
               ),
               ListTile(
-                title: const Text('After 3 days'),
-                onTap: () => Navigator.of(context).pop(now.add(const Duration(days: 3))),
+                title: Text(TranslationKeys.after3Days.tr),
+                onTap: () =>
+                    Navigator.of(context).pop(now.add(const Duration(days: 3))),
               ),
               ListTile(
-                title: const Text('Next week'),
-                onTap: () => Navigator.of(context).pop(now.add(const Duration(days: 7))),
+                title: Text(TranslationKeys.nextWeek.tr),
+                onTap: () =>
+                    Navigator.of(context).pop(now.add(const Duration(days: 7))),
               ),
               ListTile(
-                title: const Text('Pick custom date/time'),
+                title: Text(TranslationKeys.pickCustomDateTime.tr),
                 onTap: () async {
                   final date = await showDatePicker(
                     context: context,
@@ -278,7 +294,13 @@ class _FollowUpCard extends GetView<TodaysWorkController> {
                     return;
                   }
                   Navigator.of(context).pop(
-                    DateTime(date.year, date.month, date.day, time.hour, time.minute),
+                    DateTime(
+                      date.year,
+                      date.month,
+                      date.day,
+                      time.hour,
+                      time.minute,
+                    ),
                   );
                 },
               ),

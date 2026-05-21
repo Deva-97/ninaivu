@@ -26,6 +26,11 @@ class SyncFailureException implements Exception {
   String toString() => message;
 }
 
+/// Pushes locally queued changes to Firestore.
+///
+/// Repositories write to SQLite first, enqueue a sync record, and then rely on
+/// this service to replay those changes to the remote store when connectivity
+/// is available.
 class SyncService {
   SyncService({
     SyncQueueLocalDataSource? syncQueueLocalDataSource,
@@ -89,6 +94,8 @@ class SyncService {
       return activeOperation;
     }
 
+    // A shared in-flight future prevents overlapping manual syncs, resume syncs,
+    // and background syncs from processing the same queue items twice.
     final operation = _performSyncPendingData(
       removeSyncedQueueItems: removeSyncedQueueItems,
     );
@@ -100,6 +107,31 @@ class SyncService {
       if (identical(_activeSyncOperation, operation)) {
         _activeSyncOperation = null;
       }
+    }
+  }
+
+  /// Attempts to sync queued changes without surfacing remote failures to the
+  /// caller. This keeps write flows offline-first: local persistence succeeds
+  /// immediately, and remote backup retries automatically when connectivity or
+  /// Firebase availability improves.
+  Future<int> syncPendingDataBestEffort({
+    bool removeSyncedQueueItems = true,
+  }) async {
+    try {
+      return await syncPendingData(
+        removeSyncedQueueItems: removeSyncedQueueItems,
+      );
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.log(
+        'Best-effort sync deferred queued changes: $error',
+      );
+      FirebaseCrashlytics.instance.recordError(
+        error,
+        stackTrace,
+        reason: 'Best-effort sync deferred queued changes',
+        fatal: false,
+      );
+      return 0;
     }
   }
 
@@ -134,6 +166,8 @@ class SyncService {
             : item.syncStatus;
         final errorMessage = error.toString().replaceFirst('Exception: ', '');
 
+        // Failures are persisted back into the queue so background retries can
+        // continue later without losing context about what went wrong.
         FirebaseCrashlytics.instance.log(
           'Sync failure for ${item.tableName}/${item.recordId}: $errorMessage',
         );
@@ -177,6 +211,8 @@ class SyncService {
       return;
     }
 
+    // Admins and agents must exist remotely before business collections can be
+    // synced under their account and pass Firestore rule checks.
     final role = currentUser.role.toAppRole();
     if (role != AppRole.admin && role != AppRole.agent) {
       return;

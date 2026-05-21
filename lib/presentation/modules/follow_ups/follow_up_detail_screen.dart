@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:ninaivu/core/utils/whatsapp_template_builder.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/whatsapp_template_selector.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/follow_up_detail_controller.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
@@ -102,6 +101,7 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
                         label: 'Remarks',
                         value: followUp.remarks ?? 'No remarks',
                       ),
+                      _DetailRow(label: 'Sync Status', value: followUp.syncStatus),
                     ],
                   ),
                 ),
@@ -113,7 +113,7 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
                   runSpacing: responsive.scaled(12, min: 10),
                   children: [
                     OutlinedButton.icon(
-                      onPressed: () => _openUri('tel:${followUp.clientMobile}'),
+                      onPressed: controller.callClient,
                       icon: const Icon(Icons.call_outlined),
                       label: const Text('Call Customer'),
                     ),
@@ -187,13 +187,6 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
         );
       }),
     );
-  }
-
-  Future<void> _openUri(String value) async {
-    final uri = Uri.parse(value);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      Get.snackbar('Unable to open', 'The requested app could not be opened.');
-    }
   }
 
   Future<void> _showRescheduleDialog(BuildContext context) async {

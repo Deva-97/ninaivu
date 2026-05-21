@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:ninaivu/core/services/communication_service.dart';
 import 'package:ninaivu/data/repositories/client_repository_impl.dart';
 import 'package:ninaivu/data/repositories/follow_up_repository_impl.dart';
 import 'package:ninaivu/data/repositories/policy_repository_impl.dart';
@@ -61,6 +62,7 @@ class FollowUpDetailBinding extends Bindings {
         deleteFollowUpUseCase: DeleteFollowUpUseCase(repository),
         markFollowUpCompletedUseCase: MarkFollowUpCompletedUseCase(repository),
         rescheduleFollowUpUseCase: RescheduleFollowUpUseCase(repository),
+        communicationService: CommunicationService(),
       ),
     );
   }

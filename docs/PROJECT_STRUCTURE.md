@@ -1,164 +1,153 @@
 # Project Structure Guide
 
-This document helps a new developer quickly understand where each part of Ninaivu lives and how to trace a feature end to end.
+This document maps the important folders and the main feature entry points in Ninaivu.
 
-## Top-Level Folders
+## Top Level
 
-- `lib/`: main Flutter application code
-- `assets/`: images and bundled visual assets
-- `test/`: widget and unit tests
-- `android/`, `ios/`, `web/`, `windows/`, `linux/`, `macos/`: platform runners and platform-specific configuration
+- `lib/`: Flutter application code
+- `assets/`: bundled images and identity assets
+- `docs/`: contributor documentation
+- `test/`: unit and widget tests
+- `android/`, `ios/`, `web/`, `windows/`, `linux/`, `macos/`: platform runners and native configuration
 - `firestore.rules`: Firestore security rules
-- `pubspec.yaml`: dependencies, assets, and Flutter package metadata
 
-## `lib/` Layout
+## `lib/`
 
 ### `lib/main.dart`
 
-App entry point. This file initializes Firebase, Crashlytics, notifications, shared preferences, Google sign-in, and the global theme controller before starting the app.
+Application bootstrap:
+
+- Firebase initialization
+- Crashlytics wiring
+- notifications
+- shared preferences
+- app settings
+- background sync registration
+- lifecycle observers
 
 ### `lib/app.dart`
 
-Root `GetMaterialApp` configuration. This is where routes, theme, and responsive theme scaling are wired together.
+Root `GetMaterialApp` with routes, localization, and theme selection from settings.
 
 ### `lib/core/`
 
-Shared infrastructure used across the entire app.
+Shared infrastructure.
 
-- `constants/`: app-wide values such as strings, colors, enums, and fixed constants
-- `database/`: SQLite helper and table/column names
-- `permissions/`: role and permission helpers
-- `services/`: authentication, storage, sync, notifications, analytics, preferences, and reminder-related services
-- `theme/`: light/dark theme setup and theme controller
-- `utils/`: generic helper logic
-- `validation/`: business validation helpers
-- `widgets/`: reusable UI widgets such as buttons, empty states, logo, text fields, and responsive helpers
+- `constants/`: route labels, translations, colors, and app-wide constants
+- `database/`: SQLite table names, columns, and bootstrap helper
+- `localization/`: app languages and translations
+- `permissions/`: role and access helpers
+- `services/`: auth, sync, notifications, search, import/export, app lock, and profile image services
+- `theme/`: material theme setup
+- `utils/`: reusable helpers
+- `validation/`: domain validation helpers
+- `widgets/`: reusable building blocks used across screens
 
 ### `lib/data/`
 
-Implementation layer for persistence and integration.
+Persistence and integration layer.
 
-- `datasources/local/`: SQLite reads and writes for each feature
-- `datasources/remote/`: Firestore reads and writes for each feature
-- `models/`: DTO and storage models that map to and from domain entities
-- `repositories/`: repository implementations that coordinate local and remote data handling
+- `datasources/local/`: SQLite reads and writes
+- `datasources/remote/`: Firestore reads and writes
+- `models/`: map between local, remote, and domain shapes
+- `repositories/`: combine local-first writes with sync orchestration
 
 ### `lib/domain/`
 
-Business layer that stays independent from Flutter UI details.
+Business contracts and use cases.
 
-- `entities/`: core business objects like `Client`, `Policy`, `FollowUp`, and `Reminder`
-- `repositories/`: abstract contracts used by the domain layer
-- `usecases/`: one-file-per-action business operations grouped by feature
+- `entities/`: app data structures
+- `repositories/`: abstractions used by use cases
+- `usecases/`: one action per file
 
 ### `lib/presentation/`
 
-User-facing layer for screens, navigation, state, and dependency injection.
+Routes, state, and UI.
 
-- `bindings/`: GetX dependency registration per feature
-- `controllers/`: screen and workflow state management
-- `modules/`: actual UI screens grouped by feature area
-- `routes/`: route names, route table, and navigation middleware
+- `bindings/`: dependency registration
+- `controllers/`: GetX state and workflow logic
+- `modules/`: feature screens
+- `routes/`: route names, page registration, and middleware
 
-## Feature Tracing Examples
+## Feature Entry Points
 
-### If you want to change a client screen
-
-Start here:
-
-- `lib/presentation/modules/clients/`
-
-Then trace related logic:
-
-- `lib/presentation/controllers/client_*`
-- `lib/presentation/bindings/client_bindings.dart`
-- `lib/domain/usecases/clients/`
-- `lib/data/repositories/client_repository_impl.dart`
-- `lib/data/datasources/local/client_local_data_source.dart`
-- `lib/data/datasources/remote/client_remote_data_source.dart`
-
-### If you want to change policy rules
-
-Start here:
-
-- `lib/domain/usecases/policies/`
-- `lib/core/validation/policy_validator.dart`
-- `lib/core/services/reminder_generator_service.dart`
-
-Then check connected UI and persistence files:
-
-- `lib/presentation/modules/policies/`
-- `lib/presentation/controllers/policy_*`
-- `lib/data/datasources/local/policy_local_data_source.dart`
-- `lib/data/datasources/remote/policy_remote_data_source.dart`
-
-### If you want to change auth flow
-
-Start here:
+### Authentication and profile setup
 
 - `lib/presentation/modules/common/auth/`
 - `lib/core/services/auth_service.dart`
-- `lib/domain/usecases/auth/`
-- `lib/data/repositories/auth_repository_impl.dart`
 
-## Common Work Areas
+### Dashboards
 
-### New screen or UI adjustment
+- `lib/presentation/modules/admin/dashboard/`
+- `lib/presentation/modules/agent/dashboard/`
+- `lib/presentation/controllers/admin_dashboard_controller.dart`
+- `lib/presentation/controllers/agent_dashboard_controller.dart`
 
-Usually update:
+### Clients
 
-- `lib/presentation/modules/...`
-- `lib/presentation/controllers/...`
-- optionally `lib/presentation/bindings/...`
+- `lib/presentation/modules/clients/`
+- `lib/presentation/controllers/client_*`
+- `lib/data/repositories/client_repository_impl.dart`
 
-### New business rule
+### Policies
 
-Usually update:
+- `lib/presentation/modules/policies/`
+- `lib/presentation/controllers/policy_*`
+- `lib/data/repositories/policy_repository_impl.dart`
+- `lib/core/services/reminder_generator_service.dart`
 
-- `lib/domain/usecases/...`
-- `lib/domain/entities/...`
-- `lib/core/validation/...`
+### Reminders and follow-ups
 
-### New storage field or sync behavior
+- `lib/presentation/modules/reminders/`
+- `lib/presentation/modules/follow_ups/`
+- `lib/data/repositories/reminder_repository_impl.dart`
+- `lib/data/repositories/follow_up_repository_impl.dart`
 
-Usually update:
+### Settings, search, and utilities
+
+- `lib/presentation/modules/common/settings/`
+- `lib/presentation/modules/common/search/`
+- `lib/core/services/global_search_service.dart`
+- `lib/core/services/import_export_service.dart`
+- `lib/core/services/profile_image_service.dart`
+- `lib/core/services/insurance_document_parser.dart`
+
+## Sync-Related Files Worth Knowing Early
+
+- `lib/core/services/sync_service.dart`
+- `lib/core/services/auto_sync_service.dart`
+- `lib/core/services/background_sync_service.dart`
+- `lib/core/services/app_lifecycle_service.dart`
+- `lib/data/datasources/local/sync_queue_local_data_source.dart`
+- `lib/core/database/database_helper.dart`
+
+## When A New Synced Field Is Added
+
+You will usually touch:
 
 - `lib/core/database/database_tables.dart`
 - `lib/core/database/database_helper.dart`
-- `lib/data/models/...`
-- `lib/data/datasources/local/...`
-- `lib/data/datasources/remote/...`
-- `lib/data/repositories/...`
+- the relevant domain entity
+- the relevant data model
+- local data source mapping
+- remote data source mapping
+- repository orchestration
+- `firestore.rules` if authorization or ownership changes
 
-### New route
+## Platform Files To Review For Native Features
 
-Usually update:
+- `android/app/src/main/AndroidManifest.xml`
+- `ios/Runner/Info.plist`
+- `web/manifest.json`
 
-- `lib/presentation/routes/app_routes.dart`
-- `lib/presentation/routes/app_pages.dart`
-- optionally `lib/presentation/routes/route_middleware.dart`
+Examples in the current app:
 
-## Files Worth Knowing Early
+- background sync support
+- local notifications
+- image picking permissions
 
-- `lib/main.dart`: startup lifecycle
-- `lib/app.dart`: app shell
-- `lib/core/services/sync_service.dart`: sync pipeline
-- `lib/core/services/reminder_generator_service.dart`: reminder generation rules
-- `lib/core/services/auth_service.dart`: auth/session workflow
-- `lib/core/database/database_helper.dart`: local database bootstrap
-- `lib/presentation/routes/app_pages.dart`: route registration
-- `lib/presentation/routes/route_middleware.dart`: route protection
+## Do Not Change Casually
 
-## What Not To Change Casually
-
-- Generated files like `lib/firebase_options.dart`
-- Platform runner files unless the change is platform-specific
-- Firebase config files unless the target Firebase project changes
-
-## Suggested First Steps For A New Developer
-
-1. Read `README.md`.
-2. Open the feature folder you need under `lib/presentation/modules/`.
-3. Read the corresponding controller file in `lib/presentation/controllers/`.
-4. Follow the use case and repository chain into `domain/` and `data/`.
-5. Run `flutter analyze` and `flutter test` after your changes.
+- generated Flutter/Firebase files
+- platform runner files unrelated to your feature
+- Firestore rules without checking repository and sync assumptions at the same time

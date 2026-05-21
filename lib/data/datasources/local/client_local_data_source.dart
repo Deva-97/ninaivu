@@ -1,8 +1,13 @@
 import 'package:ninaivu/core/database/database_helper.dart';
 import 'package:ninaivu/core/database/database_tables.dart';
 import 'package:ninaivu/data/models/client_model.dart';
+import 'package:ninaivu/domain/entities/upcoming_client_event.dart';
 import 'package:sqflite/sqflite.dart';
 
+/// Encapsulates all SQLite access for client records.
+///
+/// Complex queries live here so repositories can focus on permissions,
+/// orchestration, and sync behavior instead of SQL details.
 class ClientLocalDataSource {
   ClientLocalDataSource({DatabaseHelper? databaseHelper})
     : _databaseHelper = databaseHelper ?? DatabaseHelper.instance;
@@ -47,6 +52,8 @@ class ClientLocalDataSource {
     required bool includeDeleted,
   }) async {
     final db = await _databaseHelper.database;
+    // Policy count is fetched with the client because most detail/list screens
+    // need it immediately and it avoids a second query per record.
     final result = await db.rawQuery(
       '''
       SELECT c.*,
@@ -168,6 +175,107 @@ class ClientLocalDataSource {
     return (Sqflite.firstIntValue(result) ?? 0) > 0;
   }
 
+  Future<ClientModel?> findClientByMobile({
+    required String businessId,
+    required String mobile,
+    required bool isAdmin,
+    required String userId,
+    String? excludingClientId,
+  }) async {
+    final db = await _databaseHelper.database;
+    final whereClauses = <String>[
+      '${DatabaseColumns.businessId} = ?',
+      'mobile = ?',
+      '${DatabaseColumns.isDeleted} = 0',
+    ];
+    final args = <Object?>[businessId, mobile];
+    if (!isAdmin) {
+      whereClauses.add(
+        '(${DatabaseColumns.createdBy} = ? OR ${DatabaseColumns.agentId} = ? OR ${DatabaseColumns.assignedTo} = ?)',
+      );
+      args.addAll([userId, userId, userId]);
+    }
+    if (excludingClientId != null && excludingClientId.isNotEmpty) {
+      whereClauses.add('${DatabaseColumns.id} != ?');
+      args.add(excludingClientId);
+    }
+
+    final result = await db.rawQuery(
+      '''
+      SELECT c.*,
+        (
+          SELECT COUNT(*)
+          FROM ${DatabaseTables.policies} p
+          WHERE p.client_id = c.id AND p.is_deleted = 0
+        ) AS policy_count
+      FROM ${DatabaseTables.clients} c
+      WHERE ${whereClauses.join(' AND ')}
+      LIMIT 1
+      ''',
+      args,
+    );
+
+    if (result.isEmpty) {
+      return null;
+    }
+    return ClientModel.fromMap(result.first);
+  }
+
+  Future<List<UpcomingClientEvent>> getUpcomingSpecialDates({
+    required String businessId,
+    required bool isAdmin,
+    required String userId,
+    int withinDays = 30,
+  }) async {
+    // Special dates are derived in Dart because the source values are stored as
+    // full timestamps, but the recurrence rule is based only on month/day.
+    final clients = isAdmin
+        ? await getClientsForAdmin(businessId: businessId, limit: 500, offset: 0)
+        : await getClientsForAgent(
+            businessId: businessId,
+            userId: userId,
+            limit: 500,
+            offset: 0,
+          );
+    final now = DateTime.now();
+    final events = <UpcomingClientEvent>[];
+
+    for (final client in clients) {
+      final birthday = _nextOccurrence(client.dateOfBirthMs, now);
+      if (birthday != null && birthday.difference(now).inDays <= withinDays) {
+        events.add(
+          UpcomingClientEvent(
+            clientId: client.id,
+            clientName: client.name,
+            mobile: client.mobile,
+            eventType: 'birthday',
+            label: 'Birthday',
+            eventDateMs: birthday.millisecondsSinceEpoch,
+            profileImagePath: client.profileImagePath,
+          ),
+        );
+      }
+
+      final specialDate = _nextOccurrence(client.specialDateMs, now);
+      if (specialDate != null && specialDate.difference(now).inDays <= withinDays) {
+        events.add(
+          UpcomingClientEvent(
+            clientId: client.id,
+            clientName: client.name,
+            mobile: client.mobile,
+            eventType: 'special_date',
+            label: client.specialDateLabel ?? 'Special Date',
+            eventDateMs: specialDate.millisecondsSinceEpoch,
+            profileImagePath: client.profileImagePath,
+          ),
+        );
+      }
+    }
+
+    events.sort((a, b) => a.eventDateMs.compareTo(b.eventDateMs));
+    return events.take(10).toList();
+  }
+
   Future<int> countClientsForAdmin(String businessId) async {
     final db = await _databaseHelper.database;
     final result = await db.rawQuery(
@@ -246,5 +354,19 @@ class ClientLocalDataSource {
     );
 
     return result.map(ClientModel.fromMap).toList();
+  }
+
+  DateTime? _nextOccurrence(int? value, DateTime now) {
+    if (value == null) {
+      return null;
+    }
+    // Birthdays and anniversaries repeat yearly, so the stored source year is
+    // ignored when calculating the next upcoming occurrence.
+    final source = DateTime.fromMillisecondsSinceEpoch(value);
+    var occurrence = DateTime(now.year, source.month, source.day);
+    if (occurrence.isBefore(DateTime(now.year, now.month, now.day))) {
+      occurrence = DateTime(now.year + 1, source.month, source.day);
+    }
+    return occurrence;
   }
 }

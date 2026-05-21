@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:ninaivu/core/services/communication_service.dart';
 import 'package:ninaivu/domain/entities/reminder.dart';
 import 'package:ninaivu/domain/usecases/reminders/get_reminder_by_id_usecase.dart';
 import 'package:ninaivu/domain/usecases/reminders/mark_reminder_completed_usecase.dart';
@@ -9,13 +10,16 @@ class ReminderDetailController extends GetxController {
     required GetReminderByIdUseCase getReminderByIdUseCase,
     required MarkReminderCompletedUseCase markReminderCompletedUseCase,
     required MarkReminderRenewedUseCase markReminderRenewedUseCase,
+    required CommunicationService communicationService,
   }) : _getReminderByIdUseCase = getReminderByIdUseCase,
        _markReminderCompletedUseCase = markReminderCompletedUseCase,
-       _markReminderRenewedUseCase = markReminderRenewedUseCase;
+       _markReminderRenewedUseCase = markReminderRenewedUseCase,
+       _communicationService = communicationService;
 
   final GetReminderByIdUseCase _getReminderByIdUseCase;
   final MarkReminderCompletedUseCase _markReminderCompletedUseCase;
   final MarkReminderRenewedUseCase _markReminderRenewedUseCase;
+  final CommunicationService _communicationService;
 
   final reminder = Rxn<Reminder>();
   final isLoading = false.obs;
@@ -73,5 +77,13 @@ class ReminderDetailController extends GetxController {
     } finally {
       isUpdating.value = false;
     }
+  }
+
+  Future<void> callClient() async {
+    await _communicationService.openDialer(reminder.value?.clientMobile);
+  }
+
+  Future<void> whatsappClient() async {
+    await _communicationService.openWhatsAppChat(reminder.value?.clientMobile);
   }
 }

@@ -5,6 +5,10 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:ninaivu/core/services/sync_service.dart';
 
+/// Watches connectivity changes and triggers best-effort queue syncs.
+///
+/// This service is intentionally lightweight because the actual sync rules,
+/// retries, and queue processing all live inside `SyncService`.
 class AutoSyncService {
   AutoSyncService({
     SyncService? syncService,
@@ -27,6 +31,8 @@ class AutoSyncService {
       return;
     }
 
+    // A startup sync helps flush pending offline work even before the first
+    // connectivity change event arrives from the platform stream.
     _started = true;
     _scheduleSync();
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
@@ -70,6 +76,8 @@ class AutoSyncService {
 
   void _scheduleSync() {
     _debounceTimer?.cancel();
+    // Connectivity can bounce rapidly during network transitions, so debounce
+    // prevents duplicate sync attempts while the device is stabilizing.
     _debounceTimer = Timer(_debounceDuration, () {
       unawaited(_runSync());
     });

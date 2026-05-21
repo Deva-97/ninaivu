@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:ninaivu/core/utils/whatsapp_template_builder.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/client_detail_controller.dart';
-import 'package:ninaivu/presentation/modules/common/widgets/whatsapp_template_selector.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
 
 class ClientDetailScreen extends GetView<ClientDetailController> {
@@ -70,10 +68,21 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Center(
+                        child: ProfileAvatar(
+                          name: client.name,
+                          imagePath: client.profileImagePath,
+                          radius: 40,
+                          onTap: () => controller.updateProfileImage().catchError(_showError),
+                        ),
+                      ),
+                      SizedBox(height: responsive.itemGap),
                       Text(
                         client.name,
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
+                      SizedBox(height: responsive.scaled(8, min: 6)),
+                      StatusBadge(label: client.syncStatus),
                       SizedBox(height: responsive.itemGap),
                       _DetailRow(label: 'Mobile', value: client.mobile),
                       _DetailRow(
@@ -97,6 +106,22 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
                         value: client.notes ?? 'No notes',
                       ),
                       _DetailRow(
+                        label: 'Birthday',
+                        value: client.dateOfBirthMs == null
+                            ? 'Not set'
+                            : DateFormat('dd MMM yyyy').format(
+                                DateTime.fromMillisecondsSinceEpoch(
+                                  client.dateOfBirthMs!,
+                                ),
+                              ),
+                      ),
+                      _DetailRow(
+                        label: 'Special Date',
+                        value: client.specialDateMs == null
+                            ? 'Not set'
+                            : '${client.specialDateLabel ?? 'Special Date'} • ${DateFormat('dd MMM yyyy').format(DateTime.fromMillisecondsSinceEpoch(client.specialDateMs!))}',
+                      ),
+                      _DetailRow(
                         label: 'Policy Count',
                         value: client.policyCount.toString(),
                       ),
@@ -116,14 +141,8 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
                     label: const Text('Call'),
                   ),
                   OutlinedButton.icon(
-                    onPressed: () => showWhatsAppTemplateSelector(
-                      context: context,
-                      mobile: client.mobile,
-                      data: WhatsAppTemplateData(
-                        clientName: client.name,
-                        mobile: client.mobile,
-                      ),
-                    ),
+                    onPressed: () =>
+                        controller.whatsappClient().catchError(_showError),
                     icon: const Icon(Icons.chat_outlined),
                     label: const Text('WhatsApp'),
                   ),

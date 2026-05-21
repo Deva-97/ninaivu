@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   
   firebase_auth: ^6.4.0
   firebase_core: ^4.7.0
@@ -33,6 +35,9 @@ dependencies:
   local_auth: ^2.3.0
   path_provider: ^2.1.5
   share_plus: ^12.0.1
+  image_picker: ^1.2.0
+  file_picker: ^10.3.2
+  package_info_plus: ^9.0.0
 
 
 dev_dependencies:
@@ -45,4 +50,3 @@ flutter:
   uses-material-design: true
   assets:
     - assets/app_identity/ninaivu_appicon.png
-

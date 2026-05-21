@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:ninaivu/core/services/communication_service.dart';
 import 'package:ninaivu/core/services/export_service.dart';
 import 'package:ninaivu/data/repositories/policy_repository_impl.dart';
 import 'package:ninaivu/data/repositories/client_repository_impl.dart';
@@ -59,6 +60,7 @@ class PolicyDetailBinding extends Bindings {
         getClientDetailsUseCase: GetClientDetailsUseCase(clientRepository),
         policyRepository: repository,
         deletePolicyUseCase: DeletePolicyUseCase(repository),
+        communicationService: CommunicationService(),
       ),
     );
   }

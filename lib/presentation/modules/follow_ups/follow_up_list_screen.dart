@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/follow_up_list_controller.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
@@ -9,10 +10,10 @@ class FollowUpListScreen extends GetView<FollowUpListController> {
   const FollowUpListScreen({super.key});
 
   static const filters = <MapEntry<String, String>>[
-    MapEntry('today', 'Today'),
-    MapEntry('upcoming', 'Upcoming'),
-    MapEntry('missed', 'Missed'),
-    MapEntry('completed', 'Completed'),
+    MapEntry('today', TranslationKeys.today),
+    MapEntry('upcoming', TranslationKeys.upcoming),
+    MapEntry('missed', TranslationKeys.missed),
+    MapEntry('completed', TranslationKeys.completed),
   ];
 
   @override
@@ -21,7 +22,7 @@ class FollowUpListScreen extends GetView<FollowUpListController> {
     final responsive = context.responsive;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Follow-ups')),
+      appBar: AppBar(title: Text(TranslationKeys.followUps.tr)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final refreshed = await Get.toNamed(AppRoutes.followUpForm);
@@ -30,7 +31,7 @@ class FollowUpListScreen extends GetView<FollowUpListController> {
           }
         },
         icon: const Icon(Icons.add),
-        label: const Text('Add Follow-up'),
+        label: Text(TranslationKeys.addFollowUp.tr),
       ),
       body: Column(
         children: [
@@ -51,7 +52,7 @@ class FollowUpListScreen extends GetView<FollowUpListController> {
                   itemBuilder: (context, index) {
                     final filter = filters[index];
                     return ChoiceChip(
-                      label: Text(filter.value),
+                      label: Text(filter.value.tr),
                       selected: selectedFilter == filter.key,
                       onSelected: (_) => controller.loadFollowUps(filter: filter.key),
                     );
@@ -63,23 +64,23 @@ class FollowUpListScreen extends GetView<FollowUpListController> {
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
-                return const AppLoadingView(message: 'Loading follow-ups...');
+                return AppLoadingView(message: TranslationKeys.loadingFollowUps.tr);
               }
 
               final error = controller.errorMessage.value;
               if (error != null) {
                 return AppErrorView(
-                  title: 'Unable to load follow-ups',
+                  title: TranslationKeys.unableToLoadFollowUps.tr,
                   message: error,
                   onRetry: controller.loadFollowUps,
                 );
               }
 
               if (controller.followUps.isEmpty) {
-                return const AppEmptyState(
+                return AppEmptyState(
                   icon: Icons.assignment_late_outlined,
-                  title: 'No follow-ups found',
-                  subtitle: 'Create a follow-up to track the next customer action.',
+                  title: TranslationKeys.noFollowUpsFound.tr,
+                  subtitle: TranslationKeys.noFollowUpsSubtitle.tr,
                 );
               }
 
@@ -113,8 +114,8 @@ class FollowUpListScreen extends GetView<FollowUpListController> {
                             followUp.clientName ?? 'Client ${followUp.clientId}',
                           ),
                           subtitle: Text(
-                            '${followUp.type} • ${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(followUp.followUpDateTime))}\n'
-                            '${followUp.policyNumber ?? 'No policy linked'}',
+                            '${followUp.type} - ${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(followUp.followUpDateTime))}\n'
+                            '${followUp.policyNumber ?? TranslationKeys.noPolicyLinked.tr}',
                           ),
                           isThreeLine: true,
                           trailing: PopupMenuButton<String>(
@@ -130,16 +131,16 @@ class FollowUpListScreen extends GetView<FollowUpListController> {
                               } else if (value == 'delete') {
                                 final confirmed = await Get.dialog<bool>(
                                   AlertDialog(
-                                    title: const Text('Delete follow-up'),
-                                    content: const Text('Soft-delete this follow-up?'),
+                                    title: Text(TranslationKeys.deleteFollowUp.tr),
+                                    content: Text(TranslationKeys.softDeleteFollowUp.tr),
                                     actions: [
                                       TextButton(
                                         onPressed: () => Get.back(result: false),
-                                        child: const Text('Cancel'),
+                                        child: Text(TranslationKeys.cancel.tr),
                                       ),
                                       ElevatedButton(
                                         onPressed: () => Get.back(result: true),
-                                        child: const Text('Delete'),
+                                        child: Text(TranslationKeys.delete.tr),
                                       ),
                                     ],
                                   ),
@@ -149,9 +150,15 @@ class FollowUpListScreen extends GetView<FollowUpListController> {
                                 }
                               }
                             },
-                            itemBuilder: (_) => const [
-                              PopupMenuItem(value: 'edit', child: Text('Edit')),
-                              PopupMenuItem(value: 'delete', child: Text('Delete')),
+                            itemBuilder: (_) => [
+                              PopupMenuItem(
+                                value: 'edit',
+                                child: Text(TranslationKeys.edit.tr),
+                              ),
+                              PopupMenuItem(
+                                value: 'delete',
+                                child: Text(TranslationKeys.delete.tr),
+                              ),
                             ],
                             child: Padding(
                               padding: EdgeInsets.symmetric(

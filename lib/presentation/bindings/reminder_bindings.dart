@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:ninaivu/core/services/communication_service.dart';
 import 'package:ninaivu/data/repositories/reminder_repository_impl.dart';
 import 'package:ninaivu/domain/usecases/reminders/get_reminder_by_id_usecase.dart';
 import 'package:ninaivu/domain/usecases/reminders/get_reminders_usecase.dart';
@@ -28,6 +29,7 @@ class ReminderDetailBinding extends Bindings {
         getReminderByIdUseCase: GetReminderByIdUseCase(repository),
         markReminderCompletedUseCase: MarkReminderCompletedUseCase(repository),
         markReminderRenewedUseCase: MarkReminderRenewedUseCase(repository),
+        communicationService: CommunicationService(),
       ),
     );
   }

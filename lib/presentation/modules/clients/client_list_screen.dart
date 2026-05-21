@@ -83,16 +83,26 @@ class ClientListScreen extends GetView<ClientListController> {
                 onRefresh: controller.loadClients,
                 child: ResponsiveContent(
                   child: ListView.separated(
+                    controller: controller.scrollController,
                     padding: EdgeInsets.fromLTRB(
                       responsive.pagePadding,
                       0,
                       responsive.pagePadding,
                       responsive.scaled(96, min: 84),
                     ),
-                    itemCount: controller.clients.length,
+                    itemCount:
+                        controller.clients.length +
+                        (controller.isLoadingMore.value ? 1 : 0),
                     separatorBuilder: (_, _) =>
                         SizedBox(height: responsive.scaled(12, min: 10)),
                     itemBuilder: (context, index) {
+                      if (index >= controller.clients.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+
                       final client = controller.clients[index];
                       return Card(
                         child: ListTile(
@@ -105,6 +115,11 @@ class ClientListScreen extends GetView<ClientListController> {
                               await controller.loadClients();
                             }
                           },
+                          leading: ProfileAvatar(
+                            name: client.name,
+                            imagePath: client.profileImagePath,
+                            radius: 22,
+                          ),
                           title: Text(client.name),
                           subtitle: Text(
                             '${client.mobile} • ${client.areaCity ?? 'Area not set'}\nPolicies: ${client.policyCount}',

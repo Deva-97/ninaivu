@@ -16,6 +16,8 @@ import 'package:ninaivu/data/models/sync_queue_model.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
 import 'package:uuid/uuid.dart';
 
+/// Minimal result object used by the OTP screen when Firebase issues a new
+/// verification id and resend token pair.
 class OtpSendResult {
   final String verificationId;
   final int? resendToken;
@@ -26,7 +28,15 @@ class OtpSendResult {
   });
 }
 
+/// Coordinates sign-in, profile completion, and local session bootstrap.
+///
+/// The service prefers local user data when available, falls back to Firestore
+/// when needed, and then routes the user to the correct entry screen.
 class AuthService {
+  static const String _googleServerClientId =
+      '302492772767-kjt4v9mmk9dh3n447alcadrumhi2qlq2.apps.googleusercontent.com';
+  static Future<void>? _googleSignInInitialization;
+
   final FirebaseAuth firebaseAuth;
   final UserLocalDataSource userLocalDataSource;
   final UserRemoteDataSource userRemoteDataSource;
@@ -68,6 +78,7 @@ class AuthService {
 
   Future<void> signInWithGoogle() async {
     try {
+      await _ensureGoogleSignInInitialized();
       final googleUser = await GoogleSignIn.instance.authenticate();
       final googleAuth = googleUser.authentication;
       final idToken = googleAuth.idToken;
@@ -87,6 +98,7 @@ class AuthService {
       final message = _errorMessage(e);
       if (_looksLikeGoogleReauthIssue(message)) {
         try {
+          await _ensureGoogleSignInInitialized();
           await GoogleSignIn.instance.signOut();
           final googleUser = await GoogleSignIn.instance.authenticate();
           final googleAuth = googleUser.authentication;
@@ -257,6 +269,8 @@ class AuthService {
     final preferences = await AppPreferences.getInstance();
     final localUser = await userLocalDataSource.getUserById(firebaseUser.uid);
 
+    // A completed local profile is enough to restore the app immediately, which
+    // keeps startup fast and allows offline access after the first login.
     if (localUser != null && localUser.profileCompleted) {
       await preferences.saveSession(
         userId: localUser.id,
@@ -269,7 +283,11 @@ class AuthService {
     }
 
     try {
-      final remoteUser = await userRemoteDataSource.getUserById(firebaseUser.uid);
+      // Firestore is used as the authority only when local profile state is
+      // missing or incomplete on this device.
+      final remoteUser = await userRemoteDataSource.getUserById(
+        firebaseUser.uid,
+      );
       if (remoteUser != null && remoteUser.profileCompleted) {
         await userLocalDataSource.insertOrUpdateUser(remoteUser);
         await userLocalDataSource.markUserSynced(remoteUser.id);
@@ -342,6 +360,8 @@ class AuthService {
 
     final role = _getRoleFromInviteCode(inviteCode);
     final now = DateTime.now().millisecondsSinceEpoch;
+    // The first completed profile is written locally and queued like any other
+    // business record so onboarding still works with flaky connectivity.
     final user = AppUserModel(
       id: firebaseUser.uid,
       businessId: UserRemoteDataSource.defaultBusinessId,
@@ -374,13 +394,7 @@ class AuthService {
         syncStatus: 'pending_create',
       ),
     );
-    final syncedCount = await _syncService.syncPendingData();
-    if (syncedCount == 0) {
-      throw Exception(
-        'Your profile was saved only on this device. Firebase backup did not complete yet. '
-        'Please check your connection and try again.',
-      );
-    }
+    await _syncService.syncPendingDataBestEffort();
 
     final preferences = await AppPreferences.getInstance();
     await preferences.saveSession(
@@ -462,6 +476,8 @@ class AuthService {
   }
 
   String _formatIndianPhoneNumber(String mobileNumber) {
+    // Phone auth in this app is India-first, but we still preserve explicitly
+    // entered international numbers when the user includes the country prefix.
     final digitsOnly = mobileNumber.replaceAll(RegExp(r'\D'), '');
 
     if (digitsOnly.length == 10) {
@@ -494,5 +510,15 @@ class AuthService {
         normalized.contains('failed to recover auth') ||
         normalized.contains('canceled') ||
         normalized.contains('cancelled');
+  }
+
+  Future<void> _ensureGoogleSignInInitialized() {
+    final initialization = _googleSignInInitialization ??= GoogleSignIn.instance
+        .initialize(
+          serverClientId: defaultTargetPlatform == TargetPlatform.android
+              ? null
+              : _googleServerClientId,
+        );
+    return initialization;
   }
 }

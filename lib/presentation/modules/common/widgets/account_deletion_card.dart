@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/widgets/responsive_layout.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -14,23 +16,10 @@ class AccountDeletionCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final responsive = context.responsive;
-    final borderRadius = BorderRadius.circular(responsive.scaled(24, min: 20));
+    final subtitleStyle =
+        theme.listTileTheme.subtitleTextStyle ?? theme.textTheme.bodyMedium;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: borderRadius,
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.8),
-        ),
-        gradient: LinearGradient(
-          colors: [
-            colorScheme.surfaceContainerHighest.withValues(alpha: 0.85),
-            colorScheme.errorContainer.withValues(alpha: 0.26),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
+    return Card(
       child: Padding(
         padding: EdgeInsets.all(responsive.scaled(20, min: 16)),
         child: Column(
@@ -57,7 +46,7 @@ class AccountDeletionCard extends StatelessWidget {
                   ),
                   SizedBox(width: responsive.scaled(8, min: 6)),
                   Text(
-                    'Account & privacy',
+                    TranslationKeys.accountAndPrivacy.tr,
                     style: theme.textTheme.labelLarge?.copyWith(
                       color: colorScheme.error,
                       fontWeight: FontWeight.w700,
@@ -68,22 +57,19 @@ class AccountDeletionCard extends StatelessWidget {
             ),
             SizedBox(height: responsive.scaled(16, min: 12)),
             Text(
-              'Delete your Ninaivu account',
+              TranslationKeys.deleteNinaivuAccount.tr,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w800,
               ),
             ),
             SizedBox(height: responsive.scaled(8, min: 6)),
             Text(
-              'Use the official Ninaivu deletion page to request permanent account removal.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                height: 1.4,
-              ),
+              TranslationKeys.deleteAccountSubtitle.tr,
+              style: subtitleStyle?.copyWith(height: 1.4),
             ),
             SizedBox(height: responsive.scaled(14, min: 10)),
             Text(
-              'This may remove your access and associated app data.',
+              TranslationKeys.deleteAccountWarning.tr,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.error,
                 fontWeight: FontWeight.w600,
@@ -103,14 +89,14 @@ class AccountDeletionCard extends StatelessWidget {
                 ),
                 onPressed: () => _confirmAndOpen(context),
                 icon: const Icon(Icons.open_in_new_rounded),
-                label: const Text('Continue to delete account'),
+                label: Text(TranslationKeys.continueToDeleteAccount.tr),
               ),
             ),
             SizedBox(height: responsive.scaled(10, min: 8)),
             Text(
-              'Opens your secure web page outside the app.',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+              TranslationKeys.opensSecureWebPage.tr,
+              style: subtitleStyle?.copyWith(
+                fontSize: theme.textTheme.bodySmall?.fontSize,
               ),
             ),
           ],
@@ -124,19 +110,18 @@ class AccountDeletionCard extends StatelessWidget {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Delete account'),
-          content: const Text(
-            'You are leaving the app to continue the Ninaivu account deletion request. '
-            'Only continue if you want to permanently remove your account.',
+          title: Text(TranslationKeys.deleteAccount.tr),
+          content: Text(
+            TranslationKeys.deleteAccountDialogMessage.tr,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
+              child: Text(TranslationKeys.cancel.tr),
             ),
             FilledButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Continue'),
+              child: Text(TranslationKeys.continueLabel.tr),
             ),
           ],
         );
@@ -153,9 +138,9 @@ class AccountDeletionCard extends StatelessWidget {
     )) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Unable to open the account deletion page right now. Please try again.',
+            TranslationKeys.unableToOpenDeleteAccountPage.tr,
           ),
         ),
       );

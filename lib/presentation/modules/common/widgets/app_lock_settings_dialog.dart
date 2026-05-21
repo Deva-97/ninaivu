@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/services/app_lock_service.dart';
 
 class AppLockSettingsDialog extends StatefulWidget {
@@ -32,26 +33,26 @@ class _AppLockSettingsDialogState extends State<AppLockSettingsDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('App Lock'),
+      title: Text(TranslationKeys.appLock.tr),
       content: Obx(() {
         if (_appLockService.isEnabled.value) {
-          return const Text(
-            'App lock is currently enabled on this device. You can keep using your PIN and biometric unlock, or disable it below.',
+          return Text(
+            TranslationKeys.appLockEnabledDescription.tr,
           );
         }
 
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Set a 4-digit PIN for local privacy protection.'),
+            Text(TranslationKeys.setPinDescription.tr),
             const SizedBox(height: 16),
             TextField(
               controller: _pinController,
               maxLength: 4,
               obscureText: true,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'New PIN',
+              decoration: InputDecoration(
+                labelText: TranslationKeys.newPin.tr,
                 counterText: '',
               ),
             ),
@@ -62,7 +63,7 @@ class _AppLockSettingsDialogState extends State<AppLockSettingsDialog> {
               obscureText: true,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: 'Confirm PIN',
+                labelText: TranslationKeys.confirmPin.tr,
                 counterText: '',
                 errorText: _errorText,
               ),
@@ -70,7 +71,7 @@ class _AppLockSettingsDialogState extends State<AppLockSettingsDialog> {
             if (_appLockService.isBiometricAvailable.value)
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Use biometric unlock'),
+                title: Text(TranslationKeys.useBiometricUnlock.tr),
                 value: _enableBiometric,
                 onChanged: (value) => setState(() => _enableBiometric = value),
               ),
@@ -80,7 +81,7 @@ class _AppLockSettingsDialogState extends State<AppLockSettingsDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
+          child: Text(TranslationKeys.close.tr),
         ),
         Obx(() {
           if (_appLockService.isEnabled.value) {
@@ -91,13 +92,13 @@ class _AppLockSettingsDialogState extends State<AppLockSettingsDialog> {
                   Navigator.of(context).pop();
                 }
               },
-              child: const Text('Disable'),
+              child: Text(TranslationKeys.disable.tr),
             );
           }
 
           return FilledButton(
             onPressed: _save,
-            child: const Text('Enable'),
+            child: Text(TranslationKeys.enable.tr),
           );
         }),
       ],
@@ -108,11 +109,13 @@ class _AppLockSettingsDialogState extends State<AppLockSettingsDialog> {
     final pin = _pinController.text.trim();
     final confirmPin = _confirmPinController.text.trim();
     if (pin.length != 4 || !RegExp(r'^\d{4}$').hasMatch(pin)) {
-      setState(() => _errorText = 'PIN must be exactly 4 digits');
+      setState(() => _errorText = TranslationKeys.pinMustBeExactly4Digits.tr);
       return;
     }
     if (pin != confirmPin) {
-      setState(() => _errorText = 'PIN confirmation does not match');
+      setState(
+        () => _errorText = TranslationKeys.pinConfirmationDoesNotMatch.tr,
+      );
       return;
     }
 

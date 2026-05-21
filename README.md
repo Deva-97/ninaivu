@@ -1,18 +1,77 @@
 # Ninaivu
 
-Ninaivu is an offline-first Flutter app for insurance renewal operations. It helps admins and agents manage clients, policies, reminders, follow-ups, and Firebase-backed cloud backup while keeping SQLite as the primary working store.
+Ninaivu is an offline-first Flutter app for insurance renewal operations. SQLite is the primary working store on-device, and Firebase is used for authentication, cloud backup, and cross-device sync when connectivity is available.
 
-## Why This Project Is Easy To Work On
+## What The App Does
 
-This repository is organized with a clear layered structure:
+- Phone OTP and Google sign-in
+- Admin and agent dashboards
+- Agent and customer management
+- Client management with profile images, birthdays, and special dates
+- Policy management with renewal status tracking
+- Reminder and follow-up workflows
+- Global search across clients, policies, and agents
+- Settings for language, theme, app lock, profile image, sync status, and exports
+- CSV import/export for clients and policies
+- Local notifications for reminders
+- Background and queued sync retries on Android and iOS
 
-- `lib/core`: shared constants, services, theme, permissions, validation, database helpers, and reusable widgets
-- `lib/data`: local and remote data sources, models, and repository implementations
-- `lib/domain`: business entities, repository contracts, and use cases
-- `lib/presentation`: routes, bindings, controllers, and UI modules
-- `test`: widget and unit tests grouped by feature area
+## Offline-First Behavior
 
-The main onboarding source for new developers is the documentation in `README.md` and the `docs/` folder.
+- Every create, update, and delete is saved to SQLite first.
+- The same change is then queued in `sync_queue`.
+- `SyncService` pushes queued items to Firestore when the device is online.
+- `AutoSyncService` retries after connectivity changes.
+- `BackgroundSyncService` registers OS-managed work so queued changes can retry after the app is backgrounded or closed.
+- Profile setup now follows the same local-first pattern instead of failing just because Firebase backup is temporarily unavailable.
+
+## Lifecycle And App Flow Notes
+
+- On app resume, Ninaivu refreshes notifications, schedules queued background sync, and triggers an immediate sync attempt.
+- On pause or detach, the app lock service is notified so the app can protect the session when returning.
+- Route access is protected with GetX middleware:
+  - `admin`: admin dashboard, user management, all data views
+  - `agent`: agent dashboard, assigned data, settings, search
+
+## Project Structure
+
+- `lib/core`: shared constants, services, permissions, localization, theme, database helpers, and reusable widgets
+- `lib/data`: local/remote data sources, models, and repository implementations
+- `lib/domain`: entities, repository contracts, and use cases
+- `lib/presentation`: routes, bindings, controllers, and screens
+- `docs`: contributor-facing project guides
+- `test`: unit and widget tests
+
+See [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) and [docs/DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md) for the deeper map.
+
+## Key Files
+
+- `lib/main.dart`: bootstrap, Firebase, notifications, lifecycle, and global services
+- `lib/core/services/auth_service.dart`: login, profile completion, and session flow
+- `lib/core/services/sync_service.dart`: queued SQLite-to-Firestore sync
+- `lib/core/services/background_sync_service.dart`: WorkManager-backed background sync registration
+- `lib/core/services/app_lifecycle_service.dart`: resume/background lifecycle hooks
+- `lib/core/services/import_export_service.dart`: CSV import/export workflows
+- `lib/core/services/global_search_service.dart`: local search service
+- `lib/presentation/modules/common/settings/settings_screen.dart`: settings, exports, imports, and local data controls
+
+## Firestore Structure
+
+Business data is stored under:
+
+- `businesses/{businessId}/users/{userId}`
+- `businesses/{businessId}/clients/{clientId}`
+- `businesses/{businessId}/policies/{policyId}`
+- `businesses/{businessId}/reminders/{reminderId}`
+- `businesses/{businessId}/follow_ups/{followUpId}`
+
+The current rules in [firestore.rules](firestore.rules) now also validate business scoping on document writes so queued offline changes cannot be replayed into the wrong business path.
+
+## Permissions And Platform Notes
+
+- Android manifest includes internet, notifications, and boot-completed support for sync/notification recovery.
+- iOS now includes photo library usage messaging for profile image selection.
+- `web/manifest.json` has been updated to describe the app correctly instead of the Flutter default placeholder text.
 
 ## Quick Start
 
@@ -24,191 +83,7 @@ flutter test
 flutter run
 ```
 
-## Tech Stack
-
-- Flutter
-- Dart
-- GetX
-- SQLite via `sqflite`
-- Firebase Auth
-- Cloud Firestore
-- Firebase Crashlytics
-- SharedPreferences
-- `connectivity_plus`
-- Local notifications
-
-## Core Features
-
-- Phone OTP and Google sign-in
-- Admin and agent role separation
-- Client management
-- Policy management
-- Auto-generated renewal reminders
-- Follow-up tracking
-- Offline-first local persistence
-- Manual sync to Firestore
-- Background sync retries on Android and iOS
-- Last synced timestamp tracking
-- Crashlytics logging for sync failures
-
-## Architecture Summary
-
-Ninaivu follows a practical clean architecture:
-
-1. `presentation` handles screens, user interaction, state, navigation, and bindings.
-2. `domain` contains the business rules through entities, contracts, and use cases.
-3. `data` fulfills domain contracts using SQLite, Firebase, and model mapping.
-4. `core` contains shared infrastructure used across all layers.
-
-Typical flow:
-
-`Screen -> Controller -> UseCase -> Repository -> Local/Remote Data Source`
-
-## Project Structure
-
-High-level guide:
-
-- `lib/main.dart`: app bootstrap, Firebase initialization, notifications, preferences, and global dependency setup
-- `lib/app.dart`: root `GetMaterialApp` configuration
-- `lib/presentation/modules/common`: splash, login, OTP, profile setup, and shared module UI
-- `lib/presentation/modules/admin`: admin dashboard and user management
-- `lib/presentation/modules/agent`: agent dashboard
-- `lib/presentation/modules/clients`: client list, detail, and create/edit flows
-- `lib/presentation/modules/policies`: policy list, detail, and create/edit flows
-- `lib/presentation/modules/follow_ups`: follow-up list, detail, and create/edit flows
-- `lib/presentation/modules/reminders`: reminder list and detail flows
-- `lib/presentation/controllers`: GetX controllers for each feature workflow
-- `lib/presentation/bindings`: dependency injection setup per feature
-- `lib/presentation/routes`: route names, page registration, and auth middleware
-- `lib/data/datasources/local`: SQLite-facing persistence code
-- `lib/data/datasources/remote`: Firestore-facing persistence code
-- `lib/data/repositories`: repository implementations combining data sources
-- `lib/domain/usecases`: single-purpose business actions per feature
-- `lib/core/services/sync_service.dart`: offline sync orchestration
-- `lib/core/services/reminder_generator_service.dart`: renewal reminder generation rules
-- `lib/core/database`: database schema names and SQLite helper
-
-For a deeper map, see [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) and [docs/DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md).
-
-## Role Access
-
-- `admin`
-  - Access admin dashboard
-  - Manage agents and customers
-  - View all clients, policies, reminders, and follow-ups
-- `agent`
-  - Access agent dashboard only
-  - Manage only records created by or assigned to the agent
-  - Cannot access admin user management or global dashboard
-
-## Offline-First Architecture
-
-- SQLite is the source of truth
-- Every create, update, and delete writes to SQLite first
-- Every mutation adds an item to `sync_queue`
-- `SyncService` checks connectivity and pushes pending items to Firestore
-- Mobile builds also register OS-managed background sync tasks for queued items
-- On success, local records are marked `synced`
-- On failure, retries and error messages are stored locally and sync failures are logged to Crashlytics
-
-## Background Sync Notes
-
-- Android now uses WorkManager for periodic and queued sync retries even when the app is not in the foreground.
-- iOS now opts into Background Fetch so the system can run sync opportunistically after the app is closed.
-- Background execution is still controlled by the operating system and is never truly continuous, especially on iOS.
-
-## SQLite Tables
-
-- `users`
-- `clients`
-- `policies`
-- `reminders`
-- `follow_ups`
-- `sync_queue`
-
-## Sync Queue
-
-Tracked fields:
-
-- `id`
-- `business_id`
-- `table_name`
-- `record_id`
-- `operation`
-- `payload`
-- `retry_count`
-- `last_error`
-- `created_at`
-- `updated_at`
-- `sync_status`
-
-Supported sync statuses:
-
-- `pending_create`
-- `pending_update`
-- `pending_delete`
-- `synced`
-- `failed`
-
-## Firestore Structure
-
-All business data is written under:
-
-- `businesses/{businessId}/users/{userId}`
-- `businesses/{businessId}/clients/{clientId}`
-- `businesses/{businessId}/policies/{policyId}`
-- `businesses/{businessId}/reminders/{reminderId}`
-- `businesses/{businessId}/follow_ups/{followUpId}`
-
-## Firebase Setup Notes
-
-1. Add the Firebase config files for the target project.
-2. Confirm Firestore and Authentication are enabled.
-3. Deploy Firestore rules from `firestore.rules`.
-4. Confirm Crashlytics is enabled for the Android app.
-5. Keep the real `android/key.properties` out of git.
-
-## Android Release Signing
-
-This project is safe when `android/key.properties` is missing:
-
-- release builds fall back to debug signing locally
-- actual Play Store release signing requires your own keystore
-
-Create these locally:
-
-- `android/key.properties`
-- the keystore file referenced by `storeFile`
-
-You can start from [android/key.properties.example](android/key.properties.example).
-
-Example `android/key.properties`:
-
-```properties
-storePassword=your-keystore-password
-keyPassword=your-key-password
-keyAlias=upload
-storeFile=../keystore/upload-keystore.jks
-```
-
-## Recommended Developer Workflow
-
-1. Start in `README.md`, then open `docs/PROJECT_STRUCTURE.md`.
-2. Find the feature inside `lib/presentation/modules/<feature>`.
-3. Use the matching controller in `lib/presentation/controllers`.
-4. Trace business logic into `lib/domain/usecases`.
-5. Trace persistence into `lib/data/repositories` and `lib/data/datasources`.
-6. Run `flutter analyze` and `flutter test` before handing work off.
-
-## Suggested Coding Conventions For Future Contributors
-
-- Keep one primary responsibility per file.
-- Keep onboarding knowledge in `README.md` and the `docs/` folder so project guidance stays easy to find.
-- Prefer explaining intent at section boundaries instead of commenting every line.
-- Keep UI logic in `presentation`, business rules in `domain`, and storage/network code in `data`.
-- Avoid editing generated files unless the generation source changes.
-
-## Validation Commands
+## Recommended Validation
 
 ```bash
 flutter analyze

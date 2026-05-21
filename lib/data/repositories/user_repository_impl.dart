@@ -35,6 +35,38 @@ class UserRepositoryImpl implements UserRepository {
   Future<AppUser?> getUserById(String id) => _localDataSource.getUserById(id);
 
   @override
+  Future<AppUser> updateCurrentUserProfileImage({
+    String? profileImageData,
+    bool removeImage = false,
+  }) async {
+    final currentUser = await _localDataSource.getCurrentUser();
+    if (currentUser == null) {
+      throw Exception('Please sign in again to continue.');
+    }
+
+    final updatedUser = currentUser.copyWith(
+      profileImagePath: null,
+      profileImageData: removeImage ? null : profileImageData,
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
+      syncStatus: 'pending_update',
+    );
+    await _localDataSource.insertOrUpdateUser(updatedUser);
+    LocalDataChangeService.notifyChanged();
+    await _enqueue(
+      updatedUser,
+      'update',
+      'pending_update',
+      payload: {
+        'id': updatedUser.id,
+        'updated_at': updatedUser.updatedAt,
+        'sync_status': updatedUser.syncStatus,
+      },
+    );
+    await _syncService.syncPendingDataBestEffort();
+    return updatedUser;
+  }
+
+  @override
   Future<List<AppUser>> getUsersByRole(String role, {String? query}) =>
       _localDataSource.getUsersByRole(role, query: query);
 
@@ -96,7 +128,7 @@ class UserRepositoryImpl implements UserRepository {
     await _localDataSource.insertOrUpdateUser(updatedUser);
     LocalDataChangeService.notifyChanged();
     await _enqueue(updatedUser, 'update', 'pending_update');
-    await _syncService.syncPendingData();
+    await _syncService.syncPendingDataBestEffort();
     return updatedUser;
   }
 
@@ -117,7 +149,7 @@ class UserRepositoryImpl implements UserRepository {
     await _localDataSource.insertOrUpdateUser(deletedUser);
     LocalDataChangeService.notifyChanged();
     await _enqueue(deletedUser, 'delete', 'pending_delete');
-    await _syncService.syncPendingData();
+    await _syncService.syncPendingDataBestEffort();
   }
 
   Future<AppUser> _createUser({
@@ -149,7 +181,7 @@ class UserRepositoryImpl implements UserRepository {
     await _localDataSource.insertOrUpdateUser(user);
     LocalDataChangeService.notifyChanged();
     await _enqueue(user, 'create', 'pending_create');
-    await _syncService.syncPendingData();
+    await _syncService.syncPendingDataBestEffort();
     return user;
   }
 
@@ -171,6 +203,7 @@ class UserRepositoryImpl implements UserRepository {
     AppUserModel user,
     String operation,
     String syncStatus,
+    {Map<String, dynamic>? payload,}
   ) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     await _syncQueueLocalDataSource.enqueue(
@@ -180,7 +213,7 @@ class UserRepositoryImpl implements UserRepository {
         tableName: DatabaseTables.users,
         recordId: user.id,
         operation: operation,
-        payload: user.toMap(),
+        payload: payload ?? user.toMap(),
         retryCount: 0,
         createdAt: now,
         updatedAt: now,

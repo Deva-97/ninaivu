@@ -90,16 +90,26 @@ class PolicyListScreen extends GetView<PolicyListController> {
                 onRefresh: controller.loadPolicies,
                 child: ResponsiveContent(
                   child: ListView.separated(
+                    controller: controller.scrollController,
                     padding: EdgeInsets.fromLTRB(
                       responsive.pagePadding,
                       0,
                       responsive.pagePadding,
                       responsive.scaled(96, min: 84),
                     ),
-                    itemCount: controller.policies.length,
+                    itemCount:
+                        controller.policies.length +
+                        (controller.isLoadingMore.value ? 1 : 0),
                     separatorBuilder: (_, _) =>
                         SizedBox(height: responsive.scaled(12, min: 10)),
                     itemBuilder: (context, index) {
+                      if (index >= controller.policies.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+
                       final policy = controller.policies[index];
                       return Card(
                         child: ListTile(

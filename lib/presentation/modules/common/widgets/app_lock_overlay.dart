@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/services/app_lock_service.dart';
 
+/// Full-screen lock layer injected above the entire app tree.
+///
+/// It listens to the shared `AppLockService` so every route is protected
+/// consistently without each screen needing its own lock logic.
 class AppLockOverlay extends StatefulWidget {
   const AppLockOverlay({
     super.key,
@@ -31,6 +36,8 @@ class _AppLockOverlayState extends State<AppLockOverlay> {
       if (!_appLockService.isEnabled.value || !_appLockService.isLocked.value) {
         return widget.child;
       }
+      // Biometric is optional. When unavailable, the same overlay gracefully
+      // falls back to the local PIN flow without changing navigation state.
       final biometricAvailable =
           _appLockService.isBiometricEnabled.value &&
           _appLockService.isBiometricAvailable.value;
@@ -54,11 +61,11 @@ class _AppLockOverlayState extends State<AppLockOverlay> {
                         const Icon(Icons.lock_outline, size: 48),
                         const SizedBox(height: 16),
                         Text(
-                          'App Locked',
+                          TranslationKeys.appLocked.tr,
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         const SizedBox(height: 8),
-                        const Text('Use biometric or enter your 4-digit PIN to continue.'),
+                        Text(TranslationKeys.unlockWithBiometricOrPin.tr),
                         const SizedBox(height: 20),
                         if (biometricAvailable) ...[
                           SizedBox(
@@ -66,7 +73,7 @@ class _AppLockOverlayState extends State<AppLockOverlay> {
                             child: OutlinedButton.icon(
                               onPressed: _unlockWithBiometric,
                               icon: const Icon(Icons.fingerprint),
-                              label: const Text('Use biometric'),
+                              label: Text(TranslationKeys.useBiometric.tr),
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -79,7 +86,7 @@ class _AppLockOverlayState extends State<AppLockOverlay> {
                         Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            'Use PIN',
+                            TranslationKeys.usePin.tr,
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                         ),
@@ -90,7 +97,7 @@ class _AppLockOverlayState extends State<AppLockOverlay> {
                           obscureText: true,
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
-                            labelText: 'PIN',
+                            labelText: TranslationKeys.pin.tr,
                             errorText: _errorText,
                             counterText: '',
                           ),
@@ -110,7 +117,7 @@ class _AppLockOverlayState extends State<AppLockOverlay> {
                         ],
                         FilledButton(
                           onPressed: _unlockWithPin,
-                          child: const Text('Unlock'),
+                          child: Text(TranslationKeys.unlock.tr),
                         ),
                       ],
                     ),
@@ -128,11 +135,11 @@ class _AppLockOverlayState extends State<AppLockOverlay> {
   void _unlockWithPin() {
     final pin = _pinController.text.trim();
     if (pin.length != 4) {
-      setState(() => _errorText = 'Enter your 4-digit PIN');
+      setState(() => _errorText = TranslationKeys.enterYour4DigitPin.tr);
       return;
     }
     final isValid = _appLockService.verifyPin(pin);
-    setState(() => _errorText = isValid ? null : 'Incorrect PIN');
+    setState(() => _errorText = isValid ? null : TranslationKeys.incorrectPin.tr);
     if (isValid) {
       _pinController.clear();
     }
@@ -141,7 +148,9 @@ class _AppLockOverlayState extends State<AppLockOverlay> {
   Future<void> _unlockWithBiometric() async {
     final isValid = await _appLockService.unlockWithBiometric();
     if (!isValid && mounted) {
-      setState(() => _errorText = 'Biometric unlock was not completed');
+      setState(
+        () => _errorText = TranslationKeys.biometricUnlockNotCompleted.tr,
+      );
     }
   }
 }

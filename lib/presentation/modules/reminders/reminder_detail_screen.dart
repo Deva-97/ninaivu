@@ -82,6 +82,10 @@ class ReminderDetailScreen extends GetView<ReminderDetailController> {
                             reminder.notificationId?.toString() ??
                             'Not scheduled',
                       ),
+                      _DetailRow(
+                        label: 'Sync Status',
+                        value: reminder.syncStatus,
+                      ),
                     ],
                   ),
                 ),
@@ -90,19 +94,29 @@ class ReminderDetailScreen extends GetView<ReminderDetailController> {
               if ((reminder.clientMobile ?? '').isNotEmpty)
                 Padding(
                   padding: EdgeInsets.only(bottom: responsive.itemGap),
-                  child: OutlinedButton.icon(
-                    onPressed: () => showWhatsAppTemplateSelector(
-                      context: context,
-                      mobile: reminder.clientMobile!,
-                      data: WhatsAppTemplateData(
-                        clientName: reminder.clientName,
-                        mobile: reminder.clientMobile,
-                        policyNumber: reminder.policyNumber,
-                        companyName: reminder.companyName,
+                  child: Wrap(
+                    spacing: responsive.scaled(12, min: 10),
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: controller.callClient,
+                        icon: const Icon(Icons.call_outlined),
+                        label: const Text('Call'),
                       ),
-                    ),
-                    icon: const Icon(Icons.chat_outlined),
-                    label: const Text('WhatsApp'),
+                      OutlinedButton.icon(
+                        onPressed: () => showWhatsAppTemplateSelector(
+                          context: context,
+                          mobile: reminder.clientMobile!,
+                          data: WhatsAppTemplateData(
+                            clientName: reminder.clientName,
+                            mobile: reminder.clientMobile,
+                            policyNumber: reminder.policyNumber,
+                            companyName: reminder.companyName,
+                          ),
+                        ),
+                        icon: const Icon(Icons.chat_outlined),
+                        label: const Text('WhatsApp'),
+                      ),
+                    ],
                   ),
                 ),
               if (reminder.status.toLowerCase() != 'completed' &&

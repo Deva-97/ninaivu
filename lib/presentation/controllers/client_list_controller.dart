@@ -2,65 +2,106 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ninaivu/core/services/communication_service.dart';
 import 'package:ninaivu/core/models/export_format.dart';
 import 'package:ninaivu/domain/entities/client.dart';
 import 'package:ninaivu/domain/usecases/clients/delete_client_usecase.dart';
 import 'package:ninaivu/domain/usecases/clients/export_clients_usecase.dart';
 import 'package:ninaivu/domain/usecases/clients/get_clients_usecase.dart';
-import 'package:ninaivu/domain/usecases/clients/search_clients_usecase.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class ClientListController extends GetxController {
   ClientListController({
     required GetClientsUseCase getClientsUseCase,
-    required SearchClientsUseCase searchClientsUseCase,
     required DeleteClientUseCase deleteClientUseCase,
     required ExportClientsUseCase exportClientsUseCase,
+    required CommunicationService communicationService,
   }) : _getClientsUseCase = getClientsUseCase,
-       _searchClientsUseCase = searchClientsUseCase,
        _deleteClientUseCase = deleteClientUseCase,
-       _exportClientsUseCase = exportClientsUseCase;
+       _exportClientsUseCase = exportClientsUseCase,
+       _communicationService = communicationService;
 
   final GetClientsUseCase _getClientsUseCase;
-  final SearchClientsUseCase _searchClientsUseCase;
   final DeleteClientUseCase _deleteClientUseCase;
   final ExportClientsUseCase _exportClientsUseCase;
+  final CommunicationService _communicationService;
+
+  static const int _pageSize = 50;
 
   final searchController = TextEditingController();
+  final scrollController = ScrollController();
   final clients = <Client>[].obs;
   final isLoading = false.obs;
+  final isLoadingMore = false.obs;
+  final hasMore = true.obs;
   final errorMessage = RxnString();
 
   Timer? _debounce;
+  int _nextOffset = 0;
+  int _requestVersion = 0;
 
   @override
   void onInit() {
     super.onInit();
     searchController.addListener(_onSearchChanged);
+    scrollController.addListener(_onScroll);
     loadClients();
   }
 
   @override
   void onClose() {
     _debounce?.cancel();
+    scrollController.dispose();
     searchController.dispose();
     super.onClose();
   }
 
-  Future<void> loadClients() async {
-    isLoading.value = true;
-    errorMessage.value = null;
+  Future<void> loadClients() => _loadClients(reset: true);
+
+  Future<void> loadMoreClients() => _loadClients(reset: false);
+
+  Future<void> _loadClients({required bool reset}) async {
+    if (reset) {
+      isLoading.value = true;
+      errorMessage.value = null;
+      hasMore.value = true;
+      _nextOffset = 0;
+    } else {
+      if (isLoading.value || isLoadingMore.value || !hasMore.value) {
+        return;
+      }
+      isLoadingMore.value = true;
+    }
+
+    final requestVersion = ++_requestVersion;
+
     try {
       final query = searchController.text.trim();
-      clients.assignAll(
-        query.isEmpty
-            ? await _getClientsUseCase()
-            : await _searchClientsUseCase(query),
+      final result = await _getClientsUseCase(
+        query: query.isEmpty ? null : query,
+        limit: _pageSize,
+        offset: _nextOffset,
       );
+
+      if (requestVersion != _requestVersion || isClosed) {
+        return;
+      }
+
+      if (reset) {
+        clients.assignAll(result);
+      } else {
+        clients.addAll(result);
+      }
+      _nextOffset = clients.length;
+      hasMore.value = result.length >= _pageSize;
     } catch (e) {
-      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
+      if (requestVersion == _requestVersion && !isClosed) {
+        errorMessage.value = e.toString().replaceFirst('Exception: ', '');
+      }
     } finally {
-      isLoading.value = false;
+      if (requestVersion == _requestVersion && !isClosed) {
+        isLoading.value = false;
+        isLoadingMore.value = false;
+      }
     }
   }
 
@@ -73,21 +114,26 @@ class ClientListController extends GetxController {
       _exportClientsUseCase(format: format);
 
   Future<void> callClient(String mobile) async {
-    final uri = Uri.parse('tel:$mobile');
-    if (!await launchUrl(uri)) {
-      throw Exception('Unable to open the dialer');
-    }
+    await _communicationService.openDialer(mobile);
   }
 
   Future<void> whatsappClient(String mobile) async {
-    final uri = Uri.parse('https://wa.me/91$mobile');
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      throw Exception('Unable to open WhatsApp');
-    }
+    await _communicationService.openWhatsAppChat(mobile);
   }
 
   void _onSearchChanged() {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), loadClients);
+  }
+
+  void _onScroll() {
+    if (!scrollController.hasClients) {
+      return;
+    }
+
+    final position = scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - 240) {
+      loadMoreClients();
+    }
   }
 }

@@ -10,6 +10,10 @@ import 'package:ninaivu/domain/usecases/policies/add_policy_usecase.dart';
 import 'package:ninaivu/domain/usecases/policies/update_policy_usecase.dart';
 import 'package:uuid/uuid.dart';
 
+/// Controller for both creating and editing policies.
+///
+/// It normalizes route arguments, owns field controllers, validates date and
+/// premium inputs, and converts form state into a `PolicyModel` for saving.
 class PolicyFormController extends GetxController {
   PolicyFormController({
     required AddPolicyUseCase addPolicyUseCase,
@@ -90,6 +94,8 @@ class PolicyFormController extends GetxController {
   void onInit() {
     super.onInit();
     final args = Get.arguments;
+    // The screen accepts either a raw `Policy` for edit mode or a map that can
+    // preselect a client when creating a new policy from another workflow.
     if (args is Policy) {
       editingPolicy = args;
     } else if (args is Map<String, dynamic>) {
@@ -175,6 +181,8 @@ class PolicyFormController extends GetxController {
     try {
       final now = DateTime.now().millisecondsSinceEpoch;
       final premium = double.parse(premiumController.text.trim());
+      // The form always builds a model-shaped object so add/update use cases can
+      // share the same payload structure.
       final basePolicy = PolicyModel(
         id: editingPolicy?.id ?? _uuid.v4(),
         businessId: editingPolicy?.businessId ?? '',

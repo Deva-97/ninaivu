@@ -5,6 +5,7 @@ import 'package:ninaivu/presentation/bindings/dashboard_bindings.dart';
 import 'package:ninaivu/presentation/bindings/follow_up_bindings.dart';
 import 'package:ninaivu/presentation/bindings/policy_bindings.dart';
 import 'package:ninaivu/presentation/bindings/reminder_bindings.dart';
+import 'package:ninaivu/presentation/bindings/settings_binding.dart';
 import 'package:ninaivu/presentation/bindings/todays_work_binding.dart';
 import 'package:ninaivu/presentation/modules/admin/dashboard/admin_dashboard_screen.dart';
 import 'package:ninaivu/presentation/modules/admin/users/add_edit_agent_screen.dart';
@@ -17,6 +18,8 @@ import 'package:ninaivu/presentation/modules/common/auth/login_screen.dart';
 import 'package:ninaivu/presentation/modules/common/auth/otp_verification_screen.dart';
 import 'package:ninaivu/presentation/modules/common/auth/profile_setup_screen.dart';
 import 'package:ninaivu/presentation/modules/common/splash/splash_screen.dart';
+import 'package:ninaivu/presentation/modules/common/search/global_search_screen.dart';
+import 'package:ninaivu/presentation/modules/common/settings/settings_screen.dart';
 import 'package:ninaivu/presentation/modules/common/todays_work/todays_work_screen.dart';
 import 'package:ninaivu/presentation/modules/follow_ups/add_edit_follow_up_screen.dart';
 import 'package:ninaivu/presentation/modules/follow_ups/follow_up_detail_screen.dart';
@@ -29,6 +32,10 @@ import 'package:ninaivu/presentation/modules/reminders/reminder_list_screen.dart
 import 'package:ninaivu/presentation/routes/app_routes.dart';
 import 'package:ninaivu/presentation/routes/route_middleware.dart';
 
+/// Central route registry for the entire app.
+///
+/// Each page entry keeps its screen, dependency binding, and access middleware
+/// together so new developers can trace navigation in one file.
 class AppPages {
   AppPages._();
 
@@ -200,6 +207,24 @@ class AppPages {
       name: AppRoutes.followUpDetails,
       page: () => const FollowUpDetailScreen(),
       binding: FollowUpDetailBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin', 'agent']),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.settings,
+      page: () => const SettingsScreen(),
+      binding: SettingsBinding(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(allowedRoles: const ['admin', 'agent']),
+      ],
+    ),
+    GetPage(
+      name: AppRoutes.globalSearch,
+      page: () => const GlobalSearchScreen(),
+      binding: GlobalSearchBinding(),
       middlewares: [
         AuthMiddleware(),
         RoleMiddleware(allowedRoles: const ['admin', 'agent']),

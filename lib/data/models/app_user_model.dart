@@ -9,6 +9,8 @@ class AppUserModel extends AppUser {
     super.email,
     required super.role,
     required super.status,
+    super.profileImagePath,
+    super.profileImageData,
     required super.profileCompleted,
     required super.createdAt,
     required super.updatedAt,
@@ -27,6 +29,8 @@ class AppUserModel extends AppUser {
       email: entity.email,
       role: entity.role,
       status: entity.status,
+      profileImagePath: entity.profileImagePath,
+      profileImageData: entity.profileImageData,
       profileCompleted: entity.profileCompleted,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
@@ -37,6 +41,8 @@ class AppUserModel extends AppUser {
     );
   }
 
+  static const Object _sentinel = Object();
+
   AppUserModel copyWith({
     String? id,
     String? businessId,
@@ -45,6 +51,8 @@ class AppUserModel extends AppUser {
     String? email,
     String? role,
     String? status,
+    Object? profileImagePath = _sentinel,
+    Object? profileImageData = _sentinel,
     bool? profileCompleted,
     int? createdAt,
     int? updatedAt,
@@ -61,6 +69,12 @@ class AppUserModel extends AppUser {
       email: email ?? this.email,
       role: role ?? this.role,
       status: status ?? this.status,
+      profileImagePath: identical(profileImagePath, _sentinel)
+          ? this.profileImagePath
+          : profileImagePath as String?,
+      profileImageData: identical(profileImageData, _sentinel)
+          ? this.profileImageData
+          : profileImageData as String?,
       profileCompleted: profileCompleted ?? this.profileCompleted,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -80,6 +94,8 @@ class AppUserModel extends AppUser {
       'email': email,
       'role': role,
       'status': status,
+      'profile_image_path': profileImagePath,
+      'profile_image_data': profileImageData,
       'profile_completed': profileCompleted ? 1 : 0,
       'created_at': createdAt,
       'updated_at': updatedAt,
@@ -99,6 +115,8 @@ class AppUserModel extends AppUser {
       email: map['email'] as String?,
       role: map['role'] as String,
       status: map['status'] as String,
+      profileImagePath: map['profile_image_path'] as String?,
+      profileImageData: map['profile_image_data'] as String?,
       profileCompleted: (map['profile_completed'] as int? ?? 0) == 1,
       createdAt: map['created_at'] as int,
       updatedAt: map['updated_at'] as int,
@@ -118,6 +136,8 @@ class AppUserModel extends AppUser {
       'email': email,
       'role': role,
       'status': status,
+      'profileImagePath': profileImagePath,
+      'profileImageData': profileImageData,
       'profileCompleted': profileCompleted,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
@@ -137,6 +157,8 @@ class AppUserModel extends AppUser {
       email: map['email'] as String?,
       role: map['role'] as String,
       status: map['status'] as String? ?? 'active',
+      profileImagePath: map['profileImagePath'] as String?,
+      profileImageData: map['profileImageData'] as String?,
       profileCompleted: map['profileCompleted'] as bool? ?? false,
       createdAt: map['createdAt'] as int,
       updatedAt: map['updatedAt'] as int,
