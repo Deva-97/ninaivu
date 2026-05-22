@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/client_list_controller.dart';
+import 'package:ninaivu/presentation/modules/common/widgets/app_shell.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/export_format_picker.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
 
@@ -12,22 +14,11 @@ class ClientListScreen extends GetView<ClientListController> {
   Widget build(BuildContext context) {
     final responsive = context.responsive;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Clients'),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              final format = await showExportFormatPicker(title: 'Export clients');
-              if (format != null) {
-                await controller.exportClients(format);
-              }
-            },
-            icon: const Icon(Icons.ios_share_outlined),
-            tooltip: 'Export clients',
-          ),
-        ],
-      ),
+    return AppShellScaffold(
+      currentTab: AppShellTab.clients,
+      dashboardRoute: AppRoutes.agentDashboard,
+      title: TranslationKeys.clients.tr,
+      subtitle: 'Search and manage your client portfolio',
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final refreshed = await Get.toNamed(AppRoutes.clientForm);
@@ -36,26 +27,35 @@ class ClientListScreen extends GetView<ClientListController> {
           }
         },
         icon: const Icon(Icons.add),
-        label: const Text('Add Client'),
+        label: Text(TranslationKeys.addClient.tr),
       ),
+      actions: [
+        AppIconButton(
+          tooltip: TranslationKeys.exportClients.tr,
+          icon: Icons.ios_share_outlined,
+          onPressed: () async {
+            final format = await showExportFormatPicker(
+              title: TranslationKeys.exportClients.tr,
+            );
+            if (format != null) {
+              await controller.exportClients(format);
+            }
+          },
+        ),
+      ],
       body: Column(
         children: [
           ResponsiveContent(
             child: Padding(
-              padding: EdgeInsets.all(responsive.pagePadding),
-              child: TextField(
+              padding: EdgeInsets.symmetric(horizontal: responsive.pagePadding),
+              child: AppSearchField(
                 controller: controller.searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search by name or mobile',
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: IconButton(
-                    onPressed: controller.loadClients,
-                    icon: const Icon(Icons.refresh),
-                  ),
-                ),
+                hintText: TranslationKeys.searchHint.tr,
+                onRefresh: controller.loadClients,
               ),
             ),
           ),
+          SizedBox(height: responsive.itemGap),
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
@@ -88,13 +88,10 @@ class ClientListScreen extends GetView<ClientListController> {
                       responsive.pagePadding,
                       0,
                       responsive.pagePadding,
-                      responsive.scaled(96, min: 84),
+                      responsive.scaled(110, min: 96),
                     ),
-                    itemCount:
-                        controller.clients.length +
-                        (controller.isLoadingMore.value ? 1 : 0),
-                    separatorBuilder: (_, _) =>
-                        SizedBox(height: responsive.scaled(12, min: 10)),
+                    itemCount: controller.clients.length + (controller.isLoadingMore.value ? 1 : 0),
+                    separatorBuilder: (_, _) => SizedBox(height: responsive.scaled(12, min: 10)),
                     itemBuilder: (context, index) {
                       if (index >= controller.clients.length) {
                         return const Padding(
@@ -102,89 +99,65 @@ class ClientListScreen extends GetView<ClientListController> {
                           child: Center(child: CircularProgressIndicator()),
                         );
                       }
-
                       final client = controller.clients[index];
-                      return Card(
-                        child: ListTile(
-                          onTap: () async {
-                            final refreshed = await Get.toNamed(
-                              AppRoutes.clientDetails,
-                              arguments: client.id,
-                            );
-                            if (refreshed == true) {
-                              await controller.loadClients();
-                            }
-                          },
-                          leading: ProfileAvatar(
-                            name: client.name,
-                            imagePath: client.profileImagePath,
-                            radius: 22,
-                          ),
-                          title: Text(client.name),
-                          subtitle: Text(
-                            '${client.mobile} • ${client.areaCity ?? 'Area not set'}\nPolicies: ${client.policyCount}',
-                          ),
-                          isThreeLine: true,
-                          trailing: PopupMenuButton<String>(
-                            onSelected: (value) async {
-                              try {
-                                if (value == 'call') {
-                                  await controller.callClient(client.mobile);
-                                } else if (value == 'whatsapp') {
-                                  await controller.whatsappClient(client.mobile);
-                                } else if (value == 'policies') {
-                                  await Get.toNamed(
-                                    AppRoutes.policies,
-                                    arguments: {'clientId': client.id},
-                                  );
-                                } else if (value == 'edit') {
-                                  final refreshed = await Get.toNamed(
-                                    AppRoutes.clientForm,
-                                    arguments: client,
-                                  );
-                                  if (refreshed == true) {
-                                    await controller.loadClients();
-                                  }
-                                } else if (value == 'delete') {
-                                  final confirmed = await Get.dialog<bool>(
-                                    AlertDialog(
-                                      title: const Text('Delete client'),
-                                      content: Text('Soft-delete ${client.name}?'),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Get.back(result: false),
-                                          child: const Text('Cancel'),
-                                        ),
-                                        ElevatedButton(
-                                          onPressed: () => Get.back(result: true),
-                                          child: const Text('Delete'),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                  if (confirmed == true) {
-                                    await controller.deleteClient(client.id);
-                                  }
-                                }
-                              } catch (e) {
-                                Get.snackbar(
-                                  'Action failed',
-                                  e.toString().replaceFirst('Exception: ', ''),
-                                );
+                      return ClientCard(
+                        client: client,
+                        onTap: () async {
+                          final refreshed = await Get.toNamed(
+                            AppRoutes.clientDetails,
+                            arguments: client.id,
+                          );
+                          if (refreshed == true) {
+                            await controller.loadClients();
+                          }
+                        },
+                        onMenuSelected: (value) async {
+                          try {
+                            if (value == 'call') {
+                              await controller.callClient(client.mobile);
+                            } else if (value == 'whatsapp') {
+                              await controller.whatsappClient(client.mobile);
+                            } else if (value == 'policies') {
+                              await Get.toNamed(
+                                AppRoutes.policies,
+                                arguments: {'clientId': client.id},
+                              );
+                            } else if (value == 'edit') {
+                              final refreshed = await Get.toNamed(
+                                AppRoutes.clientForm,
+                                arguments: client,
+                              );
+                              if (refreshed == true) {
+                                await controller.loadClients();
                               }
-                            },
-                            itemBuilder: (_) => const [
-                              PopupMenuItem(value: 'call', child: Text('Call')),
-                              PopupMenuItem(value: 'whatsapp', child: Text('WhatsApp')),
-                              PopupMenuItem(
-                                value: 'policies',
-                                child: Text('View policies'),
-                              ),
-                              PopupMenuItem(value: 'edit', child: Text('Edit')),
-                              PopupMenuItem(value: 'delete', child: Text('Delete')),
-                            ],
-                          ),
-                        ),
+                            } else if (value == 'delete') {
+                              final confirmed = await Get.dialog<bool>(
+                                AlertDialog(
+                                  title: const Text('Delete client'),
+                                  content: Text('Soft-delete ${client.name}?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Get.back(result: false),
+                                      child: Text(TranslationKeys.cancel.tr),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () => Get.back(result: true),
+                                      child: Text(TranslationKeys.delete.tr),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (confirmed == true) {
+                                await controller.deleteClient(client.id);
+                              }
+                            }
+                          } catch (e) {
+                            Get.snackbar(
+                              'Action failed',
+                              e.toString().replaceFirst('Exception: ', ''),
+                            );
+                          }
+                        },
                       );
                     },
                   ),

@@ -38,12 +38,19 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Firebase and preferences must be ready before any route or background task
   // attempts to read session, sync, or notification state.
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-  PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
-  };
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+  } catch (error, stackTrace) {
+    debugPrint('Firebase initialization deferred: $error');
+    debugPrintStack(stackTrace: stackTrace);
+  }
   await _backgroundSyncService.initialize();
   await NotificationService.instance.init();
   await AppPreferences.getInstance();

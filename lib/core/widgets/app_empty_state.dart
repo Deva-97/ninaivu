@@ -32,10 +32,17 @@ class AppEmptyState extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icon,
-                size: responsive.scaled(48, min: 40),
-                color: theme.colorScheme.primary,
+              Container(
+                padding: EdgeInsets.all(responsive.scaled(18, min: 16)),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Icon(
+                  icon,
+                  size: responsive.scaled(34, min: 30),
+                  color: theme.colorScheme.primary,
+                ),
               ),
               SizedBox(height: responsive.itemGap),
               Text(

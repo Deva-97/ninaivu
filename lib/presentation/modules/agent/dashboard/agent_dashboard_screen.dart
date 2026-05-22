@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/agent_dashboard_controller.dart';
+import 'package:ninaivu/presentation/modules/common/widgets/app_shell.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/dashboard_widgets.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/export_format_picker.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/profile_image_actions.dart';
@@ -16,59 +17,27 @@ class AgentDashboardScreen extends GetView<AgentDashboardController> {
   Widget build(BuildContext context) {
     final responsive = context.responsive;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(TranslationKeys.agentDashboard.tr),
-        actions: [
-          IconButton(
-            tooltip: TranslationKeys.search.tr,
-            onPressed: () => Get.toNamed(AppRoutes.globalSearch),
-            icon: const Icon(Icons.search_rounded),
+    return AppShellScaffold(
+      currentTab: AppShellTab.dashboard,
+      dashboardRoute: AppRoutes.agentDashboard,
+      title: TranslationKeys.agentDashboard.tr,
+      subtitle: TranslationKeys.yourPortfolio.tr,
+      actions: [
+        AppIconButton(
+          tooltip: TranslationKeys.search.tr,
+          icon: Icons.search_rounded,
+          onPressed: () => Get.toNamed(AppRoutes.globalSearch),
+        ),
+        Obx(
+          () => AppIconButton(
+            tooltip: controller.isSyncing.value
+                ? TranslationKeys.syncing.tr
+                : TranslationKeys.syncNow.tr,
+            icon: controller.isSyncing.value ? Icons.sync : Icons.sync_rounded,
+            onPressed: controller.isSyncing.value ? null : controller.syncNow,
           ),
-          IconButton(
-            tooltip: TranslationKeys.settings.tr,
-            onPressed: () => Get.toNamed(AppRoutes.settings),
-            icon: const Icon(Icons.settings_outlined),
-          ),
-          Obx(
-            () => IconButton(
-              tooltip: controller.isSyncing.value
-                  ? TranslationKeys.syncing.tr
-                  : TranslationKeys.syncNow.tr,
-              onPressed: controller.isSyncing.value ? null : controller.syncNow,
-              icon: controller.isSyncing.value
-                  ? SizedBox(
-                      width: responsive.scaled(18, min: 16),
-                      height: responsive.scaled(18, min: 16),
-                      child: const CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.sync_rounded),
-            ),
-          ),
-          Obx(() {
-            final user = controller.currentUser.value;
-            if (user == null) {
-              return const SizedBox.shrink();
-            }
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: ProfileAvatar(
-                name: user.name,
-                imagePath: user.profileImagePath,
-                imageData: user.profileImageData,
-                radius: 18,
-                onTap: () => showProfileImageViewer(
-                  context: context,
-                  name: user.name,
-                  imagePath: user.profileImagePath,
-                  imageData: user.profileImageData,
-                ),
-              ),
-            );
-          }),
-          SizedBox(width: responsive.scaled(4, min: 2)),
-        ],
-      ),
+        ),
+      ],
       body: Obx(() {
         if (controller.isLoading.value && controller.stats.value == null) {
           return AppLoadingView(message: TranslationKeys.loadingDashboard.tr);
@@ -97,34 +66,40 @@ class AgentDashboardScreen extends GetView<AgentDashboardController> {
           child: Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: responsive.dashboardContentMaxWidth,
-              ),
+              constraints: BoxConstraints(maxWidth: responsive.dashboardContentMaxWidth),
               child: ListView(
                 padding: EdgeInsets.fromLTRB(
                   responsive.pagePadding,
+                  0,
                   responsive.pagePadding,
-                  responsive.pagePadding,
-                  responsive.sectionGap,
+                  responsive.scaled(110, min: 96),
                 ),
                 children: [
-                  Text(
-                    TranslationKeys.yourPortfolio.tr,
-                    style: Theme.of(context).textTheme.headlineSmall,
+                  Obx(() {
+                    final user = controller.currentUser.value;
+                    if (user == null) {
+                      return const SizedBox.shrink();
+                    }
+                    return ProfileAvatarBlock(
+                      name: user.name,
+                      subtitle: '${controller.backupStatusLabel.value} - ${controller.lastSyncLabel.value}',
+                      statusLabel: TranslationKeys.roleAgent.tr,
+                      imagePath: user.profileImagePath,
+                      imageData: user.profileImageData,
+                      onTap: () => showProfileImageViewer(
+                        context: context,
+                        name: user.name,
+                        imagePath: user.profileImagePath,
+                        imageData: user.profileImageData,
+                      ),
+                    );
+                  }),
+                  SizedBox(height: responsive.sectionGap),
+                  SectionTitle(
+                    title: TranslationKeys.yourPortfolio.tr,
+                    subtitle: TranslationKeys.portfolioSummary.tr,
                   ),
-                  SizedBox(height: responsive.scaled(6, min: 4)),
-                  Text(
-                    TranslationKeys.portfolioSummary.tr,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  SizedBox(height: responsive.scaled(4, min: 4)),
-                  Obx(
-                    () => Text(
-                      '${controller.backupStatusLabel.value} - ${controller.lastSyncLabel.value}',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                  SizedBox(height: responsive.scaled(18, min: 14)),
+                  SizedBox(height: responsive.itemGap),
                   GridView(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: responsive.dashboardGridCount,
@@ -173,24 +148,14 @@ class AgentDashboardScreen extends GetView<AgentDashboardController> {
                         color: Colors.amber,
                         badgeLabel: TranslationKeys.pending.tr,
                       ),
-                      DashboardMetricCard(
-                        title: TranslationKeys.missedFollowUps.tr,
-                        value: stats.missedFollowUps,
-                        icon: Icons.history_toggle_off_rounded,
-                        color: Colors.red,
-                        badgeLabel: TranslationKeys.missed.tr,
-                      ),
                     ],
                   ),
                   SizedBox(height: responsive.sectionGap),
-                  Text(
-                    TranslationKeys.quickActions.tr,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  SizedBox(height: responsive.scaled(12, min: 10)),
+                  SectionTitle(title: TranslationKeys.quickActions.tr),
+                  SizedBox(height: responsive.itemGap),
                   Wrap(
-                    spacing: responsive.scaled(12, min: 10),
-                    runSpacing: responsive.scaled(12, min: 10),
+                    spacing: 12,
+                    runSpacing: 12,
                     children: [
                       DashboardQuickAction(
                         label: TranslationKeys.todaysWork.tr,
@@ -242,23 +207,11 @@ class AgentDashboardScreen extends GetView<AgentDashboardController> {
                         color: Colors.orange,
                         onTap: () => Get.toNamed(AppRoutes.followUpForm),
                       ),
-                      DashboardQuickAction(
-                        label: TranslationKeys.viewRenewals.tr,
-                        icon: Icons.notifications_active_outlined,
-                        color: Colors.teal,
-                        onTap: () => Get.toNamed(
-                          AppRoutes.reminders,
-                          arguments: {'filter': 'pending'},
-                        ),
-                      ),
                     ],
                   ),
                   SizedBox(height: responsive.sectionGap),
-                  Text(
-                    TranslationKeys.upcomingDates.tr,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  SizedBox(height: responsive.scaled(12, min: 10)),
+                  SectionTitle(title: TranslationKeys.upcomingDates.tr),
+                  SizedBox(height: responsive.itemGap),
                   Obx(() {
                     if (controller.upcomingEvents.isEmpty) {
                       return Text(TranslationKeys.noUpcomingDates.tr);

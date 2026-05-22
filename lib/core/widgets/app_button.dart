@@ -9,6 +9,7 @@ class AppButton extends StatelessWidget {
     this.isLoading = false,
     this.icon,
     this.outlined = false,
+    this.expanded = true,
   });
 
   final String label;
@@ -16,6 +17,7 @@ class AppButton extends StatelessWidget {
   final bool isLoading;
   final IconData? icon;
   final bool outlined;
+  final bool expanded;
 
   @override
   Widget build(BuildContext context) {
@@ -43,16 +45,19 @@ class AppButton extends StatelessWidget {
       ],
     );
 
-    if (outlined) {
-      return OutlinedButton(
+    final button = outlined
+        ? OutlinedButton(
+        onPressed: isLoading ? null : onPressed,
+        child: child,
+      )
+        : ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         child: child,
       );
-    }
 
-    return ElevatedButton(
-      onPressed: isLoading ? null : onPressed,
-      child: child,
-    );
+    if (!expanded) {
+      return button;
+    }
+    return SizedBox(width: double.infinity, child: button);
   }
 }

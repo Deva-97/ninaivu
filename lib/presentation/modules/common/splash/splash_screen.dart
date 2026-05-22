@@ -27,37 +27,20 @@ class _SplashScreenState extends State<SplashScreen> {
       await _authService.checkAuthFromSplash();
     } catch (e) {
       if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final responsive = context.responsive;
-    final backgroundColors = isDark
-        ? const [Color(0xFF020617), Color(0xFF0F1F4A)]
-        : const [Color(0xFFFDFEFF), Color(0xFFE8F0FF)];
-    final titleColor = isDark
-        ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
-    final subtitleColor = isDark
-        ? AppColors.darkTextSecondary
-        : AppColors.lightTextSecondary;
-    final loaderColor = isDark ? Colors.white : AppColors.primaryDark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      body: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: backgroundColors,
-          ),
-        ),
+      body: SafeArea(
         child: Center(
           child: ResponsiveContent(
             alignment: Alignment.center,
@@ -66,33 +49,38 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  AppLogo(
-                    size: responsive.scaled(180, min: 140),
-                    semanticLabel: AppConstants.appName,
+                  Container(
+                    padding: EdgeInsets.all(responsive.scaled(24, min: 20)),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? AppColors.darkSurfaceSoft
+                          : AppColors.lightPrimaryContainer,
+                      borderRadius: BorderRadius.circular(32),
+                    ),
+                    child: AppLogo(
+                      size: responsive.scaled(118, min: 102),
+                      semanticLabel: AppConstants.appName,
+                    ),
                   ),
-                  SizedBox(height: responsive.scaled(18, min: 14)),
+                  SizedBox(height: responsive.scaled(28, min: 24)),
                   Text(
                     AppStrings.splashTitle,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: responsive.headlineSize,
-                      fontWeight: FontWeight.bold,
-                      color: titleColor,
-                    ),
+                    style: theme.textTheme.headlineMedium,
                   ),
                   SizedBox(height: responsive.scaled(8, min: 6)),
                   Text(
                     AppStrings.splashSubtitle,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: subtitleColor),
+                    style: theme.textTheme.bodyMedium,
                   ),
-                  SizedBox(height: responsive.scaled(28, min: 20)),
+                  SizedBox(height: responsive.scaled(28, min: 24)),
                   SizedBox(
-                    width: responsive.scaled(28, min: 24),
-                    height: responsive.scaled(28, min: 24),
+                    width: 26,
+                    height: 26,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(loaderColor),
+                      valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
                     ),
                   ),
                 ],

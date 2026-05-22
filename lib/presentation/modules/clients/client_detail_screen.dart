@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/client_detail_controller.dart';
+import 'package:ninaivu/presentation/modules/common/widgets/app_shell.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
 
 class ClientDetailScreen extends GetView<ClientDetailController> {
@@ -15,18 +17,13 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Client Details'),
+        title: Text(TranslationKeys.clientDetails.tr),
         actions: [
           IconButton(
             onPressed: () async {
               final client = controller.client.value;
-              if (client == null) {
-                return;
-              }
-              final refreshed = await Get.toNamed(
-                AppRoutes.clientForm,
-                arguments: client,
-              );
+              if (client == null) return;
+              final refreshed = await Get.toNamed(AppRoutes.clientForm, arguments: client);
               if (refreshed == true) {
                 await controller.loadClient();
               }
@@ -39,7 +36,6 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
         if (controller.isLoading.value) {
           return const AppLoadingView(message: 'Loading client...');
         }
-
         final error = controller.errorMessage.value;
         if (error != null) {
           return AppErrorView(
@@ -48,7 +44,6 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
             onRetry: controller.loadClient,
           );
         }
-
         final client = controller.client.value;
         if (client == null) {
           return const AppEmptyState(
@@ -62,135 +57,109 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
           child: ListView(
             padding: EdgeInsets.all(responsive.pagePadding),
             children: [
-              Card(
-                child: Padding(
-                  padding: EdgeInsets.all(responsive.pagePadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: ProfileAvatar(
-                          name: client.name,
-                          imagePath: client.profileImagePath,
-                          radius: 40,
-                          onTap: () => controller.updateProfileImage().catchError(_showError),
-                        ),
-                      ),
-                      SizedBox(height: responsive.itemGap),
-                      Text(
-                        client.name,
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                      SizedBox(height: responsive.scaled(8, min: 6)),
-                      StatusBadge(label: client.syncStatus),
-                      SizedBox(height: responsive.itemGap),
-                      _DetailRow(label: 'Mobile', value: client.mobile),
-                      _DetailRow(
-                        label: 'Alternate',
-                        value: client.alternateMobile ?? 'Not provided',
-                      ),
-                      _DetailRow(
-                        label: 'Email',
-                        value: client.email ?? 'Not provided',
-                      ),
-                      _DetailRow(
-                        label: 'Area / City',
-                        value: client.areaCity ?? 'Not set',
-                      ),
-                      _DetailRow(
-                        label: 'Address',
-                        value: client.address ?? 'Not provided',
-                      ),
-                      _DetailRow(
-                        label: 'Notes',
-                        value: client.notes ?? 'No notes',
-                      ),
-                      _DetailRow(
-                        label: 'Birthday',
-                        value: client.dateOfBirthMs == null
-                            ? 'Not set'
-                            : DateFormat('dd MMM yyyy').format(
-                                DateTime.fromMillisecondsSinceEpoch(
-                                  client.dateOfBirthMs!,
-                                ),
-                              ),
-                      ),
-                      _DetailRow(
-                        label: 'Special Date',
-                        value: client.specialDateMs == null
-                            ? 'Not set'
-                            : '${client.specialDateLabel ?? 'Special Date'} • ${DateFormat('dd MMM yyyy').format(DateTime.fromMillisecondsSinceEpoch(client.specialDateMs!))}',
-                      ),
-                      _DetailRow(
-                        label: 'Policy Count',
-                        value: client.policyCount.toString(),
-                      ),
-                    ],
+              ProfileAvatarBlock(
+                name: client.name,
+                subtitle: [client.mobile, client.areaCity].whereType<String>().where((e) => e.isNotEmpty).join(' • '),
+                statusLabel: client.syncStatus,
+                imagePath: client.profileImagePath,
+                onTap: () => controller.updateProfileImage().catchError(_showError),
+              ),
+              SizedBox(height: responsive.itemGap),
+              FormSectionCard(
+                title: 'Client Information',
+                children: [
+                  DetailFieldRow(label: TranslationKeys.mobile.tr, value: client.mobile),
+                  DetailFieldRow(label: 'Alternate', value: client.alternateMobile ?? 'Not provided'),
+                  DetailFieldRow(label: TranslationKeys.email.tr, value: client.email ?? 'Not provided'),
+                  DetailFieldRow(label: TranslationKeys.areaCity.tr, value: client.areaCity ?? 'Not set'),
+                  DetailFieldRow(label: TranslationKeys.address.tr, value: client.address ?? 'Not provided'),
+                  DetailFieldRow(label: TranslationKeys.notes.tr, value: client.notes ?? 'No notes'),
+                  DetailFieldRow(
+                    label: TranslationKeys.birthday.tr,
+                    value: client.dateOfBirthMs == null
+                        ? 'Not set'
+                        : DateFormat('dd MMM yyyy').format(
+                            DateTime.fromMillisecondsSinceEpoch(client.dateOfBirthMs!),
+                          ),
                   ),
-                ),
+                  DetailFieldRow(
+                    label: TranslationKeys.specialDate.tr,
+                    value: client.specialDateMs == null
+                        ? 'Not set'
+                        : '${client.specialDateLabel ?? 'Special Date'} • ${DateFormat('dd MMM yyyy').format(DateTime.fromMillisecondsSinceEpoch(client.specialDateMs!))}',
+                  ),
+                  DetailFieldRow(label: 'Policy Count', value: client.policyCount.toString()),
+                ],
               ),
               SizedBox(height: responsive.itemGap),
               Wrap(
-                spacing: responsive.scaled(12, min: 10),
-                runSpacing: responsive.scaled(12, min: 10),
+                spacing: 12,
+                runSpacing: 12,
                 children: [
-                  FilledButton.icon(
-                    onPressed: () =>
-                        controller.callClient().catchError(_showError),
-                    icon: const Icon(Icons.call_outlined),
-                    label: const Text('Call'),
+                  AppButton(
+                    label: TranslationKeys.call.tr,
+                    icon: Icons.call_outlined,
+                    onPressed: () => controller.callClient().catchError(_showError),
+                    expanded: false,
                   ),
-                  OutlinedButton.icon(
-                    onPressed: () =>
-                        controller.whatsappClient().catchError(_showError),
-                    icon: const Icon(Icons.chat_outlined),
-                    label: const Text('WhatsApp'),
+                  AppButton(
+                    label: TranslationKeys.whatsapp.tr,
+                    icon: Icons.chat_outlined,
+                    outlined: true,
+                    onPressed: () => controller.whatsappClient().catchError(_showError),
+                    expanded: false,
                   ),
-                  OutlinedButton.icon(
+                  AppButton(
+                    label: TranslationKeys.policies.tr,
+                    icon: Icons.description_outlined,
+                    outlined: true,
                     onPressed: () => Get.toNamed(
                       AppRoutes.policies,
                       arguments: {'clientId': client.id},
                     ),
-                    icon: const Icon(Icons.description_outlined),
-                    label: const Text('Policies'),
+                    expanded: false,
                   ),
-                  OutlinedButton.icon(
+                  AppButton(
+                    label: TranslationKeys.addPolicy.tr,
+                    icon: Icons.add_card_outlined,
+                    outlined: true,
                     onPressed: () => Get.toNamed(
                       AppRoutes.policyForm,
                       arguments: {'clientId': client.id},
                     ),
-                    icon: const Icon(Icons.add_card_outlined),
-                    label: const Text('Add Policy'),
+                    expanded: false,
                   ),
                 ],
               ),
               SizedBox(height: responsive.sectionGap),
-              Text('Timeline', style: Theme.of(context).textTheme.titleLarge),
+              SectionTitle(title: 'Timeline'),
               SizedBox(height: responsive.itemGap),
               Obx(() {
                 if (controller.timelineItems.isEmpty) {
                   return const AppEmptyState(
                     icon: Icons.timeline_outlined,
                     title: 'No timeline items yet',
-                    subtitle:
-                        'Policies, reminders, and follow-ups will appear here.',
+                    subtitle: 'Policies, reminders, and follow-ups will appear here.',
                   );
                 }
                 return Column(
                   children: controller.timelineItems
                       .map(
-                        (item) => Card(
-                          child: ListTile(
-                            leading: Icon(_timelineIcon(item.type)),
-                            title: Text(item.title),
-                            subtitle: Text(
-                              '${item.subtitle}\n${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(item.dateTimeMillis))}',
-                            ),
-                            isThreeLine: true,
-                            trailing: StatusBadge(label: item.status),
-                            onTap: () => Get.toNamed(
-                              item.routeName,
-                              arguments: item.routeArgument,
+                        (item) => Padding(
+                          padding: EdgeInsets.only(bottom: responsive.scaled(10, min: 8)),
+                          child: Card(
+                            child: ListTile(
+                              leading: Icon(_timelineIcon(item.type)),
+                              title: Text(item.title),
+                              subtitle: Text(
+                                '${item.subtitle}\n${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(item.dateTimeMillis))}',
+                              ),
+                              isThreeLine: true,
+                              trailing: StatusBadge(label: item.status),
+                              onTap: () => Get.toNamed(
+                                item.routeName,
+                                arguments: item.routeArgument,
+                              ),
                             ),
                           ),
                         ),
@@ -198,31 +167,34 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
                       .toList(),
                 );
               }),
-              SizedBox(height: responsive.sectionGap),
-              TextButton.icon(
-                onPressed: () async {
-                  final confirmed = await Get.dialog<bool>(
-                    AlertDialog(
-                      title: const Text('Delete client'),
-                      content: Text('Soft-delete ${client.name}?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Get.back(result: false),
-                          child: const Text('Cancel'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () => Get.back(result: true),
-                          child: const Text('Delete'),
-                        ),
-                      ],
-                    ),
-                  );
-                  if (confirmed == true) {
-                    await controller.deleteClient();
-                  }
-                },
-                icon: const Icon(Icons.delete_outline),
-                label: const Text('Delete Client'),
+              SizedBox(height: responsive.itemGap),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () async {
+                    final confirmed = await Get.dialog<bool>(
+                      AlertDialog(
+                        title: const Text('Delete client'),
+                        content: Text('Soft-delete ${client.name}?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Get.back(result: false),
+                            child: Text(TranslationKeys.cancel.tr),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => Get.back(result: true),
+                            child: Text(TranslationKeys.delete.tr),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirmed == true) {
+                      await controller.deleteClient();
+                    }
+                  },
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('Delete Client'),
+                ),
               ),
             ],
           ),
@@ -232,10 +204,7 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
   }
 
   void _showError(Object error) {
-    Get.snackbar(
-      'Action failed',
-      error.toString().replaceFirst('Exception: ', ''),
-    );
+    Get.snackbar('Action failed', error.toString().replaceFirst('Exception: ', ''));
   }
 
   IconData _timelineIcon(String type) {
@@ -247,28 +216,5 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
       default:
         return Icons.pending_actions_outlined;
     }
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final responsive = context.responsive;
-
-    return Padding(
-      padding: EdgeInsets.only(bottom: responsive.scaled(10, min: 8)),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(width: responsive.detailLabelWidth, child: Text(label)),
-          Expanded(child: Text(value)),
-        ],
-      ),
-    );
   }
 }

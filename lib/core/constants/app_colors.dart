@@ -3,56 +3,51 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  // Brand
-  static const Color primary = Color(0xFF2563EB);
-  static const Color primaryDark = Color(0xFF1D4ED8);
-  static const Color primaryLight = Color(0xFFDBEAFE);
+  static const Color primary = Color(0xFF004AC6);
+  static const Color primaryDark = Color(0xFF0D3C94);
+  static const Color primaryLight = Color(0xFFDBE7FF);
+  static const Color lightPrimaryContainer = Color(0xFFEAF1FF);
+  static const Color darkPrimaryContainer = Color(0xFF102447);
 
-  // Light Theme
-  static const Color lightBackground = Color(0xFFF8FAFC);
+  static const Color lightBackground = Color(0xFFF7F9FB);
   static const Color lightSurface = Color(0xFFFFFFFF);
-  static const Color lightSurfaceSoft = Color(0xFFF1F5F9);
-  static const Color lightBorder = Color(0xFFE2E8F0);
-  static const Color lightTextPrimary = Color(0xFF0F172A);
-  static const Color lightTextSecondary = Color(0xFF475569);
-  static const Color lightTextMuted = Color(0xFF94A3B8);
+  static const Color lightSurfaceSoft = Color(0xFFF2F4F7);
+  static const Color lightBorder = Color(0xFFE3E8EF);
+  static const Color lightTextPrimary = Color(0xFF191C1E);
+  static const Color lightTextSecondary = Color(0xFF5C647A);
+  static const Color lightTextMuted = Color(0xFF98A1B2);
 
-  // Dark Theme
-  static const Color darkBackground = Color(0xFF020617);
-  static const Color darkSurface = Color(0xFF0F172A);
-  static const Color darkSurfaceSoft = Color(0xFF1E293B);
-  static const Color darkBorder = Color(0xFF334155);
+  static const Color darkBackground = Color(0xFF0F141C);
+  static const Color darkSurface = Color(0xFF161C25);
+  static const Color darkSurfaceSoft = Color(0xFF1D2530);
+  static const Color darkBorder = Color(0xFF2A3442);
   static const Color darkTextPrimary = Color(0xFFF8FAFC);
-  static const Color darkTextSecondary = Color(0xFFCBD5E1);
-  static const Color darkTextMuted = Color(0xFF64748B);
+  static const Color darkTextSecondary = Color(0xFFC3CAD6);
+  static const Color darkTextMuted = Color(0xFF8390A3);
 
-  // Status
-  static const Color success = Color(0xFF16A34A);
-  static const Color warning = Color(0xFFF59E0B);
-  static const Color danger = Color(0xFFDC2626);
+  static const Color success = Color(0xFF059669);
+  static const Color warning = Color(0xFFBC4800);
+  static const Color danger = Color(0xFFBA1A1A);
   static const Color info = Color(0xFF2563EB);
+  static const Color shadow = Color(0xFF0F172A);
 
-  // Status Background - Light
   static const Color successLightBg = Color(0xFFDCFCE7);
-  static const Color warningLightBg = Color(0xFFFEF3C7);
-  static const Color dangerLightBg = Color(0xFFFEE2E2);
-  static const Color infoLightBg = Color(0xFFDBEAFE);
+  static const Color warningLightBg = Color(0xFFFFE7D6);
+  static const Color dangerLightBg = Color(0xFFFFDAD6);
+  static const Color infoLightBg = Color(0xFFDBE7FF);
 
-  // Status Text - Light
   static const Color successLightText = Color(0xFF166534);
-  static const Color warningLightText = Color(0xFF92400E);
-  static const Color dangerLightText = Color(0xFF991B1B);
-  static const Color infoLightText = Color(0xFF1E40AF);
+  static const Color warningLightText = Color(0xFF9A3412);
+  static const Color dangerLightText = Color(0xFF93000A);
+  static const Color infoLightText = Color(0xFF1849A9);
 
-  // Status Background - Dark
-  static const Color successDarkBg = Color(0xFF052E16);
-  static const Color warningDarkBg = Color(0xFF451A03);
-  static const Color dangerDarkBg = Color(0xFF450A0A);
+  static const Color successDarkBg = Color(0xFF052E23);
+  static const Color warningDarkBg = Color(0xFF40220A);
+  static const Color dangerDarkBg = Color(0xFF4A1111);
   static const Color infoDarkBg = Color(0xFF172554);
 
-  // Status Text - Dark
-  static const Color successDarkText = Color(0xFF86EFAC);
-  static const Color warningDarkText = Color(0xFFFCD34D);
-  static const Color dangerDarkText = Color(0xFFFCA5A5);
-  static const Color infoDarkText = Color(0xFF93C5FD);
+  static const Color successDarkText = Color(0xFF8DE7B9);
+  static const Color warningDarkText = Color(0xFFFFC39C);
+  static const Color dangerDarkText = Color(0xFFFFB4AB);
+  static const Color infoDarkText = Color(0xFFB8CCFF);
 }

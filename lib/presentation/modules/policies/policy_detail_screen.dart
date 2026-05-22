@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/utils/whatsapp_template_builder.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/policy_detail_controller.dart';
+import 'package:ninaivu/presentation/modules/common/widgets/app_shell.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/whatsapp_template_selector.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
 
@@ -18,18 +20,13 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Policy Details'),
+        title: Text(TranslationKeys.policyDetails.tr),
         actions: [
           IconButton(
             onPressed: () async {
               final policy = controller.policy.value;
-              if (policy == null) {
-                return;
-              }
-              final refreshed = await Get.toNamed(
-                AppRoutes.policyForm,
-                arguments: policy,
-              );
+              if (policy == null) return;
+              final refreshed = await Get.toNamed(AppRoutes.policyForm, arguments: policy);
               if (refreshed == true) {
                 await controller.loadPolicy();
               }
@@ -42,7 +39,6 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
         if (controller.isLoading.value) {
           return const AppLoadingView(message: 'Loading policy...');
         }
-
         final error = controller.errorMessage.value;
         if (error != null) {
           return AppErrorView(
@@ -51,7 +47,6 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
             onRetry: controller.loadPolicy,
           );
         }
-
         final policy = controller.policy.value;
         if (policy == null) {
           return const AppEmptyState(
@@ -65,69 +60,47 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
           child: ListView(
             padding: EdgeInsets.all(responsive.pagePadding),
             children: [
-              Card(
-                child: Padding(
-                  padding: EdgeInsets.all(responsive.pagePadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        policy.policyNumber,
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                      SizedBox(height: responsive.itemGap),
-                      _DetailRow(label: 'Company', value: policy.companyName),
-                      _DetailRow(label: 'Type', value: policy.insuranceType),
-                      _DetailRow(label: 'Client ID', value: policy.clientId),
-                      _DetailRow(
-                        label: 'Premium',
-                        value: currency.format(policy.premiumAmount),
-                      ),
-                      _DetailRow(
-                        label: 'Start Date',
-                        value: dateFormat.format(
-                          DateTime.fromMillisecondsSinceEpoch(policy.startDate),
-                        ),
-                      ),
-                      _DetailRow(
-                        label: 'End Date',
-                        value: dateFormat.format(
-                          DateTime.fromMillisecondsSinceEpoch(policy.endDate),
-                        ),
-                      ),
-                      _DetailRow(label: 'Status', value: policy.status),
-                      _DetailRow(
-                        label: 'Renewal Status',
-                        value: policy.renewalStatus,
-                      ),
-                      _DetailRow(label: 'Sync Status', value: policy.syncStatus),
-                      _DetailRow(
-                        label: 'Vehicle',
-                        value:
-                            policy.vehicleNumber ??
-                            policy.vehicleModel ??
-                            'Not applicable',
-                      ),
-                      _DetailRow(
-                        label: 'Notes',
-                        value: policy.notes ?? 'No notes',
-                      ),
-                    ],
+              FormSectionCard(
+                title: policy.policyNumber,
+                subtitle: '${policy.companyName} • ${policy.insuranceType}',
+                children: [
+                  DetailFieldRow(label: 'Premium', value: currency.format(policy.premiumAmount)),
+                  DetailFieldRow(
+                    label: 'Start Date',
+                    value: dateFormat.format(DateTime.fromMillisecondsSinceEpoch(policy.startDate)),
                   ),
-                ),
+                  DetailFieldRow(
+                    label: 'End Date',
+                    value: dateFormat.format(DateTime.fromMillisecondsSinceEpoch(policy.endDate)),
+                  ),
+                  DetailFieldRow(label: 'Status', value: policy.status),
+                  DetailFieldRow(label: 'Renewal Status', value: policy.renewalStatus),
+                  DetailFieldRow(label: 'Sync Status', value: policy.syncStatus),
+                  DetailFieldRow(label: 'Client ID', value: policy.clientId),
+                  DetailFieldRow(
+                    label: 'Vehicle',
+                    value: policy.vehicleNumber ?? policy.vehicleModel ?? 'Not applicable',
+                  ),
+                  DetailFieldRow(label: TranslationKeys.notes.tr, value: policy.notes ?? 'No notes'),
+                ],
               ),
-              SizedBox(height: responsive.sectionGap),
+              SizedBox(height: responsive.itemGap),
               if (controller.client.value?.mobile != null)
                 Wrap(
-                  spacing: responsive.scaled(12, min: 10),
-                  runSpacing: responsive.scaled(12, min: 10),
+                  spacing: 12,
+                  runSpacing: 12,
                   children: [
-                    OutlinedButton.icon(
-                      onPressed: () => controller.callClient(),
-                      icon: const Icon(Icons.call_outlined),
-                      label: const Text('Call'),
+                    AppButton(
+                      label: TranslationKeys.call.tr,
+                      icon: Icons.call_outlined,
+                      onPressed: controller.callClient,
+                      expanded: false,
                     ),
-                    OutlinedButton.icon(
+                    AppButton(
+                      label: TranslationKeys.whatsapp.tr,
+                      icon: Icons.chat_outlined,
+                      outlined: true,
+                      expanded: false,
                       onPressed: () => showWhatsAppTemplateSelector(
                         context: context,
                         mobile: controller.client.value!.mobile,
@@ -141,64 +114,42 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
                           premiumAmount: policy.premiumAmount,
                         ),
                       ),
-                      icon: const Icon(Icons.chat_outlined),
-                      label: const Text('WhatsApp'),
                     ),
                   ],
                 ),
-              SizedBox(height: responsive.scaled(12, min: 10)),
-              TextButton.icon(
-                onPressed: () async {
-                  final confirmed = await Get.dialog<bool>(
-                    AlertDialog(
-                      title: const Text('Delete policy'),
-                      content: Text('Soft-delete ${policy.policyNumber}?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Get.back(result: false),
-                          child: const Text('Cancel'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () => Get.back(result: true),
-                          child: const Text('Delete'),
-                        ),
-                      ],
-                    ),
-                  );
-                  if (confirmed == true) {
-                    await controller.deletePolicy();
-                  }
-                },
-                icon: const Icon(Icons.delete_outline),
-                label: const Text('Delete Policy'),
+              SizedBox(height: responsive.itemGap),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () async {
+                    final confirmed = await Get.dialog<bool>(
+                      AlertDialog(
+                        title: const Text('Delete policy'),
+                        content: Text('Soft-delete ${policy.policyNumber}?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Get.back(result: false),
+                            child: Text(TranslationKeys.cancel.tr),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => Get.back(result: true),
+                            child: Text(TranslationKeys.delete.tr),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirmed == true) {
+                      await controller.deletePolicy();
+                    }
+                  },
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('Delete Policy'),
+                ),
               ),
             ],
           ),
         );
       }),
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final responsive = context.responsive;
-
-    return Padding(
-      padding: EdgeInsets.only(bottom: responsive.scaled(10, min: 8)),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(width: responsive.detailLabelWidth, child: Text(label)),
-          Expanded(child: Text(value)),
-        ],
-      ),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/global_search_controller.dart';
+import 'package:ninaivu/presentation/modules/common/widgets/app_shell.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
 
 class GlobalSearchScreen extends GetView<GlobalSearchController> {
@@ -18,12 +19,9 @@ class GlobalSearchScreen extends GetView<GlobalSearchController> {
           children: [
             Padding(
               padding: EdgeInsets.all(responsive.pagePadding),
-              child: TextField(
+              child: AppSearchField(
                 controller: controller.queryController,
-                decoration: InputDecoration(
-                  hintText: TranslationKeys.searchHint.tr,
-                  prefixIcon: const Icon(Icons.search),
-                ),
+                hintText: TranslationKeys.searchHint.tr,
               ),
             ),
             Expanded(
@@ -52,9 +50,8 @@ class GlobalSearchScreen extends GetView<GlobalSearchController> {
                       title: TranslationKeys.groupedClients.tr,
                       children: controller.clients
                           .map(
-                            (client) => ListTile(
-                              title: Text(client.name),
-                              subtitle: Text(client.mobile),
+                            (client) => ClientCard(
+                              client: client,
                               onTap: () => Get.toNamed(
                                 AppRoutes.clientDetails,
                                 arguments: client.id,
@@ -67,11 +64,10 @@ class GlobalSearchScreen extends GetView<GlobalSearchController> {
                       title: TranslationKeys.groupedPolicies.tr,
                       children: controller.policies
                           .map(
-                            (policy) => ListTile(
-                              title: Text(policy.policyNumber),
-                              subtitle: Text(
-                                '${policy.insuranceType} • ${policy.vehicleNumber ?? policy.companyName}',
-                              ),
+                            (policy) => PolicyCard(
+                              policy: policy,
+                              subtitle:
+                                  '${policy.insuranceType} • ${policy.vehicleNumber ?? policy.companyName}',
                               onTap: () => Get.toNamed(
                                 AppRoutes.policyDetails,
                                 arguments: policy.id,
@@ -85,9 +81,11 @@ class GlobalSearchScreen extends GetView<GlobalSearchController> {
                         title: TranslationKeys.groupedAgents.tr,
                         children: controller.agents
                             .map(
-                              (agent) => ListTile(
-                                title: Text(agent.name),
-                                subtitle: Text(agent.mobile ?? agent.email ?? ''),
+                              (agent) => Card(
+                                child: ListTile(
+                                  title: Text(agent.name),
+                                  subtitle: Text(agent.mobile ?? agent.email ?? ''),
+                                ),
                               ),
                             )
                             .toList(),
@@ -115,16 +113,20 @@ class _Section extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final responsive = context.responsive;
-    return Card(
-      margin: EdgeInsets.only(bottom: responsive.itemGap),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: responsive.scaled(8, min: 8)),
-        child: Column(
-          children: [
-            ListTile(title: Text(title)),
-            ...children,
-          ],
-        ),
+    return Padding(
+      padding: EdgeInsets.only(bottom: responsive.itemGap),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SectionTitle(title: title),
+          SizedBox(height: responsive.scaled(10, min: 8)),
+          ...children.map(
+            (child) => Padding(
+              padding: EdgeInsets.only(bottom: responsive.scaled(10, min: 8)),
+              child: child,
+            ),
+          ),
+        ],
       ),
     );
   }

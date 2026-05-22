@@ -37,7 +37,7 @@ class AuthService {
       '302492772767-kjt4v9mmk9dh3n447alcadrumhi2qlq2.apps.googleusercontent.com';
   static Future<void>? _googleSignInInitialization;
 
-  final FirebaseAuth firebaseAuth;
+  final FirebaseAuth? firebaseAuth;
   final UserLocalDataSource userLocalDataSource;
   final UserRemoteDataSource userRemoteDataSource;
   final SyncQueueLocalDataSource _syncQueueLocalDataSource;
@@ -51,7 +51,7 @@ class AuthService {
     SyncQueueLocalDataSource? syncQueueLocalDataSource,
     SyncService? syncService,
     Uuid? uuid,
-  }) : firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
+  }) : firebaseAuth = firebaseAuth ?? _safeFirebaseAuthInstance(),
        userLocalDataSource = userLocalDataSource ?? UserLocalDataSource(),
        userRemoteDataSource = userRemoteDataSource ?? UserRemoteDataSource(),
        _syncQueueLocalDataSource =
@@ -59,25 +59,41 @@ class AuthService {
        _syncService = syncService ?? SyncService(),
        _uuid = uuid ?? const Uuid();
 
-  User? get currentUser => firebaseAuth.currentUser;
+  User? get currentUser => firebaseAuth?.currentUser;
 
   Future<void> checkAuthFromSplash() async {
     await Future.delayed(const Duration(seconds: 1));
 
-    final user = firebaseAuth.currentUser;
-    if (user == null) {
-      final preferences = await AppPreferences.getInstance();
-      await preferences.clearSession();
-      await BackgroundSyncService.instance.cancelAllTasks();
-      Get.offAllNamed(AppRoutes.login);
+    final preferences = await AppPreferences.getInstance();
+    final firebaseUser = firebaseAuth?.currentUser;
+    if (firebaseUser != null) {
+      await checkUserAfterLogin();
       return;
     }
 
-    await checkUserAfterLogin();
+    final restoredLocalUser = await _restoreOfflineSessionIfAvailable(
+      preferences,
+    );
+    if (restoredLocalUser != null) {
+      await BackgroundSyncService.instance.ensureRegistered();
+      if (restoredLocalUser.profileCompleted) {
+        _navigateByRole(restoredLocalUser.role);
+      } else {
+        Get.offAllNamed(AppRoutes.profileSetup);
+      }
+      return;
+    }
+
+    await preferences.clearSession();
+    await BackgroundSyncService.instance.cancelAllTasks();
+    Get.offAllNamed(AppRoutes.login);
   }
 
   Future<void> signInWithGoogle() async {
     try {
+      final auth = _requireFirebaseAuth(
+        action: 'Google sign-in',
+      );
       await _ensureGoogleSignInInitialized();
       final googleUser = await GoogleSignIn.instance.authenticate();
       final googleAuth = googleUser.authentication;
@@ -88,7 +104,7 @@ class AuthService {
       }
 
       final credential = GoogleAuthProvider.credential(idToken: idToken);
-      await firebaseAuth.signInWithCredential(credential);
+      await auth.signInWithCredential(credential);
       await checkUserAfterLogin();
     } on GoogleSignInException catch (e) {
       throw Exception(e.description ?? 'Google login failed');
@@ -98,6 +114,9 @@ class AuthService {
       final message = _errorMessage(e);
       if (_looksLikeGoogleReauthIssue(message)) {
         try {
+          final auth = _requireFirebaseAuth(
+            action: 'Google sign-in',
+          );
           await _ensureGoogleSignInInitialized();
           await GoogleSignIn.instance.signOut();
           final googleUser = await GoogleSignIn.instance.authenticate();
@@ -109,7 +128,7 @@ class AuthService {
           }
 
           final credential = GoogleAuthProvider.credential(idToken: idToken);
-          await firebaseAuth.signInWithCredential(credential);
+          await auth.signInWithCredential(credential);
           await checkUserAfterLogin();
           return;
         } on GoogleSignInException catch (retryError) {
@@ -130,13 +149,14 @@ class AuthService {
   Future<void> sendOtp({required String mobileNumber}) async {
     final completer = Completer<void>();
     final formattedNumber = _formatIndianPhoneNumber(mobileNumber);
+    final auth = _requireFirebaseAuth(action: 'Phone sign-in');
 
-    await firebaseAuth.verifyPhoneNumber(
+    await auth.verifyPhoneNumber(
       phoneNumber: formattedNumber,
       timeout: const Duration(seconds: 60),
       verificationCompleted: (PhoneAuthCredential credential) async {
         try {
-          await firebaseAuth.signInWithCredential(credential);
+          await auth.signInWithCredential(credential);
           await checkUserAfterLogin();
           if (!completer.isCompleted) {
             completer.complete();
@@ -187,14 +207,15 @@ class AuthService {
   }) async {
     final completer = Completer<OtpSendResult>();
     final formattedNumber = _formatIndianPhoneNumber(mobileNumber);
+    final auth = _requireFirebaseAuth(action: 'OTP resend');
 
-    await firebaseAuth.verifyPhoneNumber(
+    await auth.verifyPhoneNumber(
       phoneNumber: formattedNumber,
       timeout: const Duration(seconds: 60),
       forceResendingToken: resendToken,
       verificationCompleted: (PhoneAuthCredential credential) async {
         try {
-          await firebaseAuth.signInWithCredential(credential);
+          await auth.signInWithCredential(credential);
           await checkUserAfterLogin();
           if (!completer.isCompleted) {
             completer.complete(
@@ -243,12 +264,13 @@ class AuthService {
     required String otp,
   }) async {
     try {
+      final auth = _requireFirebaseAuth(action: 'OTP verification');
       final credential = PhoneAuthProvider.credential(
         verificationId: verificationId,
         smsCode: otp,
       );
 
-      await firebaseAuth.signInWithCredential(credential);
+      await auth.signInWithCredential(credential);
       await checkUserAfterLogin();
     } on FirebaseAuthException catch (e) {
       throw Exception(_friendlyAuthError(e, fallback: 'Invalid OTP'));
@@ -258,15 +280,27 @@ class AuthService {
   }
 
   Future<void> checkUserAfterLogin() async {
-    final firebaseUser = firebaseAuth.currentUser;
+    final firebaseUser = firebaseAuth?.currentUser;
+    final preferences = await AppPreferences.getInstance();
     if (firebaseUser == null) {
-      final preferences = await AppPreferences.getInstance();
+      final restoredLocalUser = await _restoreOfflineSessionIfAvailable(
+        preferences,
+      );
+      if (restoredLocalUser != null) {
+        await BackgroundSyncService.instance.ensureRegistered();
+        if (restoredLocalUser.profileCompleted) {
+          _navigateByRole(restoredLocalUser.role);
+        } else {
+          Get.offAllNamed(AppRoutes.profileSetup);
+        }
+        return;
+      }
+
       await preferences.clearSession();
       Get.offAllNamed(AppRoutes.login);
       return;
     }
 
-    final preferences = await AppPreferences.getInstance();
     final localUser = await userLocalDataSource.getUserById(firebaseUser.uid);
 
     // A completed local profile is enough to restore the app immediately, which
@@ -352,10 +386,12 @@ class AuthService {
     required String? email,
     required String inviteCode,
   }) async {
-    final firebaseUser = firebaseAuth.currentUser;
+    final firebaseUser = firebaseAuth?.currentUser;
     if (firebaseUser == null) {
-      Get.offAllNamed(AppRoutes.login);
-      return;
+      throw Exception(
+        'Profile setup requires an authenticated online session. '
+        'Please sign in again when connectivity is available.',
+      );
     }
 
     final role = _getRoleFromInviteCode(inviteCode);
@@ -408,7 +444,7 @@ class AuthService {
   }
 
   Future<void> logout() async {
-    await firebaseAuth.signOut();
+    await firebaseAuth?.signOut();
     await GoogleSignIn.instance.signOut();
     final preferences = await AppPreferences.getInstance();
     await preferences.clearSession();
@@ -520,5 +556,46 @@ class AuthService {
               : _googleServerClientId,
         );
     return initialization;
+  }
+
+  Future<AppUserModel?> _restoreOfflineSessionIfAvailable(
+    AppPreferences preferences,
+  ) async {
+    final userId = preferences.userId;
+    if (userId == null || userId.isEmpty) {
+      return null;
+    }
+
+    final localUser = await userLocalDataSource.getUserById(userId);
+    if (localUser == null || localUser.isDeleted) {
+      return null;
+    }
+
+    await preferences.saveSession(
+      userId: localUser.id,
+      role: localUser.role,
+      businessId: localUser.businessId,
+    );
+    return localUser;
+  }
+
+  FirebaseAuth _requireFirebaseAuth({required String action}) {
+    final auth = firebaseAuth;
+    if (auth != null) {
+      return auth;
+    }
+
+    throw Exception(
+      '$action is unavailable until Firebase finishes initializing. '
+      'Offline data already saved on this device is still available.',
+    );
+  }
+
+  static FirebaseAuth? _safeFirebaseAuthInstance() {
+    try {
+      return FirebaseAuth.instance;
+    } catch (_) {
+      return null;
+    }
   }
 }

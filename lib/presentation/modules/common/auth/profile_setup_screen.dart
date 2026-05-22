@@ -20,7 +20,13 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
   bool _isLoading = false;
 
-  User? get _firebaseUser => FirebaseAuth.instance.currentUser;
+  User? get _firebaseUser {
+    try {
+      return FirebaseAuth.instance.currentUser;
+    } catch (_) {
+      return null;
+    }
+  }
 
   @override
   void initState() {
