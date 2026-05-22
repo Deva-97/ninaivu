@@ -2,10 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ninaivu/data/models/client_model.dart';
 
 class ClientRemoteDataSource {
-  ClientRemoteDataSource({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance;
+  ClientRemoteDataSource({FirebaseFirestore? firestore}) : _firestore = firestore;
 
-  final FirebaseFirestore _firestore;
+  FirebaseFirestore? _firestore;
 
   Future<void> upsertClient(ClientModel client) async {
     await _collection(client.businessId).doc(client.id).set(
@@ -22,7 +21,7 @@ class ClientRemoteDataSource {
   }
 
   CollectionReference<Map<String, dynamic>> _collection(String businessId) {
-    return _firestore
+    return (_firestore ??= FirebaseFirestore.instance)
         .collection('businesses')
         .doc(businessId)
         .collection('clients');

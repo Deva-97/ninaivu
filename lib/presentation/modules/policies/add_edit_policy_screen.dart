@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
+import 'package:ninaivu/core/localization/localized_value_helper.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/policy_form_controller.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/app_shell.dart';
@@ -16,7 +18,11 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(controller.editingPolicy == null ? 'Add Policy' : 'Edit Policy'),
+        title: Text(
+          controller.editingPolicy == null
+              ? TranslationKeys.addPolicy.tr
+              : '${TranslationKeys.edit.tr} ${TranslationKeys.policyLabel.tr}',
+        ),
       ),
       body: Form(
         key: controller.formKey,
@@ -25,12 +31,12 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
             padding: EdgeInsets.all(responsive.pagePadding),
             children: [
               FormSectionCard(
-                title: 'Client Information',
-                subtitle: 'Link the policy to an existing client before saving.',
+                title: TranslationKeys.clientInformation.tr,
+                subtitle: TranslationKeys.policiesLinkedToClient.tr,
                 children: [
                   Obx(
                     () => SearchableClientPicker(
-                      label: 'Client',
+                      label: TranslationKeys.clientLabel.tr,
                       selectedClient: controller.selectedClient.value,
                       errorText: controller.clientValidationMessage.value,
                       onSearch: controller.searchClients,
@@ -41,14 +47,19 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
               ),
               SizedBox(height: responsive.itemGap),
               FormSectionCard(
-                title: 'Policy Details',
+                title: TranslationKeys.policyDetails.tr,
                 children: [
                   Obx(
                     () => DropdownButtonFormField<String>(
                       initialValue: controller.selectedInsuranceType.value,
-                      decoration: const InputDecoration(labelText: 'Insurance Type'),
+                      decoration: InputDecoration(labelText: TranslationKeys.insuranceType.tr),
                       items: PolicyFormController.insuranceTypes
-                          .map((item) => DropdownMenuItem<String>(value: item, child: Text(item)))
+                          .map(
+                            (item) => DropdownMenuItem<String>(
+                              value: item,
+                              child: Text(LocalizedValueHelper.policyInsuranceType(item)),
+                            ),
+                          )
                           .toList(),
                       onChanged: (value) {
                         if (value != null) {
@@ -60,25 +71,30 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
                   TextFormField(
                     controller: controller.policyNumberController,
                     validator: (value) => controller.validateRequired(value, 'policy number'),
-                    decoration: const InputDecoration(labelText: 'Policy Number'),
+                    decoration: InputDecoration(labelText: TranslationKeys.policyNumber.tr),
                   ),
                   TextFormField(
                     controller: controller.companyNameController,
                     validator: (value) => controller.validateRequired(value, 'company name'),
-                    decoration: const InputDecoration(labelText: 'Company Name'),
+                    decoration: InputDecoration(labelText: TranslationKeys.companyName.tr),
                   ),
                   TextFormField(
                     controller: controller.premiumController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     validator: controller.validatePremium,
-                    decoration: const InputDecoration(labelText: 'Premium Amount'),
+                    decoration: InputDecoration(labelText: TranslationKeys.premiumAmount.tr),
                   ),
                   Obx(
                     () => DropdownButtonFormField<String>(
                       initialValue: controller.selectedPaymentFrequency.value,
-                      decoration: const InputDecoration(labelText: 'Payment Frequency'),
+                      decoration: InputDecoration(labelText: TranslationKeys.paymentFrequency.tr),
                       items: PolicyFormController.paymentFrequencies
-                          .map((item) => DropdownMenuItem<String>(value: item, child: Text(item)))
+                          .map(
+                            (item) => DropdownMenuItem<String>(
+                              value: item,
+                              child: Text(LocalizedValueHelper.paymentFrequency(item)),
+                            ),
+                          )
                           .toList(),
                       onChanged: (value) {
                         if (value != null) {
@@ -90,9 +106,14 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
                   Obx(
                     () => DropdownButtonFormField<String>(
                       initialValue: controller.selectedStatus.value,
-                      decoration: const InputDecoration(labelText: 'Status'),
+                      decoration: InputDecoration(labelText: TranslationKeys.status.tr),
                       items: PolicyFormController.policyStatuses
-                          .map((item) => DropdownMenuItem<String>(value: item, child: Text(item)))
+                          .map(
+                            (item) => DropdownMenuItem<String>(
+                              value: item,
+                              child: Text(LocalizedValueHelper.policyStatus(item)),
+                            ),
+                          )
                           .toList(),
                       onChanged: (value) {
                         if (value != null) {
@@ -104,9 +125,14 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
                   Obx(
                     () => DropdownButtonFormField<String>(
                       initialValue: controller.selectedRenewalStatus.value,
-                      decoration: const InputDecoration(labelText: 'Renewal Status'),
+                      decoration: InputDecoration(labelText: TranslationKeys.renewalStatus.tr),
                       items: PolicyFormController.renewalStatuses
-                          .map((item) => DropdownMenuItem<String>(value: item, child: Text(item)))
+                          .map(
+                            (item) => DropdownMenuItem<String>(
+                              value: item,
+                              child: Text(LocalizedValueHelper.renewalStatus(item)),
+                            ),
+                          )
                           .toList(),
                       onChanged: (value) {
                         if (value != null) {
@@ -118,7 +144,7 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
                   Obx(
                     () => ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Start Date'),
+                      title: Text(TranslationKeys.startDate.tr),
                       subtitle: Text(dateFormat.format(controller.startDate.value)),
                       trailing: const Icon(Icons.calendar_today_outlined),
                       onTap: () => controller.pickDate(context: context, isStartDate: true),
@@ -127,7 +153,7 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
                   Obx(
                     () => ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('End Date'),
+                      title: Text(TranslationKeys.endDate.tr),
                       subtitle: Text(dateFormat.format(controller.endDate.value)),
                       trailing: const Icon(Icons.calendar_today_outlined),
                       onTap: () => controller.pickDate(context: context, isStartDate: false),
@@ -137,21 +163,21 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
               ),
               SizedBox(height: responsive.itemGap),
               FormSectionCard(
-                title: 'Optional Details',
+                title: TranslationKeys.optionalDetails.tr,
                 children: [
                   TextFormField(
                     controller: controller.vehicleNumberController,
-                    decoration: const InputDecoration(labelText: 'Vehicle Number'),
+                    decoration: InputDecoration(labelText: TranslationKeys.vehicleNumber.tr),
                   ),
                   TextFormField(
                     controller: controller.vehicleModelController,
-                    decoration: const InputDecoration(labelText: 'Vehicle Model'),
+                    decoration: InputDecoration(labelText: TranslationKeys.vehicleModel.tr),
                   ),
                   TextFormField(
                     controller: controller.notesController,
                     minLines: 3,
                     maxLines: 5,
-                    decoration: const InputDecoration(labelText: 'Notes'),
+                    decoration: InputDecoration(labelText: TranslationKeys.notes.tr),
                   ),
                 ],
               ),
@@ -160,7 +186,9 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
                 () => SizedBox(
                   height: responsive.buttonHeight,
                   child: AppButton(
-                    label: controller.editingPolicy == null ? 'Save Policy' : 'Update Policy',
+                    label: controller.editingPolicy == null
+                        ? TranslationKeys.savePolicy.tr
+                        : TranslationKeys.updatePolicy.tr,
                     onPressed: controller.submit,
                     isLoading: controller.isSaving.value,
                   ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/validation/policy_validator.dart';
 import 'package:ninaivu/domain/entities/client.dart';
 import 'package:ninaivu/data/models/policy_model.dart';
@@ -164,7 +165,7 @@ class PolicyFormController extends GetxController {
       return;
     }
     if (selectedClient.value == null) {
-      clientValidationMessage.value = 'Select a client before saving';
+      clientValidationMessage.value = TranslationKeys.selectClientBeforeSaving.tr;
       return;
     }
 
@@ -173,7 +174,7 @@ class PolicyFormController extends GetxController {
       endDate: endDate.value,
     );
     if (dateError != null) {
-      Get.snackbar('Invalid dates', dateError);
+      Get.snackbar(TranslationKeys.invalidDates.tr, dateError);
       return;
     }
 
@@ -218,7 +219,10 @@ class PolicyFormController extends GetxController {
 
       Get.back(result: true);
     } catch (e) {
-      Get.snackbar('Unable to save', e.toString().replaceFirst('Exception: ', ''));
+      Get.snackbar(
+        TranslationKeys.unableToSave.tr,
+        e.toString().replaceFirst('Exception: ', ''),
+      );
     } finally {
       isSaving.value = false;
     }
@@ -226,7 +230,7 @@ class PolicyFormController extends GetxController {
 
   String? validateRequired(String? value, String fieldName) {
     if (value == null || value.trim().isEmpty) {
-      return 'Enter $fieldName';
+      return '${TranslationKeys.enterFieldPrefix.tr} $fieldName';
     }
     return null;
   }
@@ -244,11 +248,11 @@ class PolicyFormController extends GetxController {
 
   String? validatePremium(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Enter premium amount';
+      return TranslationKeys.enterPremiumAmount.tr;
     }
     final premium = double.tryParse(value.trim());
     if (premium == null || premium <= 0) {
-      return 'Enter a valid positive amount';
+      return TranslationKeys.enterValidPositiveAmount.tr;
     }
     return null;
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
+import 'package:ninaivu/core/localization/localized_value_helper.dart';
 import 'package:ninaivu/core/utils/whatsapp_template_builder.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/reminder_detail_controller.dart';
@@ -15,16 +17,16 @@ class ReminderDetailScreen extends GetView<ReminderDetailController> {
     final responsive = context.responsive;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Reminder Details')),
+      appBar: AppBar(title: Text(TranslationKeys.reminderDetails.tr)),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const AppLoadingView(message: 'Loading reminder...');
+          return AppLoadingView(message: TranslationKeys.loadingReminder.tr);
         }
 
         final error = controller.errorMessage.value;
         if (error != null) {
           return AppErrorView(
-            title: 'Unable to load reminder',
+            title: TranslationKeys.unableToLoadReminder.tr,
             message: error,
             onRetry: controller.loadReminder,
           );
@@ -32,10 +34,10 @@ class ReminderDetailScreen extends GetView<ReminderDetailController> {
 
         final reminder = controller.reminder.value;
         if (reminder == null) {
-          return const AppEmptyState(
+          return AppEmptyState(
             icon: Icons.notifications_off_outlined,
-            title: 'Reminder unavailable',
-            subtitle: 'This reminder could not be found.',
+            title: TranslationKeys.reminderUnavailable.tr,
+            subtitle: TranslationKeys.reminderNotFound.tr,
           );
         }
 
@@ -50,26 +52,27 @@ class ReminderDetailScreen extends GetView<ReminderDetailController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        reminder.clientName ?? 'Client ${reminder.clientId}',
+                        reminder.clientName ??
+                            '${TranslationKeys.clientLabel.tr} ${reminder.clientId}',
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       SizedBox(height: responsive.itemGap),
                       StatusBadge(label: _statusLabel(reminder.status)),
                       SizedBox(height: responsive.scaled(18, min: 14)),
                       _DetailRow(
-                        label: 'Policy',
+                        label: TranslationKeys.policyLabel.tr,
                         value: reminder.policyNumber ?? reminder.policyId,
                       ),
                       _DetailRow(
-                        label: 'Company',
-                        value: reminder.companyName ?? 'Not available',
+                        label: TranslationKeys.company.tr,
+                        value: reminder.companyName ?? TranslationKeys.notAvailable.tr,
                       ),
                       _DetailRow(
-                        label: 'Reminder Type',
-                        value: reminder.reminderType,
+                        label: TranslationKeys.reminderType.tr,
+                        value: LocalizedValueHelper.reminderType(reminder.reminderType),
                       ),
                       _DetailRow(
-                        label: 'Schedule',
+                        label: TranslationKeys.schedule.tr,
                         value: dateFormat.format(
                           DateTime.fromMillisecondsSinceEpoch(
                             reminder.reminderDateTime,
@@ -77,13 +80,12 @@ class ReminderDetailScreen extends GetView<ReminderDetailController> {
                         ),
                       ),
                       _DetailRow(
-                        label: 'Notification ID',
-                        value:
-                            reminder.notificationId?.toString() ??
-                            'Not scheduled',
+                        label: TranslationKeys.notificationId.tr,
+                        value: reminder.notificationId?.toString() ??
+                            TranslationKeys.notScheduled.tr,
                       ),
                       _DetailRow(
-                        label: 'Sync Status',
+                        label: TranslationKeys.syncStatus.tr,
                         value: reminder.syncStatus,
                       ),
                     ],
@@ -100,7 +102,7 @@ class ReminderDetailScreen extends GetView<ReminderDetailController> {
                       OutlinedButton.icon(
                         onPressed: controller.callClient,
                         icon: const Icon(Icons.call_outlined),
-                        label: const Text('Call'),
+                        label: Text(TranslationKeys.call.tr),
                       ),
                       OutlinedButton.icon(
                         onPressed: () => showWhatsAppTemplateSelector(
@@ -114,7 +116,7 @@ class ReminderDetailScreen extends GetView<ReminderDetailController> {
                           ),
                         ),
                         icon: const Icon(Icons.chat_outlined),
-                        label: const Text('WhatsApp'),
+                        label: Text(TranslationKeys.whatsapp.tr),
                       ),
                     ],
                   ),
@@ -126,7 +128,7 @@ class ReminderDetailScreen extends GetView<ReminderDetailController> {
                     SizedBox(
                       height: responsive.compactButtonHeight,
                       child: AppButton(
-                        label: 'Mark Completed',
+                        label: TranslationKeys.markCompleted.tr,
                         onPressed: controller.markCompleted,
                         isLoading: controller.isUpdating.value,
                       ),
@@ -136,7 +138,7 @@ class ReminderDetailScreen extends GetView<ReminderDetailController> {
                       height: responsive.compactButtonHeight,
                       child: OutlinedButton(
                         onPressed: controller.markRenewed,
-                        child: const Text('Mark Renewed'),
+                        child: Text(TranslationKeys.markRenewed.tr),
                       ),
                     ),
                   ],
@@ -151,8 +153,12 @@ class ReminderDetailScreen extends GetView<ReminderDetailController> {
   String _statusLabel(String status) {
     final normalized = status.trim().toLowerCase();
     if (normalized.isEmpty) {
-      return 'Pending';
+      return TranslationKeys.pending.tr;
     }
+    if (normalized == 'completed') return TranslationKeys.completed.tr;
+    if (normalized == 'cancelled') return TranslationKeys.cancelled.tr;
+    if (normalized == 'pending') return TranslationKeys.pending.tr;
+    if (normalized == 'missed') return TranslationKeys.missed.tr;
     return normalized[0].toUpperCase() + normalized.substring(1);
   }
 }

@@ -2,10 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ninaivu/data/models/reminder_model.dart';
 
 class ReminderRemoteDataSource {
-  ReminderRemoteDataSource({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance;
+  ReminderRemoteDataSource({FirebaseFirestore? firestore}) : _firestore = firestore;
 
-  final FirebaseFirestore _firestore;
+  FirebaseFirestore? _firestore;
 
   Future<void> upsertReminder(ReminderModel reminder) async {
     await _collection(reminder.businessId).doc(reminder.id).set(
@@ -22,7 +21,7 @@ class ReminderRemoteDataSource {
   }
 
   CollectionReference<Map<String, dynamic>> _collection(String businessId) {
-    return _firestore
+    return (_firestore ??= FirebaseFirestore.instance)
         .collection('businesses')
         .doc(businessId)
         .collection('reminders');

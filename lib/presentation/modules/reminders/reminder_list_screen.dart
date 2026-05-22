@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/reminder_list_controller.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/app_shell.dart';
@@ -9,13 +10,13 @@ import 'package:ninaivu/presentation/routes/app_routes.dart';
 class ReminderListScreen extends GetView<ReminderListController> {
   const ReminderListScreen({super.key});
 
-  static const filters = <MapEntry<String, String>>[
-    MapEntry('pending', 'All upcoming'),
-    MapEntry('today', 'Today'),
-    MapEntry('upcoming7days', 'Upcoming 7 days'),
-    MapEntry('upcoming30days', 'Upcoming 30 days'),
-    MapEntry('missed', 'Missed'),
-    MapEntry('completed', 'Completed'),
+  static final filters = <MapEntry<String, String>>[
+    MapEntry('pending', TranslationKeys.allUpcoming.tr),
+    MapEntry('today', TranslationKeys.today.tr),
+    MapEntry('upcoming7days', TranslationKeys.upcoming7Days.tr),
+    MapEntry('upcoming30days', TranslationKeys.upcoming30Days.tr),
+    MapEntry('missed', TranslationKeys.missed.tr),
+    MapEntry('completed', TranslationKeys.completed.tr),
   ];
 
   @override
@@ -24,7 +25,7 @@ class ReminderListScreen extends GetView<ReminderListController> {
     final responsive = context.responsive;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Renewal Reminders')),
+      appBar: AppBar(title: Text(TranslationKeys.renewalReminders.tr)),
       body: Column(
         children: [
           Obx(
@@ -39,21 +40,21 @@ class ReminderListScreen extends GetView<ReminderListController> {
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
-                return const AppLoadingView(message: 'Loading reminders...');
+                return AppLoadingView(message: TranslationKeys.loadingReminders.tr);
               }
               final error = controller.errorMessage.value;
               if (error != null) {
                 return AppErrorView(
-                  title: 'Unable to load reminders',
+                  title: TranslationKeys.unableToLoadReminders.tr,
                   message: error,
                   onRetry: controller.loadReminders,
                 );
               }
               if (controller.reminders.isEmpty) {
-                return const AppEmptyState(
+                return AppEmptyState(
                   icon: Icons.notifications_none_rounded,
-                  title: 'No reminders found',
-                  subtitle: 'Renewal reminders will appear here once policies are due.',
+                  title: TranslationKeys.noRemindersFound.tr,
+                  subtitle: TranslationKeys.noRemindersSubtitle.tr,
                 );
               }
               return RefreshIndicator(
@@ -67,13 +68,17 @@ class ReminderListScreen extends GetView<ReminderListController> {
                       responsive.pagePadding,
                     ),
                     itemCount: controller.reminders.length,
-                    separatorBuilder: (_, _) => SizedBox(height: responsive.scaled(12, min: 10)),
+                    separatorBuilder: (_, _) =>
+                        SizedBox(height: responsive.scaled(12, min: 10)),
                     itemBuilder: (context, index) {
                       final reminder = controller.reminders[index];
                       return ReminderCard(
                         reminder: reminder,
                         subtitle:
-                            '${reminder.policyNumber ?? 'Policy'} • ${reminder.companyName ?? 'Insurance'}\n${reminder.reminderType} • ${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(reminder.reminderDateTime))}',
+                            '${reminder.policyNumber ?? TranslationKeys.policyLabel.tr} - '
+                            '${reminder.companyName ?? TranslationKeys.insuranceLabel.tr}\n'
+                            '${reminder.reminderType} - '
+                            '${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(reminder.reminderDateTime))}',
                         onTap: () async {
                           final refreshed = await Get.toNamed(
                             AppRoutes.reminderDetails,

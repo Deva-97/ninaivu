@@ -10,10 +10,11 @@ class UserFetchUnavailableException implements Exception {
 }
 
 class UserRemoteDataSource {
-  UserRemoteDataSource({FirebaseFirestore? firestore})
-    : firestore = firestore ?? FirebaseFirestore.instance;
+  UserRemoteDataSource({FirebaseFirestore? firestore}) : _firestore = firestore;
 
-  final FirebaseFirestore firestore;
+  FirebaseFirestore? _firestore;
+
+  FirebaseFirestore get firestore => _firestore ??= FirebaseFirestore.instance;
 
   static const String defaultBusinessId = 'default_business';
 

@@ -17,6 +17,16 @@ import 'package:ninaivu/data/datasources/remote/reminder_remote_data_source.dart
 import 'package:ninaivu/data/datasources/remote/user_remote_data_source.dart';
 import 'package:ninaivu/data/models/sync_queue_model.dart';
 
+typedef SyncLogWriter = Future<void> Function(String message);
+typedef SyncErrorRecorder =
+    Future<void> Function(
+      Object error,
+      StackTrace stackTrace, {
+      required String reason,
+      required bool fatal,
+    });
+typedef SyncOnlineStatusChecker = Future<bool> Function();
+
 class SyncFailureException implements Exception {
   const SyncFailureException(this.message);
 
@@ -45,6 +55,9 @@ class SyncService {
     ReminderRemoteDataSource? reminderRemoteDataSource,
     FollowUpRemoteDataSource? followUpRemoteDataSource,
     Connectivity? connectivity,
+    SyncOnlineStatusChecker? onlineStatusChecker,
+    SyncLogWriter? logWriter,
+    SyncErrorRecorder? errorRecorder,
   }) : _syncQueueLocalDataSource =
            syncQueueLocalDataSource ?? SyncQueueLocalDataSource(),
        _userLocalDataSource = userLocalDataSource ?? UserLocalDataSource(),
@@ -56,16 +69,25 @@ class SyncService {
            reminderLocalDataSource ?? ReminderLocalDataSource(),
        _followUpLocalDataSource =
            followUpLocalDataSource ?? FollowUpLocalDataSource(),
-       _userRemoteDataSource = userRemoteDataSource ?? UserRemoteDataSource(),
-       _clientRemoteDataSource =
-           clientRemoteDataSource ?? ClientRemoteDataSource(),
-       _policyRemoteDataSource =
-           policyRemoteDataSource ?? PolicyRemoteDataSource(),
-       _reminderRemoteDataSource =
-           reminderRemoteDataSource ?? ReminderRemoteDataSource(),
-       _followUpRemoteDataSource =
-           followUpRemoteDataSource ?? FollowUpRemoteDataSource(),
-       _connectivity = connectivity ?? Connectivity();
+       _userRemoteDataSource = userRemoteDataSource,
+       _clientRemoteDataSource = clientRemoteDataSource,
+       _policyRemoteDataSource = policyRemoteDataSource,
+       _reminderRemoteDataSource = reminderRemoteDataSource,
+       _followUpRemoteDataSource = followUpRemoteDataSource,
+       _connectivity = connectivity ?? Connectivity(),
+       _onlineStatusChecker = onlineStatusChecker,
+       _logWriter =
+           logWriter ?? ((message) => FirebaseCrashlytics.instance.log(message)),
+       _errorRecorder =
+           errorRecorder ??
+           ((error, stackTrace, {required reason, required fatal}) {
+             return FirebaseCrashlytics.instance.recordError(
+               error,
+               stackTrace,
+               reason: reason,
+               fatal: fatal,
+             );
+           });
 
   final SyncQueueLocalDataSource _syncQueueLocalDataSource;
   final UserLocalDataSource _userLocalDataSource;
@@ -73,17 +95,34 @@ class SyncService {
   final PolicyLocalDataSource _policyLocalDataSource;
   final ReminderLocalDataSource _reminderLocalDataSource;
   final FollowUpLocalDataSource _followUpLocalDataSource;
-  final UserRemoteDataSource _userRemoteDataSource;
-  final ClientRemoteDataSource _clientRemoteDataSource;
-  final PolicyRemoteDataSource _policyRemoteDataSource;
-  final ReminderRemoteDataSource _reminderRemoteDataSource;
-  final FollowUpRemoteDataSource _followUpRemoteDataSource;
+  UserRemoteDataSource? _userRemoteDataSource;
+  ClientRemoteDataSource? _clientRemoteDataSource;
+  PolicyRemoteDataSource? _policyRemoteDataSource;
+  ReminderRemoteDataSource? _reminderRemoteDataSource;
+  FollowUpRemoteDataSource? _followUpRemoteDataSource;
   final Connectivity _connectivity;
+  final SyncOnlineStatusChecker? _onlineStatusChecker;
+  final SyncLogWriter _logWriter;
+  final SyncErrorRecorder _errorRecorder;
 
   static const int retryThreshold = 5;
   static Future<int>? _activeSyncOperation;
 
+  UserRemoteDataSource get _resolvedUserRemoteDataSource =>
+      _userRemoteDataSource ??= UserRemoteDataSource();
+  ClientRemoteDataSource get _resolvedClientRemoteDataSource =>
+      _clientRemoteDataSource ??= ClientRemoteDataSource();
+  PolicyRemoteDataSource get _resolvedPolicyRemoteDataSource =>
+      _policyRemoteDataSource ??= PolicyRemoteDataSource();
+  ReminderRemoteDataSource get _resolvedReminderRemoteDataSource =>
+      _reminderRemoteDataSource ??= ReminderRemoteDataSource();
+  FollowUpRemoteDataSource get _resolvedFollowUpRemoteDataSource =>
+      _followUpRemoteDataSource ??= FollowUpRemoteDataSource();
+
   Future<bool> isOnline() async {
+    if (_onlineStatusChecker != null) {
+      return _onlineStatusChecker();
+    }
     final results = await _connectivity.checkConnectivity();
     return !results.contains(ConnectivityResult.none);
   }
@@ -116,16 +155,16 @@ class SyncService {
   /// Firebase availability improves.
   Future<int> syncPendingDataBestEffort({
     bool removeSyncedQueueItems = true,
-  }) async {
+    }) async {
     try {
       return await syncPendingData(
         removeSyncedQueueItems: removeSyncedQueueItems,
       );
     } catch (error, stackTrace) {
-      FirebaseCrashlytics.instance.log(
+      await _logWriter(
         'Best-effort sync deferred queued changes: $error',
       );
-      FirebaseCrashlytics.instance.recordError(
+      await _errorRecorder(
         error,
         stackTrace,
         reason: 'Best-effort sync deferred queued changes',
@@ -168,10 +207,10 @@ class SyncService {
 
         // Failures are persisted back into the queue so background retries can
         // continue later without losing context about what went wrong.
-        FirebaseCrashlytics.instance.log(
+        await _logWriter(
           'Sync failure for ${item.tableName}/${item.recordId}: $errorMessage',
         );
-        FirebaseCrashlytics.instance.recordError(
+        await _errorRecorder(
           error,
           stackTrace,
           reason: 'Failed syncing ${item.tableName}/${item.recordId}',
@@ -219,7 +258,7 @@ class SyncService {
     }
 
     try {
-      await _userRemoteDataSource.upsertUser(currentUser);
+      await _resolvedUserRemoteDataSource.upsertUser(currentUser);
       await _userLocalDataSource.markUserSynced(currentUser.id);
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
@@ -256,7 +295,7 @@ class SyncService {
 
   Future<void> _syncUser(SyncQueueModel item) async {
     if (item.operation == 'delete') {
-      await _userRemoteDataSource.deleteUser(
+      await _resolvedUserRemoteDataSource.deleteUser(
         businessId: item.businessId,
         userId: item.recordId,
       );
@@ -269,12 +308,12 @@ class SyncService {
     if (user == null) {
       throw Exception('User ${item.recordId} missing locally');
     }
-    await _userRemoteDataSource.upsertUser(user);
+    await _resolvedUserRemoteDataSource.upsertUser(user);
   }
 
   Future<void> _syncClient(SyncQueueModel item) async {
     if (item.operation == 'delete') {
-      await _clientRemoteDataSource.deleteClient(
+      await _resolvedClientRemoteDataSource.deleteClient(
         businessId: item.businessId,
         clientId: item.recordId,
       );
@@ -287,12 +326,12 @@ class SyncService {
     if (client == null) {
       throw Exception('Client ${item.recordId} missing locally');
     }
-    await _clientRemoteDataSource.upsertClient(client);
+    await _resolvedClientRemoteDataSource.upsertClient(client);
   }
 
   Future<void> _syncPolicy(SyncQueueModel item) async {
     if (item.operation == 'delete') {
-      await _policyRemoteDataSource.deletePolicy(
+      await _resolvedPolicyRemoteDataSource.deletePolicy(
         businessId: item.businessId,
         policyId: item.recordId,
       );
@@ -305,12 +344,12 @@ class SyncService {
     if (policy == null) {
       throw Exception('Policy ${item.recordId} missing locally');
     }
-    await _policyRemoteDataSource.upsertPolicy(policy);
+    await _resolvedPolicyRemoteDataSource.upsertPolicy(policy);
   }
 
   Future<void> _syncReminder(SyncQueueModel item) async {
     if (item.operation == 'delete') {
-      await _reminderRemoteDataSource.deleteReminder(
+      await _resolvedReminderRemoteDataSource.deleteReminder(
         businessId: item.businessId,
         reminderId: item.recordId,
       );
@@ -322,12 +361,12 @@ class SyncService {
     if (reminder == null) {
       throw Exception('Reminder ${item.recordId} missing locally');
     }
-    await _reminderRemoteDataSource.upsertReminder(reminder);
+    await _resolvedReminderRemoteDataSource.upsertReminder(reminder);
   }
 
   Future<void> _syncFollowUp(SyncQueueModel item) async {
     if (item.operation == 'delete') {
-      await _followUpRemoteDataSource.deleteFollowUp(
+      await _resolvedFollowUpRemoteDataSource.deleteFollowUp(
         businessId: item.businessId,
         followUpId: item.recordId,
       );
@@ -339,7 +378,7 @@ class SyncService {
     if (followUp == null) {
       throw Exception('Follow-up ${item.recordId} missing locally');
     }
-    await _followUpRemoteDataSource.upsertFollowUp(followUp);
+    await _resolvedFollowUpRemoteDataSource.upsertFollowUp(followUp);
   }
 
   Future<void> _markLocalRecordSynced(SyncQueueModel item) async {

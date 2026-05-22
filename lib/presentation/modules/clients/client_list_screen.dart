@@ -18,7 +18,7 @@ class ClientListScreen extends GetView<ClientListController> {
       currentTab: AppShellTab.clients,
       dashboardRoute: AppRoutes.agentDashboard,
       title: TranslationKeys.clients.tr,
-      subtitle: 'Search and manage your client portfolio',
+      subtitle: TranslationKeys.searchManageClientPortfolio.tr,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final refreshed = await Get.toNamed(AppRoutes.clientForm);
@@ -59,23 +59,23 @@ class ClientListScreen extends GetView<ClientListController> {
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
-                return const AppLoadingView(message: 'Loading clients...');
+                return AppLoadingView(message: TranslationKeys.loadingClients.tr);
               }
 
               final error = controller.errorMessage.value;
               if (error != null) {
                 return AppErrorView(
-                  title: 'Unable to load clients',
+                  title: TranslationKeys.unableToLoadClients.tr,
                   message: error,
                   onRetry: controller.loadClients,
                 );
               }
 
               if (controller.clients.isEmpty) {
-                return const AppEmptyState(
+                return AppEmptyState(
                   icon: Icons.people_outline_rounded,
-                  title: 'No clients yet',
-                  subtitle: 'Add your first client to start tracking policies.',
+                  title: TranslationKeys.noClientsYet.tr,
+                  subtitle: TranslationKeys.noClientsSubtitle.tr,
                 );
               }
 
@@ -102,6 +102,8 @@ class ClientListScreen extends GetView<ClientListController> {
                       final client = controller.clients[index];
                       return ClientCard(
                         client: client,
+                        onCall: () => controller.callClient(client.mobile),
+                        onWhatsApp: () => controller.whatsappClient(client.mobile),
                         onTap: () async {
                           final refreshed = await Get.toNamed(
                             AppRoutes.clientDetails,
@@ -113,11 +115,7 @@ class ClientListScreen extends GetView<ClientListController> {
                         },
                         onMenuSelected: (value) async {
                           try {
-                            if (value == 'call') {
-                              await controller.callClient(client.mobile);
-                            } else if (value == 'whatsapp') {
-                              await controller.whatsappClient(client.mobile);
-                            } else if (value == 'policies') {
+                            if (value == 'policies') {
                               await Get.toNamed(
                                 AppRoutes.policies,
                                 arguments: {'clientId': client.id},
@@ -133,8 +131,10 @@ class ClientListScreen extends GetView<ClientListController> {
                             } else if (value == 'delete') {
                               final confirmed = await Get.dialog<bool>(
                                 AlertDialog(
-                                  title: const Text('Delete client'),
-                                  content: Text('Soft-delete ${client.name}?'),
+                                  title: Text(TranslationKeys.deleteClient.tr),
+                                  content: Text(
+                                    '${TranslationKeys.softDeleteClient.tr}\n${client.name}',
+                                  ),
                                   actions: [
                                     TextButton(
                                       onPressed: () => Get.back(result: false),
@@ -153,7 +153,7 @@ class ClientListScreen extends GetView<ClientListController> {
                             }
                           } catch (e) {
                             Get.snackbar(
-                              'Action failed',
+                              TranslationKeys.actionFailed.tr,
                               e.toString().replaceFirst('Exception: ', ''),
                             );
                           }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/domain/entities/app_user.dart';
 import 'package:ninaivu/domain/usecases/users/create_agent_usecase.dart';
 import 'package:ninaivu/domain/usecases/users/create_customer_usecase.dart';
@@ -36,8 +37,8 @@ class AdminUserFormController extends GetxController {
   AppUser? editingUser;
 
   String get title => editingUser == null
-      ? 'Add ${isAgentForm ? 'Agent' : 'Customer'}'
-      : 'Edit ${isAgentForm ? 'Agent' : 'Customer'}';
+      ? (isAgentForm ? TranslationKeys.addAgent.tr : TranslationKeys.addCustomer.tr)
+      : (isAgentForm ? TranslationKeys.editAgent.tr : TranslationKeys.editCustomer.tr);
 
   @override
   void onInit() {
@@ -101,7 +102,10 @@ class AdminUserFormController extends GetxController {
       }
       Get.back(result: true);
     } catch (e) {
-      Get.snackbar('Unable to save', e.toString().replaceFirst('Exception: ', ''));
+      Get.snackbar(
+        TranslationKeys.unableToSave.tr,
+        e.toString().replaceFirst('Exception: ', ''),
+      );
     } finally {
       isSaving.value = false;
     }
@@ -109,14 +113,14 @@ class AdminUserFormController extends GetxController {
 
   String? validateName(String? value) {
     if (value == null || value.trim().length < 2) {
-      return 'Enter a valid name';
+      return TranslationKeys.enterAValidName.tr;
     }
     return null;
   }
 
   String? validateMobile(String? value) {
     if (value == null || !RegExp(r'^\d{10}$').hasMatch(value.trim())) {
-      return 'Enter a valid 10-digit mobile number';
+      return TranslationKeys.enterValid10DigitMobile.tr;
     }
     return null;
   }
@@ -127,7 +131,7 @@ class AdminUserFormController extends GetxController {
       return null;
     }
     if (!GetUtils.isEmail(email)) {
-      return 'Enter a valid email';
+      return TranslationKeys.enterValidEmail.tr;
     }
     return null;
   }

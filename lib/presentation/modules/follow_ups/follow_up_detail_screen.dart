@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
+import 'package:ninaivu/core/localization/localized_value_helper.dart';
 import 'package:ninaivu/core/utils/whatsapp_template_builder.dart';
-import 'package:ninaivu/presentation/modules/common/widgets/whatsapp_template_selector.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/follow_up_detail_controller.dart';
+import 'package:ninaivu/presentation/modules/common/widgets/whatsapp_template_selector.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
 
 class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
@@ -17,7 +19,7 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Follow-up Details'),
+        title: Text(TranslationKeys.followUpDetails.tr),
         actions: [
           IconButton(
             onPressed: () async {
@@ -39,13 +41,13 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const AppLoadingView(message: 'Loading follow-up...');
+          return AppLoadingView(message: TranslationKeys.loadingFollowUp.tr);
         }
 
         final error = controller.errorMessage.value;
         if (error != null) {
           return AppErrorView(
-            title: 'Unable to load follow-up',
+            title: TranslationKeys.unableToLoadFollowUp.tr,
             message: error,
             onRetry: controller.loadFollowUp,
           );
@@ -53,10 +55,10 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
 
         final followUp = controller.followUp.value;
         if (followUp == null) {
-          return const AppEmptyState(
+          return AppEmptyState(
             icon: Icons.assignment_late_outlined,
-            title: 'Follow-up unavailable',
-            subtitle: 'This follow-up could not be found.',
+            title: TranslationKeys.followUpUnavailable.tr,
+            subtitle: TranslationKeys.followUpNotFound.tr,
           );
         }
 
@@ -71,15 +73,19 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        followUp.clientName ?? 'Client ${followUp.clientId}',
+                        followUp.clientName ??
+                            '${TranslationKeys.clientLabel.tr} ${followUp.clientId}',
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       SizedBox(height: responsive.itemGap),
-                      StatusBadge(label: followUp.status),
+                      StatusBadge(label: LocalizedValueHelper.followUpStatus(followUp.status)),
                       SizedBox(height: responsive.scaled(18, min: 14)),
-                      _DetailRow(label: 'Type', value: followUp.type),
                       _DetailRow(
-                        label: 'When',
+                        label: TranslationKeys.type.tr,
+                        value: LocalizedValueHelper.followUpType(followUp.type),
+                      ),
+                      _DetailRow(
+                        label: TranslationKeys.when.tr,
                         value: dateFormat.format(
                           DateTime.fromMillisecondsSinceEpoch(
                             followUp.followUpDateTime,
@@ -87,21 +93,20 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
                         ),
                       ),
                       _DetailRow(
-                        label: 'Policy',
-                        value:
-                            followUp.policyNumber ??
+                        label: TranslationKeys.policyLabel.tr,
+                        value: followUp.policyNumber ??
                             followUp.policyId ??
-                            'Not linked',
+                            TranslationKeys.notLinked.tr,
                       ),
                       _DetailRow(
-                        label: 'Customer Mobile',
-                        value: followUp.clientMobile ?? 'Not available',
+                        label: TranslationKeys.customerMobile.tr,
+                        value: followUp.clientMobile ?? TranslationKeys.notAvailable.tr,
                       ),
                       _DetailRow(
-                        label: 'Remarks',
-                        value: followUp.remarks ?? 'No remarks',
+                        label: TranslationKeys.remarks.tr,
+                        value: followUp.remarks ?? TranslationKeys.noNotes.tr,
                       ),
-                      _DetailRow(label: 'Sync Status', value: followUp.syncStatus),
+                      _DetailRow(label: TranslationKeys.syncStatus.tr, value: followUp.syncStatus),
                     ],
                   ),
                 ),
@@ -115,7 +120,7 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
                     OutlinedButton.icon(
                       onPressed: controller.callClient,
                       icon: const Icon(Icons.call_outlined),
-                      label: const Text('Call Customer'),
+                      label: Text(TranslationKeys.callCustomer.tr),
                     ),
                     OutlinedButton.icon(
                       onPressed: () => showWhatsAppTemplateSelector(
@@ -129,7 +134,7 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
                         ),
                       ),
                       icon: const Icon(Icons.chat_outlined),
-                      label: const Text('WhatsApp'),
+                      label: Text(TranslationKeys.whatsapp.tr),
                     ),
                   ],
                 ),
@@ -141,7 +146,7 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
                     SizedBox(
                       height: responsive.compactButtonHeight,
                       child: AppButton(
-                        label: 'Mark Completed',
+                        label: TranslationKeys.markCompleted.tr,
                         onPressed: controller.markCompleted,
                         isLoading: controller.isUpdating.value,
                       ),
@@ -151,7 +156,7 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
                       height: responsive.compactButtonHeight,
                       child: OutlinedButton(
                         onPressed: () => _showRescheduleDialog(context),
-                        child: const Text('Reschedule'),
+                        child: Text(TranslationKeys.reschedule.tr),
                       ),
                     ),
                   ],
@@ -161,16 +166,16 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
                 onPressed: () async {
                   final confirmed = await Get.dialog<bool>(
                     AlertDialog(
-                      title: const Text('Delete follow-up'),
-                      content: const Text('Soft-delete this follow-up?'),
+                      title: Text(TranslationKeys.deleteFollowUp.tr),
+                      content: Text(TranslationKeys.softDeleteFollowUp.tr),
                       actions: [
                         TextButton(
                           onPressed: () => Get.back(result: false),
-                          child: const Text('Cancel'),
+                          child: Text(TranslationKeys.cancel.tr),
                         ),
                         ElevatedButton(
                           onPressed: () => Get.back(result: true),
-                          child: const Text('Delete'),
+                          child: Text(TranslationKeys.delete.tr),
                         ),
                       ],
                     ),
@@ -180,7 +185,7 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
                   }
                 },
                 icon: const Icon(Icons.delete_outline),
-                label: const Text('Delete Follow-up'),
+                label: Text(TranslationKeys.deleteFollowUpButton.tr),
               ),
             ],
           ),
@@ -199,22 +204,22 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: const Text('Tomorrow'),
+                title: Text(TranslationKeys.tomorrow.tr),
                 onTap: () =>
                     Navigator.of(context).pop(now.add(const Duration(days: 1))),
               ),
               ListTile(
-                title: const Text('After 3 days'),
+                title: Text(TranslationKeys.after3Days.tr),
                 onTap: () =>
                     Navigator.of(context).pop(now.add(const Duration(days: 3))),
               ),
               ListTile(
-                title: const Text('Next week'),
+                title: Text(TranslationKeys.nextWeek.tr),
                 onTap: () =>
                     Navigator.of(context).pop(now.add(const Duration(days: 7))),
               ),
               ListTile(
-                title: const Text('Pick custom date/time'),
+                title: Text(TranslationKeys.pickCustomDateTime.tr),
                 onTap: () async {
                   final date = await showDatePicker(
                     context: context,

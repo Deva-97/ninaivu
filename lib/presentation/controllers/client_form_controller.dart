@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/services/profile_image_service.dart';
 import 'package:ninaivu/data/models/client_model.dart';
 import 'package:ninaivu/domain/entities/client.dart';
@@ -44,7 +45,9 @@ class ClientFormController extends GetxController {
 
   Client? editingClient;
 
-  String get title => editingClient == null ? 'Add Client' : 'Edit Client';
+  String get title => editingClient == null
+      ? TranslationKeys.addClient.tr
+      : '${TranslationKeys.edit.tr} ${TranslationKeys.clients.tr}';
 
   @override
   void onInit() {
@@ -93,22 +96,20 @@ class ClientFormController extends GetxController {
       if (duplicateClient != null) {
         final action = await Get.dialog<String>(
           AlertDialog(
-            title: const Text('Duplicate mobile number'),
-            content: const Text(
-              'A client with this mobile number already exists. Do you still want to continue?',
-            ),
+            title: Text(TranslationKeys.duplicateMobileTitle.tr),
+            content: Text(TranslationKeys.duplicateMobileMessage.tr),
             actions: [
               TextButton(
                 onPressed: () => Get.back(result: 'cancel'),
-                child: const Text('Cancel'),
+                child: Text(TranslationKeys.cancel.tr),
               ),
               TextButton(
                 onPressed: () => Get.back(result: 'view'),
-                child: const Text('View Existing Client'),
+                child: Text(TranslationKeys.viewExistingClient.tr),
               ),
               FilledButton(
                 onPressed: () => Get.back(result: 'continue'),
-                child: const Text('Continue Anyway'),
+                child: Text(TranslationKeys.continueAnyway.tr),
               ),
             ],
           ),
@@ -153,7 +154,10 @@ class ClientFormController extends GetxController {
       }
       Get.back(result: true);
     } catch (e) {
-      Get.snackbar('Unable to save', e.toString().replaceFirst('Exception: ', ''));
+      Get.snackbar(
+        TranslationKeys.unableToSave.tr,
+        e.toString().replaceFirst('Exception: ', ''),
+      );
     } finally {
       isSaving.value = false;
     }
@@ -168,14 +172,14 @@ class ClientFormController extends GetxController {
 
   String? validateName(String? value) {
     if (value == null || value.trim().length < 2) {
-      return 'Enter a valid name';
+      return TranslationKeys.enterAValidName.tr;
     }
     return null;
   }
 
   String? validateMobile(String? value) {
     if (value == null || !RegExp(r'^\d{10}$').hasMatch(value.trim())) {
-      return 'Enter a valid 10-digit mobile number';
+      return TranslationKeys.enterValid10DigitMobile.tr;
     }
     if (duplicateMobileMessage.value != null) {
       return duplicateMobileMessage.value;
@@ -196,7 +200,7 @@ class ClientFormController extends GetxController {
       excludingClientId: editingClient?.id,
     );
     duplicateMobileMessage.value = hasDuplicate
-        ? 'A client with this mobile number already exists.'
+        ? TranslationKeys.duplicateMobileMessage.tr
         : null;
     formKey.currentState?.validate();
   }
@@ -207,7 +211,7 @@ class ClientFormController extends GetxController {
       return null;
     }
     if (!GetUtils.isEmail(email)) {
-      return 'Enter a valid email';
+      return TranslationKeys.enterValidEmail.tr;
     }
     return null;
   }

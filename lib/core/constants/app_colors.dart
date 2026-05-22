@@ -3,24 +3,24 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  static const Color primary = Color(0xFF004AC6);
-  static const Color primaryDark = Color(0xFF0D3C94);
-  static const Color primaryLight = Color(0xFFDBE7FF);
+  static const Color primary = Color(0xFF275BA8);
+  static const Color primaryDark = Color(0xFF1F4682);
+  static const Color primaryLight = Color(0xFFDDE8FB);
   static const Color lightPrimaryContainer = Color(0xFFEAF1FF);
-  static const Color darkPrimaryContainer = Color(0xFF102447);
+  static const Color darkPrimaryContainer = Color(0xFF183150);
 
-  static const Color lightBackground = Color(0xFFF7F9FB);
+  static const Color lightBackground = Color(0xFFF5F7FA);
   static const Color lightSurface = Color(0xFFFFFFFF);
-  static const Color lightSurfaceSoft = Color(0xFFF2F4F7);
-  static const Color lightBorder = Color(0xFFE3E8EF);
-  static const Color lightTextPrimary = Color(0xFF191C1E);
-  static const Color lightTextSecondary = Color(0xFF5C647A);
-  static const Color lightTextMuted = Color(0xFF98A1B2);
+  static const Color lightSurfaceSoft = Color(0xFFEEF2F6);
+  static const Color lightBorder = Color(0xFFDCE3EC);
+  static const Color lightTextPrimary = Color(0xFF162033);
+  static const Color lightTextSecondary = Color(0xFF58657A);
+  static const Color lightTextMuted = Color(0xFF8A96A8);
 
-  static const Color darkBackground = Color(0xFF0F141C);
-  static const Color darkSurface = Color(0xFF161C25);
-  static const Color darkSurfaceSoft = Color(0xFF1D2530);
-  static const Color darkBorder = Color(0xFF2A3442);
+  static const Color darkBackground = Color(0xFF0E1520);
+  static const Color darkSurface = Color(0xFF141C28);
+  static const Color darkSurfaceSoft = Color(0xFF1A2431);
+  static const Color darkBorder = Color(0xFF293649);
   static const Color darkTextPrimary = Color(0xFFF8FAFC);
   static const Color darkTextSecondary = Color(0xFFC3CAD6);
   static const Color darkTextMuted = Color(0xFF8390A3);
@@ -50,4 +50,20 @@ class AppColors {
   static const Color warningDarkText = Color(0xFFFFC39C);
   static const Color dangerDarkText = Color(0xFFFFB4AB);
   static const Color infoDarkText = Color(0xFFB8CCFF);
+
+  static const Color slate = Color(0xFF475467);
+  static const Color slateLight = Color(0xFFE8EDF3);
+  static const Color heroBlue = Color(0xFF234A84);
+  static const Color heroBlueSoft = Color(0xFFD7E5FF);
+  static const Color heroBlueDark = Color(0xFF10233F);
+  static const Color actionPrimary = Color(0xFF2E5DA8);
+  static const Color actionSecondary = Color(0xFF5C6E82);
+  static const Color call = Color(0xFF0F766E);
+  static const Color whatsapp = Color(0xFF128C7E);
+  static const Color priority = Color(0xFFB45309);
+  static const Color dangerSoft = Color(0xFFFDE8E6);
+  static const Color successSoft = Color(0xFFE4F7EC);
+  static const Color infoSoft = Color(0xFFE7F0FF);
+  static const Color surfaceHighlight = Color(0xFFF9FBFD);
+  static const Color darkSurfaceHighlight = Color(0xFF1E2938);
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/domain/entities/client.dart';
 import 'package:ninaivu/domain/entities/policy.dart';
 import 'package:ninaivu/data/models/follow_up_model.dart';
@@ -137,7 +138,7 @@ class FollowUpFormController extends GetxController {
       return;
     }
     if (selectedClient.value == null) {
-      clientValidationMessage.value = 'Select a client before saving';
+      clientValidationMessage.value = TranslationKeys.selectClientBeforeSaving.tr;
       return;
     }
 
@@ -182,7 +183,10 @@ class FollowUpFormController extends GetxController {
 
       Get.back(result: true);
     } catch (e) {
-      Get.snackbar('Unable to save', e.toString().replaceFirst('Exception: ', ''));
+      Get.snackbar(
+        TranslationKeys.unableToSave.tr,
+        e.toString().replaceFirst('Exception: ', ''),
+      );
     } finally {
       isSaving.value = false;
     }
@@ -190,7 +194,7 @@ class FollowUpFormController extends GetxController {
 
   String? validateRequired(String? value, String fieldName) {
     if (value == null || value.trim().isEmpty) {
-      return 'Enter $fieldName';
+      return '${TranslationKeys.enterFieldPrefix.tr} $fieldName';
     }
     return null;
   }
@@ -218,7 +222,8 @@ class FollowUpFormController extends GetxController {
 
   void selectPolicy(Policy policy) {
     if (selectedClient.value == null || policy.clientId != selectedClient.value!.id) {
-      clientValidationMessage.value = 'Selected policy must belong to the selected client';
+      clientValidationMessage.value =
+          TranslationKeys.selectedPolicyMustBelongToSelectedClient.tr;
       return;
     }
     selectedPolicy.value = policy;

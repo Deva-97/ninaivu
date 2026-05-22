@@ -21,8 +21,8 @@ class PolicyListScreen extends GetView<PolicyListController> {
       dashboardRoute: AppRoutes.agentDashboard,
       title: TranslationKeys.policies.tr,
       subtitle: controller.clientId == null
-          ? 'Track active policies and renewals'
-          : 'Policies linked to this client',
+          ? TranslationKeys.trackActivePolicies.tr
+          : TranslationKeys.policiesLinkedToClient.tr,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final refreshed = await Get.toNamed(
@@ -58,7 +58,7 @@ class PolicyListScreen extends GetView<PolicyListController> {
                 padding: EdgeInsets.symmetric(horizontal: responsive.pagePadding),
                 child: AppSearchField(
                   controller: controller.searchController,
-                  hintText: 'Search by policy number, company or type',
+                  hintText: TranslationKeys.searchPoliciesHint.tr,
                   onSubmitted: (_) => controller.loadPolicies(),
                   onRefresh: controller.loadPolicies,
                 ),
@@ -68,21 +68,21 @@ class PolicyListScreen extends GetView<PolicyListController> {
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
-                return const AppLoadingView(message: 'Loading policies...');
+                return AppLoadingView(message: TranslationKeys.loadingPolicies.tr);
               }
               final error = controller.errorMessage.value;
               if (error != null) {
                 return AppErrorView(
-                  title: 'Unable to load policies',
+                  title: TranslationKeys.unableToLoadPolicies.tr,
                   message: error,
                   onRetry: controller.loadPolicies,
                 );
               }
               if (controller.policies.isEmpty) {
-                return const AppEmptyState(
+                return AppEmptyState(
                   icon: Icons.description_outlined,
-                  title: 'No policies yet',
-                  subtitle: 'Create a policy to start tracking renewals.',
+                  title: TranslationKeys.noPoliciesYet.tr,
+                  subtitle: TranslationKeys.noPoliciesSubtitle.tr,
                 );
               }
               return RefreshIndicator(
@@ -96,8 +96,11 @@ class PolicyListScreen extends GetView<PolicyListController> {
                       responsive.pagePadding,
                       responsive.scaled(110, min: 96),
                     ),
-                    itemCount: controller.policies.length + (controller.isLoadingMore.value ? 1 : 0),
-                    separatorBuilder: (_, _) => SizedBox(height: responsive.scaled(12, min: 10)),
+                    itemCount:
+                        controller.policies.length +
+                        (controller.isLoadingMore.value ? 1 : 0),
+                    separatorBuilder: (_, _) =>
+                        SizedBox(height: responsive.scaled(12, min: 10)),
                     itemBuilder: (context, index) {
                       if (index >= controller.policies.length) {
                         return const Padding(
@@ -109,7 +112,9 @@ class PolicyListScreen extends GetView<PolicyListController> {
                       return PolicyCard(
                         policy: policy,
                         subtitle:
-                            '${policy.companyName} • ${policy.insuranceType}\nValid till ${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(policy.endDate))}',
+                            '${policy.companyName} - ${policy.insuranceType}\n'
+                            '${TranslationKeys.validTill.tr} '
+                            '${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(policy.endDate))}',
                         onTap: () async {
                           final refreshed = await Get.toNamed(
                             AppRoutes.policyDetails,
@@ -131,8 +136,11 @@ class PolicyListScreen extends GetView<PolicyListController> {
                           } else if (value == 'delete') {
                             final confirmed = await Get.dialog<bool>(
                               AlertDialog(
-                                title: const Text('Delete policy'),
-                                content: Text('Soft-delete ${policy.policyNumber}?'),
+                                title: Text(TranslationKeys.deletePolicy.tr),
+                                content: Text(
+                                  '${TranslationKeys.softDeletePolicy.tr}\n'
+                                  '${policy.policyNumber}',
+                                ),
                                 actions: [
                                   TextButton(
                                     onPressed: () => Get.back(result: false),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:ninaivu/core/constants/translation_keys.dart';
+import 'package:ninaivu/core/localization/localized_value_helper.dart';
 import 'package:ninaivu/core/utils/whatsapp_template_builder.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/policy_detail_controller.dart';
@@ -37,22 +38,22 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const AppLoadingView(message: 'Loading policy...');
+          return AppLoadingView(message: TranslationKeys.loadingPolicy.tr);
         }
         final error = controller.errorMessage.value;
         if (error != null) {
           return AppErrorView(
-            title: 'Unable to load policy',
+            title: TranslationKeys.unableToLoadPolicy.tr,
             message: error,
             onRetry: controller.loadPolicy,
           );
         }
         final policy = controller.policy.value;
         if (policy == null) {
-          return const AppEmptyState(
+          return AppEmptyState(
             icon: Icons.description_outlined,
-            title: 'Policy unavailable',
-            subtitle: 'This policy could not be found.',
+            title: TranslationKeys.policyUnavailable.tr,
+            subtitle: TranslationKeys.policyNotFound.tr,
           );
         }
 
@@ -62,26 +63,42 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
             children: [
               FormSectionCard(
                 title: policy.policyNumber,
-                subtitle: '${policy.companyName} • ${policy.insuranceType}',
+                subtitle:
+                    '${policy.companyName} • ${LocalizedValueHelper.policyInsuranceType(policy.insuranceType)}',
                 children: [
-                  DetailFieldRow(label: 'Premium', value: currency.format(policy.premiumAmount)),
                   DetailFieldRow(
-                    label: 'Start Date',
+                    label: TranslationKeys.premium.tr,
+                    value: currency.format(policy.premiumAmount),
+                  ),
+                  DetailFieldRow(
+                    label: TranslationKeys.startDate.tr,
                     value: dateFormat.format(DateTime.fromMillisecondsSinceEpoch(policy.startDate)),
                   ),
                   DetailFieldRow(
-                    label: 'End Date',
+                    label: TranslationKeys.endDate.tr,
                     value: dateFormat.format(DateTime.fromMillisecondsSinceEpoch(policy.endDate)),
                   ),
-                  DetailFieldRow(label: 'Status', value: policy.status),
-                  DetailFieldRow(label: 'Renewal Status', value: policy.renewalStatus),
-                  DetailFieldRow(label: 'Sync Status', value: policy.syncStatus),
-                  DetailFieldRow(label: 'Client ID', value: policy.clientId),
                   DetailFieldRow(
-                    label: 'Vehicle',
-                    value: policy.vehicleNumber ?? policy.vehicleModel ?? 'Not applicable',
+                    label: TranslationKeys.status.tr,
+                    value: LocalizedValueHelper.policyStatus(policy.status),
                   ),
-                  DetailFieldRow(label: TranslationKeys.notes.tr, value: policy.notes ?? 'No notes'),
+                  DetailFieldRow(
+                    label: TranslationKeys.renewalStatus.tr,
+                    value: LocalizedValueHelper.renewalStatus(policy.renewalStatus),
+                  ),
+                  DetailFieldRow(label: TranslationKeys.syncStatus.tr, value: policy.syncStatus),
+                  DetailFieldRow(label: TranslationKeys.clientLabel.tr, value: policy.clientId),
+                  DetailFieldRow(
+                    label: TranslationKeys.vehicle.tr,
+                    value:
+                        policy.vehicleNumber ??
+                        policy.vehicleModel ??
+                        TranslationKeys.notApplicable.tr,
+                  ),
+                  DetailFieldRow(
+                    label: TranslationKeys.notes.tr,
+                    value: policy.notes ?? TranslationKeys.noNotes.tr,
+                  ),
                 ],
               ),
               SizedBox(height: responsive.itemGap),
@@ -124,8 +141,10 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
                   onPressed: () async {
                     final confirmed = await Get.dialog<bool>(
                       AlertDialog(
-                        title: const Text('Delete policy'),
-                        content: Text('Soft-delete ${policy.policyNumber}?'),
+                        title: Text(TranslationKeys.deletePolicy.tr),
+                        content: Text(
+                          '${TranslationKeys.softDeletePolicy.tr}\n${policy.policyNumber}',
+                        ),
                         actions: [
                           TextButton(
                             onPressed: () => Get.back(result: false),
@@ -143,7 +162,7 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
                     }
                   },
                   icon: const Icon(Icons.delete_outline),
-                  label: const Text('Delete Policy'),
+                  label: Text(TranslationKeys.deletePolicyButton.tr),
                 ),
               ),
             ],

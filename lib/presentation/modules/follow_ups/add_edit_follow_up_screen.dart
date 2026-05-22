@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
+import 'package:ninaivu/core/localization/localized_value_helper.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/follow_up_form_controller.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/app_shell.dart';
@@ -17,7 +19,11 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(controller.editingFollowUp == null ? 'Add Follow-up' : 'Edit Follow-up'),
+        title: Text(
+          controller.editingFollowUp == null
+              ? TranslationKeys.addFollowUp.tr
+              : '${TranslationKeys.edit.tr} ${TranslationKeys.followUps.tr}',
+        ),
       ),
       body: Form(
         key: controller.formKey,
@@ -26,11 +32,11 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
             padding: EdgeInsets.all(responsive.pagePadding),
             children: [
               FormSectionCard(
-                title: 'Follow-up Details',
+                title: TranslationKeys.followUpDetails.tr,
                 children: [
                   Obx(
                     () => SearchableClientPicker(
-                      label: 'Client',
+                      label: TranslationKeys.clientLabel.tr,
                       selectedClient: controller.selectedClient.value,
                       errorText: controller.clientValidationMessage.value,
                       onSearch: controller.searchClients,
@@ -39,7 +45,7 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
                   ),
                   Obx(
                     () => SearchablePolicyPicker(
-                      label: 'Policy',
+                      label: TranslationKeys.policyLabel.tr,
                       selectedPolicy: controller.selectedPolicy.value,
                       enabled: controller.selectedClient.value != null,
                       onSearch: controller.searchPolicies,
@@ -50,9 +56,14 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
                   Obx(
                     () => DropdownButtonFormField<String>(
                       initialValue: controller.selectedType.value,
-                      decoration: const InputDecoration(labelText: 'Type'),
+                      decoration: InputDecoration(labelText: TranslationKeys.type.tr),
                       items: FollowUpFormController.followUpTypes
-                          .map((item) => DropdownMenuItem<String>(value: item, child: Text(item)))
+                          .map(
+                            (item) => DropdownMenuItem<String>(
+                              value: item,
+                              child: Text(LocalizedValueHelper.followUpType(item)),
+                            ),
+                          )
                           .toList(),
                       onChanged: (value) {
                         if (value != null) {
@@ -64,9 +75,14 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
                   Obx(
                     () => DropdownButtonFormField<String>(
                       initialValue: controller.selectedStatus.value,
-                      decoration: const InputDecoration(labelText: 'Status'),
+                      decoration: InputDecoration(labelText: TranslationKeys.status.tr),
                       items: FollowUpFormController.followUpStatuses
-                          .map((item) => DropdownMenuItem<String>(value: item, child: Text(item)))
+                          .map(
+                            (item) => DropdownMenuItem<String>(
+                              value: item,
+                              child: Text(LocalizedValueHelper.followUpStatus(item)),
+                            ),
+                          )
                           .toList(),
                       onChanged: (value) {
                         if (value != null) {
@@ -78,7 +94,7 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
                   Obx(
                     () => ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Follow-up Date'),
+                      title: Text(TranslationKeys.followUpDate.tr),
                       subtitle: Text(dateFormat.format(controller.selectedDate.value)),
                       trailing: const Icon(Icons.calendar_today_outlined),
                       onTap: () => controller.pickDate(context),
@@ -87,7 +103,7 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
                   Obx(
                     () => ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Follow-up Time'),
+                      title: Text(TranslationKeys.followUpTime.tr),
                       subtitle: Text(controller.selectedTime.value.format(context)),
                       trailing: const Icon(Icons.access_time_outlined),
                       onTap: () => controller.pickTime(context),
@@ -97,7 +113,7 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
                     controller: controller.remarksController,
                     minLines: 3,
                     maxLines: 5,
-                    decoration: const InputDecoration(labelText: 'Remarks'),
+                    decoration: InputDecoration(labelText: TranslationKeys.remarks.tr),
                   ),
                 ],
               ),
@@ -107,8 +123,8 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
                   height: responsive.buttonHeight,
                   child: AppButton(
                     label: controller.editingFollowUp == null
-                        ? 'Save Follow-up'
-                        : 'Update Follow-up',
+                        ? TranslationKeys.saveFollowUp.tr
+                        : TranslationKeys.updateFollowUp.tr,
                     onPressed: controller.submit,
                     isLoading: controller.isSaving.value,
                   ),

@@ -18,5 +18,6 @@ class DashboardQuickAction extends QuickActionCard {
     required super.icon,
     required super.color,
     required super.onTap,
+    super.prominent,
   });
 }

@@ -36,13 +36,13 @@ class AddEditClientScreen extends GetView<ClientFormController> {
               ),
               SizedBox(height: responsive.sectionGap),
               FormSectionCard(
-                title: 'Client Information',
-                subtitle: 'Add the primary contact details used across policies and follow-ups.',
+                title: TranslationKeys.clientInformation.tr,
+                subtitle: TranslationKeys.searchManageClientPortfolio.tr,
                 children: [
                   TextFormField(
                     controller: controller.nameController,
                     validator: controller.validateName,
-                    decoration: const InputDecoration(labelText: 'Client Name'),
+                    decoration: InputDecoration(labelText: TranslationKeys.clientName.tr),
                   ),
                   TextFormField(
                     controller: controller.mobileController,
@@ -64,8 +64,8 @@ class AddEditClientScreen extends GetView<ClientFormController> {
                   TextFormField(
                     controller: controller.alternateMobileController,
                     keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      labelText: 'Alternate Mobile',
+                    decoration: InputDecoration(
+                      labelText: TranslationKeys.alternateMobile.tr,
                       prefixText: '+91 ',
                     ),
                   ),
@@ -79,7 +79,7 @@ class AddEditClientScreen extends GetView<ClientFormController> {
               ),
               SizedBox(height: responsive.itemGap),
               FormSectionCard(
-                title: 'Additional Details',
+                title: TranslationKeys.additionalDetails.tr,
                 children: [
                   TextFormField(
                     controller: controller.addressController,
@@ -191,7 +191,9 @@ class AddEditClientScreen extends GetView<ClientFormController> {
                 () => SizedBox(
                   height: responsive.buttonHeight,
                   child: AppButton(
-                    label: controller.editingClient == null ? 'Save Client' : 'Update Client',
+                    label: controller.editingClient == null
+                        ? TranslationKeys.saveClient.tr
+                        : TranslationKeys.updateClient.tr,
                     onPressed: controller.submit,
                     isLoading: controller.isSaving.value,
                   ),

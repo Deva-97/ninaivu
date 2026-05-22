@@ -34,22 +34,22 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const AppLoadingView(message: 'Loading client...');
+          return AppLoadingView(message: TranslationKeys.loadingClient.tr);
         }
         final error = controller.errorMessage.value;
         if (error != null) {
           return AppErrorView(
-            title: 'Unable to load client',
+            title: TranslationKeys.unableToLoadClient.tr,
             message: error,
             onRetry: controller.loadClient,
           );
         }
         final client = controller.client.value;
         if (client == null) {
-          return const AppEmptyState(
+          return AppEmptyState(
             icon: Icons.person_off_outlined,
-            title: 'Client unavailable',
-            subtitle: 'This client could not be found.',
+            title: TranslationKeys.clientUnavailable.tr,
+            subtitle: TranslationKeys.clientNotFound.tr,
           );
         }
 
@@ -59,25 +59,43 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
             children: [
               ProfileAvatarBlock(
                 name: client.name,
-                subtitle: [client.mobile, client.areaCity].whereType<String>().where((e) => e.isNotEmpty).join(' • '),
+                subtitle: [client.mobile, client.areaCity]
+                    .whereType<String>()
+                    .where((e) => e.isNotEmpty)
+                    .join(' • '),
                 statusLabel: client.syncStatus,
                 imagePath: client.profileImagePath,
                 onTap: () => controller.updateProfileImage().catchError(_showError),
               ),
               SizedBox(height: responsive.itemGap),
               FormSectionCard(
-                title: 'Client Information',
+                title: TranslationKeys.clientInformation.tr,
                 children: [
                   DetailFieldRow(label: TranslationKeys.mobile.tr, value: client.mobile),
-                  DetailFieldRow(label: 'Alternate', value: client.alternateMobile ?? 'Not provided'),
-                  DetailFieldRow(label: TranslationKeys.email.tr, value: client.email ?? 'Not provided'),
-                  DetailFieldRow(label: TranslationKeys.areaCity.tr, value: client.areaCity ?? 'Not set'),
-                  DetailFieldRow(label: TranslationKeys.address.tr, value: client.address ?? 'Not provided'),
-                  DetailFieldRow(label: TranslationKeys.notes.tr, value: client.notes ?? 'No notes'),
+                  DetailFieldRow(
+                    label: TranslationKeys.alternate.tr,
+                    value: client.alternateMobile ?? TranslationKeys.notProvided.tr,
+                  ),
+                  DetailFieldRow(
+                    label: TranslationKeys.email.tr,
+                    value: client.email ?? TranslationKeys.notProvided.tr,
+                  ),
+                  DetailFieldRow(
+                    label: TranslationKeys.areaCity.tr,
+                    value: client.areaCity ?? TranslationKeys.notSet.tr,
+                  ),
+                  DetailFieldRow(
+                    label: TranslationKeys.address.tr,
+                    value: client.address ?? TranslationKeys.notProvided.tr,
+                  ),
+                  DetailFieldRow(
+                    label: TranslationKeys.notes.tr,
+                    value: client.notes ?? TranslationKeys.noNotes.tr,
+                  ),
                   DetailFieldRow(
                     label: TranslationKeys.birthday.tr,
                     value: client.dateOfBirthMs == null
-                        ? 'Not set'
+                        ? TranslationKeys.notSet.tr
                         : DateFormat('dd MMM yyyy').format(
                             DateTime.fromMillisecondsSinceEpoch(client.dateOfBirthMs!),
                           ),
@@ -85,10 +103,13 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
                   DetailFieldRow(
                     label: TranslationKeys.specialDate.tr,
                     value: client.specialDateMs == null
-                        ? 'Not set'
-                        : '${client.specialDateLabel ?? 'Special Date'} • ${DateFormat('dd MMM yyyy').format(DateTime.fromMillisecondsSinceEpoch(client.specialDateMs!))}',
+                        ? TranslationKeys.notSet.tr
+                        : '${client.specialDateLabel ?? TranslationKeys.specialDate.tr} • ${DateFormat('dd MMM yyyy').format(DateTime.fromMillisecondsSinceEpoch(client.specialDateMs!))}',
                   ),
-                  DetailFieldRow(label: 'Policy Count', value: client.policyCount.toString()),
+                  DetailFieldRow(
+                    label: TranslationKeys.policyCount.tr,
+                    value: client.policyCount.toString(),
+                  ),
                 ],
               ),
               SizedBox(height: responsive.itemGap),
@@ -132,14 +153,14 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
                 ],
               ),
               SizedBox(height: responsive.sectionGap),
-              SectionTitle(title: 'Timeline'),
+              SectionTitle(title: TranslationKeys.timeline.tr),
               SizedBox(height: responsive.itemGap),
               Obx(() {
                 if (controller.timelineItems.isEmpty) {
-                  return const AppEmptyState(
+                  return AppEmptyState(
                     icon: Icons.timeline_outlined,
-                    title: 'No timeline items yet',
-                    subtitle: 'Policies, reminders, and follow-ups will appear here.',
+                    title: TranslationKeys.noTimelineItemsYet.tr,
+                    subtitle: TranslationKeys.timelineSubtitle.tr,
                   );
                 }
                 return Column(
@@ -174,8 +195,8 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
                   onPressed: () async {
                     final confirmed = await Get.dialog<bool>(
                       AlertDialog(
-                        title: const Text('Delete client'),
-                        content: Text('Soft-delete ${client.name}?'),
+                        title: Text(TranslationKeys.deleteClient.tr),
+                        content: Text('${TranslationKeys.softDeleteClient.tr}\n${client.name}'),
                         actions: [
                           TextButton(
                             onPressed: () => Get.back(result: false),
@@ -193,7 +214,7 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
                     }
                   },
                   icon: const Icon(Icons.delete_outline),
-                  label: const Text('Delete Client'),
+                  label: Text(TranslationKeys.deleteClientButton.tr),
                 ),
               ),
             ],
@@ -204,7 +225,10 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
   }
 
   void _showError(Object error) {
-    Get.snackbar('Action failed', error.toString().replaceFirst('Exception: ', ''));
+    Get.snackbar(
+      TranslationKeys.actionFailed.tr,
+      error.toString().replaceFirst('Exception: ', ''),
+    );
   }
 
   IconData _timelineIcon(String type) {

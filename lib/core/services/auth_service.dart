@@ -5,8 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ninaivu/core/database/database_tables.dart';
-import 'package:ninaivu/core/services/background_sync_service.dart';
 import 'package:ninaivu/core/services/app_preferences.dart';
+import 'package:ninaivu/core/services/background_sync_service.dart';
 import 'package:ninaivu/core/services/sync_service.dart';
 import 'package:ninaivu/data/datasources/local/sync_queue_local_data_source.dart';
 import 'package:ninaivu/data/datasources/local/user_local_data_source.dart';
@@ -15,6 +15,13 @@ import 'package:ninaivu/data/models/app_user_model.dart';
 import 'package:ninaivu/data/models/sync_queue_model.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
 import 'package:uuid/uuid.dart';
+
+part 'auth_service_bootstrap.dart';
+part 'auth_service_google.dart';
+part 'auth_service_helpers.dart';
+part 'auth_service_phone.dart';
+part 'auth_service_profile.dart';
+part 'auth_service_session.dart';
 
 /// Minimal result object used by the OTP screen when Firebase issues a new
 /// verification id and resend token pair.
@@ -61,541 +68,38 @@ class AuthService {
 
   User? get currentUser => firebaseAuth?.currentUser;
 
-  Future<void> checkAuthFromSplash() async {
-    await Future.delayed(const Duration(seconds: 1));
+  Future<void> checkAuthFromSplash() => _checkAuthFromSplash();
 
-    final preferences = await AppPreferences.getInstance();
-    final firebaseUser = firebaseAuth?.currentUser;
-    if (firebaseUser != null) {
-      await checkUserAfterLogin();
-      return;
-    }
+  Future<void> signInWithGoogle() => _signInWithGoogle();
 
-    final restoredLocalUser = await _restoreOfflineSessionIfAvailable(
-      preferences,
-    );
-    if (restoredLocalUser != null) {
-      await BackgroundSyncService.instance.ensureRegistered();
-      if (restoredLocalUser.profileCompleted) {
-        _navigateByRole(restoredLocalUser.role);
-      } else {
-        Get.offAllNamed(AppRoutes.profileSetup);
-      }
-      return;
-    }
-
-    await preferences.clearSession();
-    await BackgroundSyncService.instance.cancelAllTasks();
-    Get.offAllNamed(AppRoutes.login);
-  }
-
-  Future<void> signInWithGoogle() async {
-    try {
-      final auth = _requireFirebaseAuth(
-        action: 'Google sign-in',
-      );
-      await _ensureGoogleSignInInitialized();
-      final googleUser = await GoogleSignIn.instance.authenticate();
-      final googleAuth = googleUser.authentication;
-      final idToken = googleAuth.idToken;
-
-      if (idToken == null || idToken.isEmpty) {
-        throw Exception('Google sign-in did not return an ID token');
-      }
-
-      final credential = GoogleAuthProvider.credential(idToken: idToken);
-      await auth.signInWithCredential(credential);
-      await checkUserAfterLogin();
-    } on GoogleSignInException catch (e) {
-      throw Exception(e.description ?? 'Google login failed');
-    } on FirebaseAuthException catch (e) {
-      throw Exception(_friendlyAuthError(e, fallback: 'Google login failed'));
-    } catch (e) {
-      final message = _errorMessage(e);
-      if (_looksLikeGoogleReauthIssue(message)) {
-        try {
-          final auth = _requireFirebaseAuth(
-            action: 'Google sign-in',
-          );
-          await _ensureGoogleSignInInitialized();
-          await GoogleSignIn.instance.signOut();
-          final googleUser = await GoogleSignIn.instance.authenticate();
-          final googleAuth = googleUser.authentication;
-          final idToken = googleAuth.idToken;
-
-          if (idToken == null || idToken.isEmpty) {
-            throw Exception('Google sign-in did not return an ID token');
-          }
-
-          final credential = GoogleAuthProvider.credential(idToken: idToken);
-          await auth.signInWithCredential(credential);
-          await checkUserAfterLogin();
-          return;
-        } on GoogleSignInException catch (retryError) {
-          throw Exception(retryError.description ?? 'Google login failed');
-        } on FirebaseAuthException catch (retryError) {
-          throw Exception(
-            _friendlyAuthError(retryError, fallback: 'Google login failed'),
-          );
-        } catch (retryError) {
-          throw Exception(_errorMessage(retryError));
-        }
-      }
-
-      throw Exception(message);
-    }
-  }
-
-  Future<void> sendOtp({required String mobileNumber}) async {
-    final completer = Completer<void>();
-    final formattedNumber = _formatIndianPhoneNumber(mobileNumber);
-    final auth = _requireFirebaseAuth(action: 'Phone sign-in');
-
-    await auth.verifyPhoneNumber(
-      phoneNumber: formattedNumber,
-      timeout: const Duration(seconds: 60),
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        try {
-          await auth.signInWithCredential(credential);
-          await checkUserAfterLogin();
-          if (!completer.isCompleted) {
-            completer.complete();
-          }
-        } on FirebaseAuthException catch (e) {
-          if (!completer.isCompleted) {
-            completer.completeError(
-              Exception(
-                _friendlyAuthError(e, fallback: 'OTP verification failed'),
-              ),
-            );
-          }
-        } catch (e) {
-          if (!completer.isCompleted) {
-            completer.completeError(Exception(_errorMessage(e)));
-          }
-        }
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        if (!completer.isCompleted) {
-          completer.completeError(
-            Exception(_friendlyAuthError(e, fallback: 'OTP sending failed')),
-          );
-        }
-      },
-      codeSent: (String verificationId, int? resendToken) {
-        Get.toNamed(
-          AppRoutes.otpVerification,
-          arguments: {
-            'verificationId': verificationId,
-            'mobileNumber': mobileNumber,
-            'resendToken': resendToken,
-          },
-        );
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {},
-    );
-
-    return completer.future;
-  }
+  Future<void> sendOtp({required String mobileNumber}) =>
+      _sendOtp(mobileNumber: mobileNumber);
 
   Future<OtpSendResult> resendOtp({
     required String mobileNumber,
     required int? resendToken,
-  }) async {
-    final completer = Completer<OtpSendResult>();
-    final formattedNumber = _formatIndianPhoneNumber(mobileNumber);
-    final auth = _requireFirebaseAuth(action: 'OTP resend');
-
-    await auth.verifyPhoneNumber(
-      phoneNumber: formattedNumber,
-      timeout: const Duration(seconds: 60),
-      forceResendingToken: resendToken,
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        try {
-          await auth.signInWithCredential(credential);
-          await checkUserAfterLogin();
-          if (!completer.isCompleted) {
-            completer.complete(
-              OtpSendResult(verificationId: '', resendToken: resendToken),
-            );
-          }
-        } on FirebaseAuthException catch (e) {
-          if (!completer.isCompleted) {
-            completer.completeError(
-              Exception(
-                _friendlyAuthError(e, fallback: 'OTP verification failed'),
-              ),
-            );
-          }
-        } catch (e) {
-          if (!completer.isCompleted) {
-            completer.completeError(Exception(_errorMessage(e)));
-          }
-        }
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        if (!completer.isCompleted) {
-          completer.completeError(
-            Exception(_friendlyAuthError(e, fallback: 'OTP resend failed')),
-          );
-        }
-      },
-      codeSent: (String verificationId, int? newResendToken) {
-        if (!completer.isCompleted) {
-          completer.complete(
-            OtpSendResult(
-              verificationId: verificationId,
-              resendToken: newResendToken,
-            ),
-          );
-        }
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {},
-    );
-
-    return completer.future;
-  }
+  }) => _resendOtp(mobileNumber: mobileNumber, resendToken: resendToken);
 
   Future<void> verifyOtp({
     required String verificationId,
     required String otp,
-  }) async {
-    try {
-      final auth = _requireFirebaseAuth(action: 'OTP verification');
-      final credential = PhoneAuthProvider.credential(
-        verificationId: verificationId,
-        smsCode: otp,
-      );
+  }) => _verifyOtp(verificationId: verificationId, otp: otp);
 
-      await auth.signInWithCredential(credential);
-      await checkUserAfterLogin();
-    } on FirebaseAuthException catch (e) {
-      throw Exception(_friendlyAuthError(e, fallback: 'Invalid OTP'));
-    } catch (e) {
-      throw Exception(_errorMessage(e));
-    }
-  }
+  Future<void> checkUserAfterLogin() => _checkUserAfterLogin();
 
-  Future<void> checkUserAfterLogin() async {
-    final firebaseUser = firebaseAuth?.currentUser;
-    final preferences = await AppPreferences.getInstance();
-    if (firebaseUser == null) {
-      final restoredLocalUser = await _restoreOfflineSessionIfAvailable(
-        preferences,
-      );
-      if (restoredLocalUser != null) {
-        await BackgroundSyncService.instance.ensureRegistered();
-        if (restoredLocalUser.profileCompleted) {
-          _navigateByRole(restoredLocalUser.role);
-        } else {
-          Get.offAllNamed(AppRoutes.profileSetup);
-        }
-        return;
-      }
-
-      await preferences.clearSession();
-      Get.offAllNamed(AppRoutes.login);
-      return;
-    }
-
-    final localUser = await userLocalDataSource.getUserById(firebaseUser.uid);
-
-    // A completed local profile is enough to restore the app immediately, which
-    // keeps startup fast and allows offline access after the first login.
-    if (localUser != null && localUser.profileCompleted) {
-      await preferences.saveSession(
-        userId: localUser.id,
-        role: localUser.role,
-        businessId: localUser.businessId,
-      );
-      await BackgroundSyncService.instance.ensureRegistered();
-      _navigateByRole(localUser.role);
-      return;
-    }
-
-    try {
-      // Firestore is used as the authority only when local profile state is
-      // missing or incomplete on this device.
-      final remoteUser = await userRemoteDataSource.getUserById(
-        firebaseUser.uid,
-      );
-      if (remoteUser != null && remoteUser.profileCompleted) {
-        await userLocalDataSource.insertOrUpdateUser(remoteUser);
-        await userLocalDataSource.markUserSynced(remoteUser.id);
-        await preferences.saveSession(
-          userId: remoteUser.id,
-          role: remoteUser.role,
-          businessId: remoteUser.businessId,
-        );
-        await BackgroundSyncService.instance.ensureRegistered();
-        _navigateByRole(remoteUser.role);
-        return;
-      }
-    } on UserFetchUnavailableException {
-      debugPrint(
-        'Firestore user lookup is temporarily unavailable for ${firebaseUser.uid}.',
-      );
-
-      if (localUser != null) {
-        await preferences.saveSession(
-          userId: localUser.id,
-          role: localUser.role,
-          businessId: localUser.businessId,
-        );
-        await BackgroundSyncService.instance.ensureRegistered();
-        Get.offAllNamed(AppRoutes.profileSetup);
-        return;
-      }
-
-      throw Exception(
-        'We could not verify your account right now. '
-        'Please check your connection and try again.',
-      );
-    } on FirebaseException catch (e) {
-      debugPrint(
-        'Firestore user lookup failed for ${firebaseUser.uid}: ${e.code} ${e.message}',
-      );
-      rethrow;
-    } catch (e) {
-      debugPrint('Unexpected auth lookup error for ${firebaseUser.uid}: $e');
-      rethrow;
-    }
-
-    Get.offAllNamed(AppRoutes.profileSetup);
-  }
-
-  Future<String?> checkUserAfterLoginError() async {
-    try {
-      await checkUserAfterLogin();
-      return null;
-    } on FirebaseAuthException catch (e) {
-      return e.message ?? 'Authentication failed. Please try again.';
-    } on FirebaseException catch (e) {
-      return e.message ?? 'Unable to reach the server right now.';
-    } catch (e) {
-      return e.toString().replaceFirst('Exception: ', '');
-    }
-  }
+  Future<String?> checkUserAfterLoginError() => _checkUserAfterLoginError();
 
   Future<void> completeProfile({
     required String name,
     required String? mobile,
     required String? email,
     required String inviteCode,
-  }) async {
-    final firebaseUser = firebaseAuth?.currentUser;
-    if (firebaseUser == null) {
-      throw Exception(
-        'Profile setup requires an authenticated online session. '
-        'Please sign in again when connectivity is available.',
-      );
-    }
+  }) => _completeProfile(
+    name: name,
+    mobile: mobile,
+    email: email,
+    inviteCode: inviteCode,
+  );
 
-    final role = _getRoleFromInviteCode(inviteCode);
-    final now = DateTime.now().millisecondsSinceEpoch;
-    // The first completed profile is written locally and queued like any other
-    // business record so onboarding still works with flaky connectivity.
-    final user = AppUserModel(
-      id: firebaseUser.uid,
-      businessId: UserRemoteDataSource.defaultBusinessId,
-      name: name,
-      mobile: mobile,
-      email: email,
-      role: role,
-      status: 'active',
-      profileCompleted: true,
-      createdAt: now,
-      updatedAt: now,
-      isDeleted: false,
-      syncStatus: 'pending_create',
-      createdBy: firebaseUser.uid,
-      agentId: role == 'agent' ? firebaseUser.uid : null,
-    );
-
-    await userLocalDataSource.insertOrUpdateUser(user);
-    await _syncQueueLocalDataSource.enqueue(
-      SyncQueueModel(
-        id: _uuid.v4(),
-        businessId: user.businessId,
-        tableName: DatabaseTables.users,
-        recordId: user.id,
-        operation: 'create',
-        payload: user.toMap(),
-        retryCount: 0,
-        createdAt: now,
-        updatedAt: now,
-        syncStatus: 'pending_create',
-      ),
-    );
-    await _syncService.syncPendingDataBestEffort();
-
-    final preferences = await AppPreferences.getInstance();
-    await preferences.saveSession(
-      userId: user.id,
-      role: user.role,
-      businessId: user.businessId,
-    );
-    await BackgroundSyncService.instance.ensureRegistered();
-
-    _navigateByRole(role);
-  }
-
-  Future<void> logout() async {
-    await firebaseAuth?.signOut();
-    await GoogleSignIn.instance.signOut();
-    final preferences = await AppPreferences.getInstance();
-    await preferences.clearSession();
-    await BackgroundSyncService.instance.cancelAllTasks();
-    Get.offAllNamed(AppRoutes.login);
-  }
-
-  String _getRoleFromInviteCode(String inviteCode) {
-    final code = inviteCode.trim().toUpperCase();
-    if (code == 'NINAIVU_ADMIN') {
-      return 'admin';
-    }
-    if (code == 'NINAIVU_AGENT') {
-      return 'agent';
-    }
-    throw Exception('Invalid invite code');
-  }
-
-  void _navigateByRole(String role) {
-    switch (role) {
-      case 'admin':
-        Get.offAllNamed(AppRoutes.adminDashboard);
-        break;
-      case 'agent':
-        Get.offAllNamed(AppRoutes.agentDashboard);
-        break;
-      default:
-        Get.offAllNamed(AppRoutes.login);
-    }
-  }
-
-  String _friendlyAuthError(
-    FirebaseAuthException e, {
-    required String fallback,
-  }) {
-    final code = e.code.toLowerCase();
-    final message = (e.message ?? '').toLowerCase();
-
-    if (message.contains('billing_not_enabled') ||
-        code == 'billing-not-enabled' ||
-        code == 'internal-error') {
-      if (message.contains('billing_not_enabled')) {
-        return 'Phone login is not enabled for this Firebase project yet. '
-            'Enable billing in Google Cloud/Firebase for this project, then try again.';
-      }
-    }
-
-    if (code == 'invalid-phone-number') {
-      return 'Enter a valid mobile number with the correct country format.';
-    }
-    if (code == 'too-many-requests') {
-      return 'Too many OTP attempts were made. Please wait a while and try again.';
-    }
-    if (code == 'session-expired') {
-      return 'The OTP session expired. Please request a new OTP.';
-    }
-    if (code == 'invalid-verification-code') {
-      return 'The OTP you entered is incorrect. Please try again.';
-    }
-    if (code == 'network-request-failed') {
-      return 'Network error while contacting Firebase. Please check your connection and try again.';
-    }
-
-    return e.message ?? fallback;
-  }
-
-  String _formatIndianPhoneNumber(String mobileNumber) {
-    // Phone auth in this app is India-first, but we still preserve explicitly
-    // entered international numbers when the user includes the country prefix.
-    final digitsOnly = mobileNumber.replaceAll(RegExp(r'\D'), '');
-
-    if (digitsOnly.length == 10) {
-      return '+91$digitsOnly';
-    }
-
-    if (digitsOnly.length == 12 && digitsOnly.startsWith('91')) {
-      return '+$digitsOnly';
-    }
-
-    if (mobileNumber.trim().startsWith('+')) {
-      return mobileNumber.trim();
-    }
-
-    return '+$digitsOnly';
-  }
-
-  String _errorMessage(Object error) {
-    if (error is Exception) {
-      return error.toString().replaceFirst('Exception: ', '');
-    }
-
-    return error.toString();
-  }
-
-  bool _looksLikeGoogleReauthIssue(String message) {
-    final normalized = message.toLowerCase();
-    return normalized.contains('sign_in_failed') ||
-        normalized.contains('user did not grant permission') ||
-        normalized.contains('failed to recover auth') ||
-        normalized.contains('canceled') ||
-        normalized.contains('cancelled');
-  }
-
-  Future<void> _ensureGoogleSignInInitialized() {
-    final initialization = _googleSignInInitialization ??= GoogleSignIn.instance
-        .initialize(
-          serverClientId: defaultTargetPlatform == TargetPlatform.android
-              ? null
-              : _googleServerClientId,
-        );
-    return initialization;
-  }
-
-  Future<AppUserModel?> _restoreOfflineSessionIfAvailable(
-    AppPreferences preferences,
-  ) async {
-    final userId = preferences.userId;
-    if (userId == null || userId.isEmpty) {
-      return null;
-    }
-
-    final localUser = await userLocalDataSource.getUserById(userId);
-    if (localUser == null || localUser.isDeleted) {
-      return null;
-    }
-
-    await preferences.saveSession(
-      userId: localUser.id,
-      role: localUser.role,
-      businessId: localUser.businessId,
-    );
-    return localUser;
-  }
-
-  FirebaseAuth _requireFirebaseAuth({required String action}) {
-    final auth = firebaseAuth;
-    if (auth != null) {
-      return auth;
-    }
-
-    throw Exception(
-      '$action is unavailable until Firebase finishes initializing. '
-      'Offline data already saved on this device is still available.',
-    );
-  }
-
-  static FirebaseAuth? _safeFirebaseAuthInstance() {
-    try {
-      return FirebaseAuth.instance;
-    } catch (_) {
-      return null;
-    }
-  }
+  Future<void> logout() => _logout();
 }

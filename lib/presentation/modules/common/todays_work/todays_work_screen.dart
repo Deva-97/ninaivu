@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:ninaivu/core/constants/app_colors.dart';
 import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/utils/whatsapp_template_builder.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/domain/entities/follow_up.dart';
 import 'package:ninaivu/domain/entities/reminder.dart';
 import 'package:ninaivu/presentation/controllers/todays_work_controller.dart';
+import 'package:ninaivu/presentation/modules/common/widgets/app_shell.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/whatsapp_template_selector.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -39,37 +41,57 @@ class TodaysWorkScreen extends GetView<TodaysWorkController> {
             child: ListView(
               padding: EdgeInsets.all(responsive.pagePadding),
               children: [
+                DashboardHeroCard(
+                  title: TranslationKeys.todaysPriority.tr,
+                  subtitle: TranslationKeys.agentPrioritySubtitle.tr,
+                  primaryValue:
+                      controller.renewalsToday.length + controller.followUpsToday.length,
+                  primaryLabel: TranslationKeys.todaysWork.tr,
+                  primaryIcon: Icons.today_outlined,
+                  highlights: [
+                    DashboardHeroHighlight(
+                      label: TranslationKeys.renewalsToday.tr,
+                      value: controller.renewalsToday.length,
+                      color: AppColors.warning,
+                    ),
+                    DashboardHeroHighlight(
+                      label: TranslationKeys.followUpsToday.tr,
+                      value: controller.followUpsToday.length,
+                      color: AppColors.info,
+                    ),
+                    DashboardHeroHighlight(
+                      label: TranslationKeys.missedFollowUps.tr,
+                      value: controller.missedFollowUps.length,
+                      color: AppColors.danger,
+                    ),
+                  ],
+                ),
+                SizedBox(height: responsive.sectionGap),
                 _SectionHeader(
                   title: TranslationKeys.renewalsToday.tr,
                   count: controller.renewalsToday.length,
                 ),
-                ...controller.renewalsToday.map(
-                  (item) => _ReminderCard(item: item),
-                ),
+                ...controller.renewalsToday.map((item) => _ReminderWorkCard(item: item)),
                 SizedBox(height: responsive.sectionGap),
                 _SectionHeader(
                   title: TranslationKeys.upcomingRenewals.tr,
                   count: controller.upcomingRenewals.length,
                 ),
                 ...controller.upcomingRenewals.map(
-                  (item) => _ReminderCard(item: item),
+                  (item) => _ReminderWorkCard(item: item),
                 ),
                 SizedBox(height: responsive.sectionGap),
                 _SectionHeader(
                   title: TranslationKeys.followUpsToday.tr,
                   count: controller.followUpsToday.length,
                 ),
-                ...controller.followUpsToday.map(
-                  (item) => _FollowUpCard(item: item),
-                ),
+                ...controller.followUpsToday.map((item) => _FollowUpWorkCard(item: item)),
                 SizedBox(height: responsive.sectionGap),
                 _SectionHeader(
                   title: TranslationKeys.missedFollowUps.tr,
                   count: controller.missedFollowUps.length,
                 ),
-                ...controller.missedFollowUps.map(
-                  (item) => _FollowUpCard(item: item),
-                ),
+                ...controller.missedFollowUps.map((item) => _FollowUpWorkCard(item: item)),
                 SizedBox(height: responsive.sectionGap),
                 Card(
                   child: ListTile(
@@ -111,141 +133,130 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _ReminderCard extends GetView<TodaysWorkController> {
-  const _ReminderCard({required this.item});
+class _ReminderWorkCard extends GetView<TodaysWorkController> {
+  const _ReminderWorkCard({required this.item});
 
   final Reminder item;
 
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(item.clientName ?? 'Client ${item.clientId}'),
-            const SizedBox(height: 6),
-            Text(
-              '${item.policyNumber ?? 'Policy'} - ${item.companyName ?? 'Insurance'}\n'
-              '${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(item.reminderDateTime))}',
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                if ((item.clientMobile ?? '').isNotEmpty)
-                  OutlinedButton.icon(
-                    onPressed: () => launchUrl(Uri.parse('tel:${item.clientMobile}')),
-                    icon: const Icon(Icons.call_outlined),
-                    label: Text(TranslationKeys.call.tr),
-                  ),
-                if ((item.clientMobile ?? '').isNotEmpty)
-                  OutlinedButton.icon(
-                    onPressed: () => showWhatsAppTemplateSelector(
-                      context: context,
-                      mobile: item.clientMobile!,
-                      data: WhatsAppTemplateData(
-                        clientName: item.clientName,
-                        mobile: item.clientMobile,
-                        policyNumber: item.policyNumber,
-                        companyName: item.companyName,
-                      ),
-                    ),
-                    icon: const Icon(Icons.chat_outlined),
-                    label: Text(TranslationKeys.whatsapp.tr),
-                  ),
-                OutlinedButton(
-                  onPressed: () => Get.toNamed(
-                    AppRoutes.reminderDetails,
-                    arguments: item.id,
-                  ),
-                  child: Text(TranslationKeys.viewDetails.tr),
-                ),
-                FilledButton(
-                  onPressed: () => controller.markReminderCompleted(item.id),
-                  child: Text(TranslationKeys.markCompleted.tr),
-                ),
-                FilledButton.tonal(
-                  onPressed: () => controller.markReminderRenewed(item.id),
-                  child: Text(TranslationKeys.markRenewed.tr),
-                ),
-              ],
-            ),
-          ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: ReminderCard(
+        reminder: item,
+        subtitle:
+            '${item.policyNumber ?? TranslationKeys.policyLabel.tr} - '
+            '${item.companyName ?? TranslationKeys.insuranceLabel.tr}\n'
+            '${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(item.reminderDateTime))}',
+        onTap: () => Get.toNamed(
+          AppRoutes.reminderDetails,
+          arguments: item.id,
         ),
+        actions: [
+          if ((item.clientMobile ?? '').isNotEmpty)
+            _actionButton(
+              context: context,
+              icon: Icons.call_outlined,
+              label: TranslationKeys.call.tr,
+              onPressed: () => launchUrl(Uri.parse('tel:${item.clientMobile}')),
+            ),
+          if ((item.clientMobile ?? '').isNotEmpty)
+            _actionButton(
+              context: context,
+              icon: Icons.chat_outlined,
+              label: TranslationKeys.whatsapp.tr,
+              onPressed: () => showWhatsAppTemplateSelector(
+                context: context,
+                mobile: item.clientMobile!,
+                data: WhatsAppTemplateData(
+                  clientName: item.clientName,
+                  mobile: item.clientMobile,
+                  policyNumber: item.policyNumber,
+                  companyName: item.companyName,
+                ),
+              ),
+            ),
+          OutlinedButton(
+            onPressed: () => Get.toNamed(
+              AppRoutes.reminderDetails,
+              arguments: item.id,
+            ),
+            child: Text(TranslationKeys.viewDetails.tr),
+          ),
+          FilledButton(
+            onPressed: () => controller.markReminderCompleted(item.id),
+            child: Text(TranslationKeys.markCompleted.tr),
+          ),
+          FilledButton.tonal(
+            onPressed: () => controller.markReminderRenewed(item.id),
+            child: Text(TranslationKeys.markRenewed.tr),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _FollowUpCard extends GetView<TodaysWorkController> {
-  const _FollowUpCard({required this.item});
+class _FollowUpWorkCard extends GetView<TodaysWorkController> {
+  const _FollowUpWorkCard({required this.item});
 
   final FollowUp item;
 
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(item.clientName ?? 'Client ${item.clientId}'),
-            const SizedBox(height: 6),
-            Text(
-              '${item.type} - ${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(item.followUpDateTime))}\n'
-              '${item.policyNumber ?? TranslationKeys.noPolicyLinked.tr}',
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                if ((item.clientMobile ?? '').isNotEmpty)
-                  OutlinedButton.icon(
-                    onPressed: () => launchUrl(Uri.parse('tel:${item.clientMobile}')),
-                    icon: const Icon(Icons.call_outlined),
-                    label: Text(TranslationKeys.call.tr),
-                  ),
-                if ((item.clientMobile ?? '').isNotEmpty)
-                  OutlinedButton.icon(
-                    onPressed: () => showWhatsAppTemplateSelector(
-                      context: context,
-                      mobile: item.clientMobile!,
-                      data: WhatsAppTemplateData(
-                        clientName: item.clientName,
-                        mobile: item.clientMobile,
-                        policyNumber: item.policyNumber,
-                        followUpType: item.type,
-                      ),
-                    ),
-                    icon: const Icon(Icons.chat_outlined),
-                    label: Text(TranslationKeys.whatsapp.tr),
-                  ),
-                OutlinedButton(
-                  onPressed: () => Get.toNamed(
-                    AppRoutes.followUpDetails,
-                    arguments: item.id,
-                  ),
-                  child: Text(TranslationKeys.viewDetails.tr),
-                ),
-                FilledButton(
-                  onPressed: () => controller.markFollowUpCompleted(item.id),
-                  child: Text(TranslationKeys.markCompleted.tr),
-                ),
-                FilledButton.tonal(
-                  onPressed: () => _showRescheduleDialog(context),
-                  child: Text(TranslationKeys.reschedule.tr),
-                ),
-              ],
-            ),
-          ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: FollowUpCard(
+        followUp: item,
+        subtitle:
+            '${item.type} - ${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(item.followUpDateTime))}\n'
+            '${item.policyNumber ?? TranslationKeys.noPolicyLinked.tr}',
+        onTap: () => Get.toNamed(
+          AppRoutes.followUpDetails,
+          arguments: item.id,
         ),
+        actions: [
+          if ((item.clientMobile ?? '').isNotEmpty)
+            _actionButton(
+              context: context,
+              icon: Icons.call_outlined,
+              label: TranslationKeys.call.tr,
+              onPressed: () => launchUrl(Uri.parse('tel:${item.clientMobile}')),
+            ),
+          if ((item.clientMobile ?? '').isNotEmpty)
+            _actionButton(
+              context: context,
+              icon: Icons.chat_outlined,
+              label: TranslationKeys.whatsapp.tr,
+              onPressed: () => showWhatsAppTemplateSelector(
+                context: context,
+                mobile: item.clientMobile!,
+                data: WhatsAppTemplateData(
+                  clientName: item.clientName,
+                  mobile: item.clientMobile,
+                  policyNumber: item.policyNumber,
+                  followUpType: item.type,
+                ),
+              ),
+            ),
+          OutlinedButton(
+            onPressed: () => Get.toNamed(
+              AppRoutes.followUpDetails,
+              arguments: item.id,
+            ),
+            child: Text(TranslationKeys.viewDetails.tr),
+          ),
+          FilledButton(
+            onPressed: () => controller.markFollowUpCompleted(item.id),
+            child: Text(TranslationKeys.markCompleted.tr),
+          ),
+          FilledButton.tonal(
+            onPressed: () => _showRescheduleDialog(context),
+            child: Text(TranslationKeys.reschedule.tr),
+          ),
+        ],
       ),
     );
   }
@@ -316,4 +327,21 @@ class _FollowUpCard extends GetView<TodaysWorkController> {
       );
     }
   }
+}
+
+Widget _actionButton({
+  required BuildContext context,
+  required IconData icon,
+  required String label,
+  required VoidCallback onPressed,
+}) {
+  return OutlinedButton.icon(
+    onPressed: onPressed,
+    icon: Icon(icon),
+    label: Text(label),
+    style: OutlinedButton.styleFrom(
+      minimumSize: Size(0, context.responsive.compactButtonHeight),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+    ),
+  );
 }

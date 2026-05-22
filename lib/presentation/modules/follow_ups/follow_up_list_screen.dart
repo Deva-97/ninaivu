@@ -10,11 +10,11 @@ import 'package:ninaivu/presentation/routes/app_routes.dart';
 class FollowUpListScreen extends GetView<FollowUpListController> {
   const FollowUpListScreen({super.key});
 
-  static const filters = <MapEntry<String, String>>[
-    MapEntry('today', 'Today'),
-    MapEntry('upcoming', 'Upcoming'),
-    MapEntry('missed', 'Missed'),
-    MapEntry('completed', 'Completed'),
+  static final filters = <MapEntry<String, String>>[
+    MapEntry('today', TranslationKeys.today.tr),
+    MapEntry('upcoming', TranslationKeys.upcoming.tr),
+    MapEntry('missed', TranslationKeys.missed.tr),
+    MapEntry('completed', TranslationKeys.completed.tr),
   ];
 
   @override
@@ -26,7 +26,7 @@ class FollowUpListScreen extends GetView<FollowUpListController> {
       currentTab: AppShellTab.followUps,
       dashboardRoute: AppRoutes.agentDashboard,
       title: TranslationKeys.followUps.tr,
-      subtitle: 'Track follow-up calls and pending actions',
+      subtitle: TranslationKeys.followUpSubtitle.tr,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final refreshed = await Get.toNamed(AppRoutes.followUpForm);
@@ -79,13 +79,15 @@ class FollowUpListScreen extends GetView<FollowUpListController> {
                       responsive.scaled(110, min: 96),
                     ),
                     itemCount: controller.followUps.length,
-                    separatorBuilder: (_, _) => SizedBox(height: responsive.scaled(12, min: 10)),
+                    separatorBuilder: (_, _) =>
+                        SizedBox(height: responsive.scaled(12, min: 10)),
                     itemBuilder: (context, index) {
                       final followUp = controller.followUps[index];
                       return FollowUpCard(
                         followUp: followUp,
                         subtitle:
-                            '${followUp.type} • ${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(followUp.followUpDateTime))}\n${followUp.policyNumber ?? TranslationKeys.noPolicyLinked.tr}',
+                            '${followUp.type} - ${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(followUp.followUpDateTime))}\n'
+                            '${followUp.policyNumber ?? TranslationKeys.noPolicyLinked.tr}',
                         onTap: () async {
                           final refreshed = await Get.toNamed(
                             AppRoutes.followUpDetails,

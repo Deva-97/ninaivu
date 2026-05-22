@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:ninaivu/core/constants/app_colors.dart';
 import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/agent_dashboard_controller.dart';
@@ -95,8 +96,38 @@ class AgentDashboardScreen extends GetView<AgentDashboardController> {
                     );
                   }),
                   SizedBox(height: responsive.sectionGap),
+                  DashboardHeroCard(
+                    title: TranslationKeys.todaysPriority.tr,
+                    subtitle: TranslationKeys.agentPrioritySubtitle.tr,
+                    primaryValue: stats.renewalsToday,
+                    primaryLabel: TranslationKeys.renewalsToday.tr,
+                    primaryIcon: Icons.today_outlined,
+                    highlights: [
+                      DashboardHeroHighlight(
+                        label: TranslationKeys.followUpsToday.tr,
+                        value: stats.followUpsToday,
+                        color: AppColors.warning,
+                      ),
+                      DashboardHeroHighlight(
+                        label: TranslationKeys.upcoming7Days.tr,
+                        value: stats.upcoming7Days,
+                        color: AppColors.info,
+                      ),
+                      DashboardHeroHighlight(
+                        label: TranslationKeys.upcoming30Days.tr,
+                        value: stats.upcoming30Days,
+                        color: AppColors.success,
+                      ),
+                      DashboardHeroHighlight(
+                        label: TranslationKeys.missedFollowUps.tr,
+                        value: stats.missedFollowUps,
+                        color: AppColors.danger,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: responsive.sectionGap),
                   SectionTitle(
-                    title: TranslationKeys.yourPortfolio.tr,
+                    title: TranslationKeys.portfolioHealth.tr,
                     subtitle: TranslationKeys.portfolioSummary.tr,
                   ),
                   SizedBox(height: responsive.itemGap),
@@ -114,59 +145,85 @@ class AgentDashboardScreen extends GetView<AgentDashboardController> {
                         title: TranslationKeys.myClients.tr,
                         value: stats.myClients,
                         icon: Icons.people_outline_rounded,
-                        color: Colors.indigo,
+                        color: AppColors.primary,
                       ),
                       DashboardMetricCard(
                         title: TranslationKeys.myPolicies.tr,
                         value: stats.myPolicies,
                         icon: Icons.description_outlined,
-                        color: Colors.deepPurple,
+                        color: AppColors.heroBlue,
                       ),
                       DashboardMetricCard(
                         title: TranslationKeys.renewalsToday.tr,
                         value: stats.renewalsToday,
                         icon: Icons.today_outlined,
-                        color: Colors.orange,
+                        color: AppColors.warning,
                         badgeLabel: TranslationKeys.pending.tr,
                       ),
                       DashboardMetricCard(
                         title: TranslationKeys.upcoming7Days.tr,
                         value: stats.upcoming7Days,
                         icon: Icons.date_range_outlined,
-                        color: Colors.cyan,
+                        color: AppColors.info,
                       ),
                       DashboardMetricCard(
                         title: TranslationKeys.upcoming30Days.tr,
                         value: stats.upcoming30Days,
                         icon: Icons.event_repeat_outlined,
-                        color: Colors.teal,
+                        color: AppColors.success,
                       ),
                       DashboardMetricCard(
                         title: TranslationKeys.followUpsToday.tr,
                         value: stats.followUpsToday,
                         icon: Icons.call_outlined,
-                        color: Colors.amber,
+                        color: AppColors.priority,
                         badgeLabel: TranslationKeys.pending.tr,
                       ),
                     ],
                   ),
                   SizedBox(height: responsive.sectionGap),
-                  SectionTitle(title: TranslationKeys.quickActions.tr),
-                  SizedBox(height: responsive.itemGap),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
+                  DashboardActionGroup(
+                    title: TranslationKeys.primaryActions.tr,
+                    subtitle: TranslationKeys.quickToolsSubtitle.tr,
                     children: [
                       DashboardQuickAction(
                         label: TranslationKeys.todaysWork.tr,
                         icon: Icons.today_outlined,
-                        color: Colors.orange,
+                        color: AppColors.warning,
+                        prominent: true,
                         onTap: () => Get.toNamed(AppRoutes.todaysWork),
                       ),
                       DashboardQuickAction(
+                        label: TranslationKeys.addClient.tr,
+                        icon: Icons.person_add_alt_1_outlined,
+                        color: AppColors.primary,
+                        prominent: true,
+                        onTap: () => Get.toNamed(AppRoutes.clientForm),
+                      ),
+                      DashboardQuickAction(
+                        label: TranslationKeys.addPolicy.tr,
+                        icon: Icons.note_add_outlined,
+                        color: AppColors.heroBlue,
+                        prominent: true,
+                        onTap: () => Get.toNamed(AppRoutes.policyForm),
+                      ),
+                      DashboardQuickAction(
+                        label: TranslationKeys.addFollowUp.tr,
+                        icon: Icons.add_alert_outlined,
+                        color: AppColors.priority,
+                        prominent: true,
+                        onTap: () => Get.toNamed(AppRoutes.followUpForm),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: responsive.sectionGap),
+                  DashboardActionGroup(
+                    title: TranslationKeys.secondaryTools.tr,
+                    children: [
+                      DashboardQuickAction(
                         label: TranslationKeys.exportClients.tr,
                         icon: Icons.file_download_outlined,
-                        color: Colors.blueGrey,
+                        color: AppColors.actionSecondary,
                         onTap: () async {
                           final format = await showExportFormatPicker(
                             title: TranslationKeys.exportClients.tr,
@@ -179,7 +236,7 @@ class AgentDashboardScreen extends GetView<AgentDashboardController> {
                       DashboardQuickAction(
                         label: TranslationKeys.exportPolicies.tr,
                         icon: Icons.table_view_outlined,
-                        color: Colors.brown,
+                        color: AppColors.slate,
                         onTap: () async {
                           final format = await showExportFormatPicker(
                             title: TranslationKeys.exportPolicies.tr,
@@ -189,28 +246,13 @@ class AgentDashboardScreen extends GetView<AgentDashboardController> {
                           }
                         },
                       ),
-                      DashboardQuickAction(
-                        label: TranslationKeys.addClient.tr,
-                        icon: Icons.person_add_alt_1_outlined,
-                        color: Colors.indigo,
-                        onTap: () => Get.toNamed(AppRoutes.clientForm),
-                      ),
-                      DashboardQuickAction(
-                        label: TranslationKeys.addPolicy.tr,
-                        icon: Icons.note_add_outlined,
-                        color: Colors.deepPurple,
-                        onTap: () => Get.toNamed(AppRoutes.policyForm),
-                      ),
-                      DashboardQuickAction(
-                        label: TranslationKeys.addFollowUp.tr,
-                        icon: Icons.add_alert_outlined,
-                        color: Colors.orange,
-                        onTap: () => Get.toNamed(AppRoutes.followUpForm),
-                      ),
                     ],
                   ),
                   SizedBox(height: responsive.sectionGap),
-                  SectionTitle(title: TranslationKeys.upcomingDates.tr),
+                  SectionTitle(
+                    title: TranslationKeys.upcomingDates.tr,
+                    subtitle: TranslationKeys.upcomingDatesSubtitle.tr,
+                  ),
                   SizedBox(height: responsive.itemGap),
                   Obx(() {
                     if (controller.upcomingEvents.isEmpty) {
@@ -219,13 +261,20 @@ class AgentDashboardScreen extends GetView<AgentDashboardController> {
                     return Column(
                       children: controller.upcomingEvents
                           .map(
-                            (event) => Card(
-                              child: ListTile(
-                                title: Text(event.clientName),
-                                subtitle: Text(
-                                  '${event.label} - ${DateFormat('dd MMM').format(DateTime.fromMillisecondsSinceEpoch(event.eventDateMs))}',
+                            (event) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: UpcomingWorkCard(
+                                title: event.clientName,
+                                label: event.label,
+                                dateLabel: DateFormat('dd MMM').format(
+                                  DateTime.fromMillisecondsSinceEpoch(
+                                    event.eventDateMs,
+                                  ),
                                 ),
-                                trailing: Text(event.mobile),
+                                trailingLabel: event.mobile,
+                                icon: event.eventType == 'birthday'
+                                    ? Icons.cake_outlined
+                                    : Icons.event_outlined,
                                 onTap: () => Get.toNamed(
                                   AppRoutes.clientDetails,
                                   arguments: event.clientId,

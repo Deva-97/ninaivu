@@ -16,12 +16,15 @@ import 'package:ninaivu/domain/entities/reminder.dart';
 import 'package:ninaivu/domain/repositories/reminder_repository.dart';
 import 'package:uuid/uuid.dart';
 
+typedef ReminderNotificationCanceller = Future<void> Function(int notificationId);
+
 class ReminderRepositoryImpl implements ReminderRepository {
   ReminderRepositoryImpl({
     ReminderLocalDataSource? localDataSource,
     PolicyLocalDataSource? policyLocalDataSource,
     UserLocalDataSource? userLocalDataSource,
     NotificationService? notificationService,
+    ReminderNotificationCanceller? notificationCanceller,
     SyncQueueLocalDataSource? syncQueueLocalDataSource,
     SyncService? syncService,
     Uuid? uuid,
@@ -29,6 +32,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
        _policyLocalDataSource = policyLocalDataSource ?? PolicyLocalDataSource(),
        _userLocalDataSource = userLocalDataSource ?? UserLocalDataSource(),
        _notificationService = notificationService ?? NotificationService.instance,
+       _notificationCanceller = notificationCanceller,
        _syncQueueLocalDataSource =
            syncQueueLocalDataSource ?? SyncQueueLocalDataSource(),
        _syncService = syncService ?? SyncService(),
@@ -38,6 +42,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
   final PolicyLocalDataSource _policyLocalDataSource;
   final UserLocalDataSource _userLocalDataSource;
   final NotificationService _notificationService;
+  final ReminderNotificationCanceller? _notificationCanceller;
   final SyncQueueLocalDataSource _syncQueueLocalDataSource;
   final SyncService _syncService;
   final Uuid _uuid;
@@ -75,7 +80,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
     _ensureReminderAccess(currentUser, reminder);
 
     if (reminder.notificationId != null) {
-      await _notificationService.cancelReminder(reminder.notificationId!);
+      await _cancelNotification(reminder.notificationId!);
     }
     await _localDataSource.markReminderCompleted(reminderId);
     LocalDataChangeService.notifyChanged();
@@ -98,7 +103,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
     _ensureReminderAccess(currentUser, reminder);
 
     if (reminder.notificationId != null) {
-      await _notificationService.cancelReminder(reminder.notificationId!);
+      await _cancelNotification(reminder.notificationId!);
     }
     await _localDataSource.markReminderRenewed(reminderId);
     final updatedReminder = reminder.copyWith(
@@ -205,5 +210,13 @@ class ReminderRepositoryImpl implements ReminderRepository {
         syncStatus: 'pending_update',
       ),
     );
+  }
+
+  Future<void> _cancelNotification(int notificationId) async {
+    if (_notificationCanceller != null) {
+      await _notificationCanceller(notificationId);
+      return;
+    }
+    await _notificationService.cancelReminder(notificationId);
   }
 }

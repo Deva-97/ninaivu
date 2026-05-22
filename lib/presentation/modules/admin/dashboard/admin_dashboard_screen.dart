@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:ninaivu/core/constants/app_colors.dart';
 import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/admin_dashboard_controller.dart';
@@ -95,8 +96,33 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
                     );
                   }),
                   SizedBox(height: responsive.sectionGap),
+                  DashboardHeroCard(
+                    title: TranslationKeys.todaysPriority.tr,
+                    subtitle: TranslationKeys.adminPrioritySubtitle.tr,
+                    primaryValue: stats.renewalsToday,
+                    primaryLabel: TranslationKeys.renewalsToday.tr,
+                    primaryIcon: Icons.today_outlined,
+                    highlights: [
+                      DashboardHeroHighlight(
+                        label: TranslationKeys.expiredPolicies.tr,
+                        value: stats.expiredPolicies,
+                        color: AppColors.danger,
+                      ),
+                      DashboardHeroHighlight(
+                        label: TranslationKeys.pendingFollowUps.tr,
+                        value: stats.pendingFollowUps,
+                        color: AppColors.warning,
+                      ),
+                      DashboardHeroHighlight(
+                        label: TranslationKeys.missedFollowUps.tr,
+                        value: stats.missedFollowUps,
+                        color: AppColors.info,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: responsive.sectionGap),
                   SectionTitle(
-                    title: TranslationKeys.businessOverview.tr,
+                    title: TranslationKeys.businessHealth.tr,
                     subtitle: TranslationKeys.liveSqliteCounts.tr,
                   ),
                   SizedBox(height: responsive.itemGap),
@@ -114,72 +140,98 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
                         title: TranslationKeys.totalAgents.tr,
                         value: stats.totalAgents,
                         icon: Icons.support_agent_rounded,
-                        color: Colors.blue,
+                        color: AppColors.actionSecondary,
                       ),
                       DashboardMetricCard(
                         title: TranslationKeys.totalCustomers.tr,
                         value: stats.totalCustomers,
                         icon: Icons.groups_2_outlined,
-                        color: Colors.teal,
+                        color: AppColors.info,
                       ),
                       DashboardMetricCard(
                         title: TranslationKeys.totalClients.tr,
                         value: stats.totalClients,
                         icon: Icons.people_outline_rounded,
-                        color: Colors.indigo,
+                        color: AppColors.primary,
                       ),
                       DashboardMetricCard(
                         title: TranslationKeys.totalPolicies.tr,
                         value: stats.totalPolicies,
                         icon: Icons.description_outlined,
-                        color: Colors.deepPurple,
+                        color: AppColors.heroBlue,
                       ),
                       DashboardMetricCard(
                         title: TranslationKeys.renewalsToday.tr,
                         value: stats.renewalsToday,
                         icon: Icons.today_outlined,
-                        color: Colors.orange,
+                        color: AppColors.warning,
                         badgeLabel: TranslationKeys.pending.tr,
                       ),
                       DashboardMetricCard(
                         title: TranslationKeys.upcoming7Days.tr,
                         value: stats.upcoming7Days,
                         icon: Icons.upcoming_outlined,
-                        color: Colors.cyan,
+                        color: AppColors.info,
                       ),
                       DashboardMetricCard(
                         title: TranslationKeys.expiredPolicies.tr,
                         value: stats.expiredPolicies,
                         icon: Icons.warning_amber_rounded,
-                        color: Colors.red,
+                        color: AppColors.danger,
                         badgeLabel: TranslationKeys.missed.tr,
                       ),
                       DashboardMetricCard(
                         title: TranslationKeys.pendingFollowUps.tr,
                         value: stats.pendingFollowUps,
                         icon: Icons.pending_actions_outlined,
-                        color: Colors.amber,
+                        color: AppColors.priority,
                         badgeLabel: TranslationKeys.pending.tr,
                       ),
                     ],
                   ),
                   SizedBox(height: responsive.sectionGap),
-                  SectionTitle(title: TranslationKeys.quickActions.tr),
-                  SizedBox(height: responsive.itemGap),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
+                  DashboardActionGroup(
+                    title: TranslationKeys.primaryActions.tr,
+                    subtitle: TranslationKeys.quickToolsSubtitle.tr,
                     children: [
                       DashboardQuickAction(
                         label: TranslationKeys.todaysWork.tr,
                         icon: Icons.today_outlined,
-                        color: Colors.orange,
+                        color: AppColors.warning,
+                        prominent: true,
                         onTap: () => Get.toNamed(AppRoutes.todaysWork),
                       ),
                       DashboardQuickAction(
+                        label: TranslationKeys.addClient.tr,
+                        icon: Icons.person_add_alt_1_outlined,
+                        color: AppColors.primary,
+                        prominent: true,
+                        onTap: () => Get.toNamed(AppRoutes.clientForm),
+                      ),
+                      DashboardQuickAction(
+                        label: TranslationKeys.addPolicy.tr,
+                        icon: Icons.note_add_outlined,
+                        color: AppColors.heroBlue,
+                        prominent: true,
+                        onTap: () => Get.toNamed(AppRoutes.policyForm),
+                      ),
+                      DashboardQuickAction(
+                        label: TranslationKeys.addFollowUp.tr,
+                        icon: Icons.add_alert_outlined,
+                        color: AppColors.priority,
+                        prominent: true,
+                        onTap: () => Get.toNamed(AppRoutes.followUpForm),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: responsive.sectionGap),
+                  DashboardActionGroup(
+                    title: TranslationKeys.secondaryTools.tr,
+                    children: [
+                      DashboardQuickAction(
                         label: TranslationKeys.exportClients.tr,
                         icon: Icons.file_download_outlined,
-                        color: Colors.blueGrey,
+                        color: AppColors.actionSecondary,
                         onTap: () async {
                           final format = await showExportFormatPicker(
                             title: TranslationKeys.exportClients.tr,
@@ -192,7 +244,7 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
                       DashboardQuickAction(
                         label: TranslationKeys.exportPolicies.tr,
                         icon: Icons.table_view_outlined,
-                        color: Colors.brown,
+                        color: AppColors.slate,
                         onTap: () async {
                           final format = await showExportFormatPicker(
                             title: TranslationKeys.exportPolicies.tr,
@@ -203,27 +255,9 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
                         },
                       ),
                       DashboardQuickAction(
-                        label: TranslationKeys.addClient.tr,
-                        icon: Icons.person_add_alt_1_outlined,
-                        color: Colors.indigo,
-                        onTap: () => Get.toNamed(AppRoutes.clientForm),
-                      ),
-                      DashboardQuickAction(
-                        label: TranslationKeys.addPolicy.tr,
-                        icon: Icons.note_add_outlined,
-                        color: Colors.deepPurple,
-                        onTap: () => Get.toNamed(AppRoutes.policyForm),
-                      ),
-                      DashboardQuickAction(
-                        label: TranslationKeys.addFollowUp.tr,
-                        icon: Icons.add_alert_outlined,
-                        color: Colors.orange,
-                        onTap: () => Get.toNamed(AppRoutes.followUpForm),
-                      ),
-                      DashboardQuickAction(
                         label: TranslationKeys.viewRenewals.tr,
                         icon: Icons.notifications_active_outlined,
-                        color: Colors.teal,
+                        color: AppColors.info,
                         onTap: () => Get.toNamed(
                           AppRoutes.reminders,
                           arguments: {'filter': 'pending'},
@@ -232,13 +266,16 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
                       DashboardQuickAction(
                         label: TranslationKeys.agents.tr,
                         icon: Icons.manage_accounts_outlined,
-                        color: Colors.blue,
+                        color: AppColors.actionPrimary,
                         onTap: () => Get.toNamed(AppRoutes.agentList),
                       ),
                     ],
                   ),
                   SizedBox(height: responsive.sectionGap),
-                  SectionTitle(title: TranslationKeys.upcomingDates.tr),
+                  SectionTitle(
+                    title: TranslationKeys.upcomingDates.tr,
+                    subtitle: TranslationKeys.upcomingDatesSubtitle.tr,
+                  ),
                   SizedBox(height: responsive.itemGap),
                   Obx(() {
                     if (controller.upcomingEvents.isEmpty) {
@@ -247,13 +284,20 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
                     return Column(
                       children: controller.upcomingEvents
                           .map(
-                            (event) => Card(
-                              child: ListTile(
-                                title: Text(event.clientName),
-                                subtitle: Text(
-                                  '${event.label} - ${DateFormat('dd MMM').format(DateTime.fromMillisecondsSinceEpoch(event.eventDateMs))}',
+                            (event) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: UpcomingWorkCard(
+                                title: event.clientName,
+                                label: event.label,
+                                dateLabel: DateFormat('dd MMM').format(
+                                  DateTime.fromMillisecondsSinceEpoch(
+                                    event.eventDateMs,
+                                  ),
                                 ),
-                                trailing: Text(event.mobile),
+                                trailingLabel: event.mobile,
+                                icon: event.eventType == 'birthday'
+                                    ? Icons.cake_outlined
+                                    : Icons.event_outlined,
                                 onTap: () => Get.toNamed(
                                   AppRoutes.clientDetails,
                                   arguments: event.clientId,

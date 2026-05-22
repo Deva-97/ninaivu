@@ -2,10 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ninaivu/data/models/follow_up_model.dart';
 
 class FollowUpRemoteDataSource {
-  FollowUpRemoteDataSource({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance;
+  FollowUpRemoteDataSource({FirebaseFirestore? firestore}) : _firestore = firestore;
 
-  final FirebaseFirestore _firestore;
+  FirebaseFirestore? _firestore;
 
   Future<void> upsertFollowUp(FollowUpModel followUp) async {
     await _collection(followUp.businessId).doc(followUp.id).set(
@@ -22,7 +21,7 @@ class FollowUpRemoteDataSource {
   }
 
   CollectionReference<Map<String, dynamic>> _collection(String businessId) {
-    return _firestore
+    return (_firestore ??= FirebaseFirestore.instance)
         .collection('businesses')
         .doc(businessId)
         .collection('follow_ups');

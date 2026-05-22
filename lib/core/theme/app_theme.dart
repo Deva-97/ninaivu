@@ -67,15 +67,15 @@ class AppTheme {
         color: colors.surface,
         elevation: 0,
         margin: EdgeInsets.zero,
-        shadowColor: AppColors.shadow.withValues(alpha: isDark ? 0.0 : 0.05),
+        shadowColor: AppColors.shadow.withValues(alpha: isDark ? 0.0 : 0.04),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: colors.outline.withValues(alpha: 0.8)),
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: colors.outline.withValues(alpha: 0.72)),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? AppColors.darkSurfaceSoft : AppColors.lightSurface,
+        fillColor: isDark ? AppColors.darkSurfaceSoft : AppColors.surfaceHighlight,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         hintStyle: textTheme.bodyMedium?.copyWith(
           color: isDark ? AppColors.darkTextMuted : AppColors.lightTextMuted,
@@ -110,7 +110,8 @@ class AppTheme {
           foregroundColor: colors.onSurface,
           minimumSize: const Size(double.infinity, 52),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-          side: BorderSide(color: colors.outline),
+          backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+          side: BorderSide(color: colors.outline.withValues(alpha: 0.85)),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -161,7 +162,7 @@ class AppTheme {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: colors.surface,
+        backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
         indicatorColor: AppColors.primaryLight.withValues(alpha: isDark ? 0.18 : 0.55),
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => textTheme.labelSmall?.copyWith(
@@ -188,7 +189,7 @@ class AppTheme {
         contentTextStyle: textTheme.bodyMedium?.copyWith(
           color: isDark ? AppColors.darkTextPrimary : Colors.white,
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }
