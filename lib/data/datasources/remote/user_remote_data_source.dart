@@ -56,10 +56,9 @@ class UserRemoteDataSource {
   }
 
   Future<void> upsertUser(AppUserModel user) async {
-    await _userCollection(user.businessId).doc(user.id).set(
-      user.toFirestore(),
-      SetOptions(merge: true),
-    );
+    await _userCollection(
+      user.businessId,
+    ).doc(user.id).set(user.toFirestore(), SetOptions(merge: true));
   }
 
   Future<void> createOrUpdateUser(AppUserModel user) => upsertUser(user);

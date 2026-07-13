@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/localization/app_locale.dart';
-import 'package:ninaivu/core/services/import_export_service.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/settings_controller.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/account_deletion_card.dart';
@@ -23,7 +22,8 @@ class SettingsScreen extends GetView<SettingsController> {
       title: TranslationKeys.settings.tr,
       subtitle: 'Preferences, sync tools, and account controls',
       body: Obx(() {
-        if (controller.isLoading.value && controller.currentUser.value == null) {
+        if (controller.isLoading.value &&
+            controller.currentUser.value == null) {
           return AppLoadingView(message: TranslationKeys.loadingSettings.tr);
         }
         final user = controller.currentUser.value;
@@ -46,7 +46,10 @@ class SettingsScreen extends GetView<SettingsController> {
             children: [
               ProfileAvatarBlock(
                 name: user.name,
-                subtitle: [user.mobile, user.email].whereType<String>().where((e) => e.isNotEmpty).join(' • '),
+                subtitle: [
+                  user.mobile,
+                  user.email,
+                ].whereType<String>().where((e) => e.isNotEmpty).join(' • '),
                 statusLabel: user.role == 'admin'
                     ? TranslationKeys.roleAdmin.tr
                     : TranslationKeys.roleAgent.tr,
@@ -65,28 +68,6 @@ class SettingsScreen extends GetView<SettingsController> {
               FormSectionCard(
                 title: 'Preferences',
                 children: [
-                  ListTile(
-                    title: Text(TranslationKeys.language.tr),
-                    trailing: Obx(
-                      () => DropdownButton<AppLanguage>(
-                        value: controller.settings.language.value,
-                        underline: const SizedBox.shrink(),
-                        items: AppLanguage.values
-                            .map(
-                              (value) => DropdownMenuItem(
-                                value: value,
-                                child: Text(_languageLabel(value)),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            controller.settings.updateLanguage(value);
-                          }
-                        },
-                      ),
-                    ),
-                  ),
                   ListTile(
                     title: Text(TranslationKeys.theme.tr),
                     trailing: Obx(
@@ -164,27 +145,6 @@ class SettingsScreen extends GetView<SettingsController> {
                     title: Text(TranslationKeys.exportRemindersCsv.tr),
                     onTap: controller.exportRemindersCsv,
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.upload_file_outlined),
-                    title: Text(TranslationKeys.importClientsCsv.tr),
-                    onTap: () async => _showImportSummary(await controller.importClientsCsv()),
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.upload_file_outlined),
-                    title: Text(TranslationKeys.importPoliciesCsv.tr),
-                    onTap: () async => _showImportSummary(await controller.importPoliciesCsv()),
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.description_outlined),
-                    title: Text(TranslationKeys.importDocuments.tr),
-                    subtitle: Text(TranslationKeys.documentParserPlaceholder.tr),
-                    onTap: () async {
-                      final message = await controller.importDocumentPlaceholder();
-                      if (message != null) {
-                        Get.snackbar(TranslationKeys.importDocuments.tr, message);
-                      }
-                    },
-                  ),
                 ],
               ),
               SizedBox(height: responsive.itemGap),
@@ -199,7 +159,9 @@ class SettingsScreen extends GetView<SettingsController> {
                       final confirmed = await Get.dialog<bool>(
                         AlertDialog(
                           title: Text(TranslationKeys.clearLocalData.tr),
-                          content: Text(TranslationKeys.clearLocalDataConfirmation.tr),
+                          content: Text(
+                            TranslationKeys.clearLocalDataConfirmation.tr,
+                          ),
                           actions: [
                             TextButton(
                               onPressed: () => Get.back(result: false),
@@ -264,17 +226,6 @@ class SettingsScreen extends GetView<SettingsController> {
     );
   }
 
-  String _languageLabel(AppLanguage value) {
-    switch (value) {
-      case AppLanguage.english:
-        return TranslationKeys.english.tr;
-      case AppLanguage.tamil:
-        return TranslationKeys.tamil.tr;
-      case AppLanguage.telugu:
-        return TranslationKeys.telugu.tr;
-    }
-  }
-
   String _themeLabel(AppThemeMode value) {
     switch (value) {
       case AppThemeMode.system:
@@ -284,15 +235,5 @@ class SettingsScreen extends GetView<SettingsController> {
       case AppThemeMode.dark:
         return TranslationKeys.dark.tr;
     }
-  }
-
-  void _showImportSummary(ImportSummary? summary) {
-    if (summary == null) {
-      return;
-    }
-    Get.snackbar(
-      TranslationKeys.importLabel.tr,
-      'Added: ${summary.addedCount}, Skipped: ${summary.skippedCount}, Duplicates: ${summary.duplicateCount}, Failed: ${summary.failedCount}',
-    );
   }
 }

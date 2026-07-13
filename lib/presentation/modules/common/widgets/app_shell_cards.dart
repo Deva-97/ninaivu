@@ -87,8 +87,12 @@ class ClientCard extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                AppMetaPill(text: client.areaCity ?? TranslationKeys.areaNotSet.tr),
-                AppMetaPill(text: '${client.policyCount} ${TranslationKeys.policies.tr}'),
+                AppMetaPill(
+                  text: client.areaCity ?? TranslationKeys.areaNotSet.tr,
+                ),
+                AppMetaPill(
+                  text: '${client.policyCount} ${TranslationKeys.policies.tr}',
+                ),
                 StatusBadge(label: normalizeStatus(client.syncStatus)),
               ],
             ),
@@ -292,7 +296,10 @@ class ReminderCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 4),
-                      Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
+                      Text(
+                        subtitle,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     ],
                   ),
                 ),
@@ -309,17 +316,14 @@ class ReminderCard extends StatelessWidget {
                   text: reminder.policyNumber ?? TranslationKeys.policyLabel.tr,
                 ),
                 AppMetaPill(
-                  text: reminder.companyName ?? TranslationKeys.insuranceLabel.tr,
+                  text:
+                      reminder.companyName ?? TranslationKeys.insuranceLabel.tr,
                 ),
               ],
             ),
             if (actions != null && actions!.isNotEmpty) ...[
               const SizedBox(height: 14),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: actions!,
-              ),
+              Wrap(spacing: 10, runSpacing: 10, children: actions!),
             ],
           ],
         ),
@@ -371,7 +375,10 @@ class FollowUpCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 4),
-                      Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
+                      Text(
+                        subtitle,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     ],
                   ),
                 ),
@@ -406,17 +413,15 @@ class FollowUpCard extends StatelessWidget {
               children: [
                 AppMetaPill(text: followUp.type),
                 AppMetaPill(
-                  text: followUp.policyNumber ?? TranslationKeys.noPolicyLinked.tr,
+                  text:
+                      followUp.policyNumber ??
+                      TranslationKeys.noPolicyLinked.tr,
                 ),
               ],
             ),
             if (actions != null && actions!.isNotEmpty) ...[
               const SizedBox(height: 14),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: actions!,
-              ),
+              Wrap(spacing: 10, runSpacing: 10, children: actions!),
             ],
           ],
         ),

@@ -41,13 +41,14 @@ class SearchablePolicyPicker extends StatelessWidget {
           labelText: label,
           suffixIcon: selectedPolicy == null
               ? const Icon(Icons.search)
-              : IconButton(
-                  onPressed: onClear,
-                  icon: const Icon(Icons.clear),
-                ),
+              : IconButton(onPressed: onClear, icon: const Icon(Icons.clear)),
         ),
         child: selectedPolicy == null
-            ? Text(enabled ? 'Select a policy (optional)' : 'Select a client first')
+            ? Text(
+                enabled
+                    ? 'Select a policy (optional)'
+                    : 'Select a client first',
+              )
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

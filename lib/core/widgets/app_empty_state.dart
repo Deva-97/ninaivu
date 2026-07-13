@@ -58,10 +58,7 @@ class AppEmptyState extends StatelessWidget {
               ),
               if (buttonLabel != null && onPressed != null) ...[
                 SizedBox(height: responsive.scaled(20, min: 16)),
-                AppButton(
-                  label: buttonLabel!,
-                  onPressed: onPressed,
-                ),
+                AppButton(label: buttonLabel!, onPressed: onPressed),
               ],
             ],
           ),

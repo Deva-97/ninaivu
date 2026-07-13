@@ -5,6 +5,7 @@ class Policy {
     required this.clientId,
     required this.insuranceType,
     required this.policyNumber,
+    this.policyHolderName,
     required this.companyName,
     required this.startDate,
     required this.endDate,
@@ -31,6 +32,7 @@ class Policy {
   final String clientId;
   final String insuranceType;
   final String policyNumber;
+  final String? policyHolderName;
   final String companyName;
   final int startDate;
   final int endDate;

@@ -45,7 +45,8 @@ class TodaysWorkScreen extends GetView<TodaysWorkController> {
                   title: TranslationKeys.todaysPriority.tr,
                   subtitle: TranslationKeys.agentPrioritySubtitle.tr,
                   primaryValue:
-                      controller.renewalsToday.length + controller.followUpsToday.length,
+                      controller.renewalsToday.length +
+                      controller.followUpsToday.length,
                   primaryLabel: TranslationKeys.todaysWork.tr,
                   primaryIcon: Icons.today_outlined,
                   highlights: [
@@ -71,7 +72,9 @@ class TodaysWorkScreen extends GetView<TodaysWorkController> {
                   title: TranslationKeys.renewalsToday.tr,
                   count: controller.renewalsToday.length,
                 ),
-                ...controller.renewalsToday.map((item) => _ReminderWorkCard(item: item)),
+                ...controller.renewalsToday.map(
+                  (item) => _ReminderWorkCard(item: item),
+                ),
                 SizedBox(height: responsive.sectionGap),
                 _SectionHeader(
                   title: TranslationKeys.upcomingRenewals.tr,
@@ -85,13 +88,17 @@ class TodaysWorkScreen extends GetView<TodaysWorkController> {
                   title: TranslationKeys.followUpsToday.tr,
                   count: controller.followUpsToday.length,
                 ),
-                ...controller.followUpsToday.map((item) => _FollowUpWorkCard(item: item)),
+                ...controller.followUpsToday.map(
+                  (item) => _FollowUpWorkCard(item: item),
+                ),
                 SizedBox(height: responsive.sectionGap),
                 _SectionHeader(
                   title: TranslationKeys.missedFollowUps.tr,
                   count: controller.missedFollowUps.length,
                 ),
-                ...controller.missedFollowUps.map((item) => _FollowUpWorkCard(item: item)),
+                ...controller.missedFollowUps.map(
+                  (item) => _FollowUpWorkCard(item: item),
+                ),
                 SizedBox(height: responsive.sectionGap),
                 Card(
                   child: ListTile(
@@ -149,10 +156,7 @@ class _ReminderWorkCard extends GetView<TodaysWorkController> {
             '${item.policyNumber ?? TranslationKeys.policyLabel.tr} - '
             '${item.companyName ?? TranslationKeys.insuranceLabel.tr}\n'
             '${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(item.reminderDateTime))}',
-        onTap: () => Get.toNamed(
-          AppRoutes.reminderDetails,
-          arguments: item.id,
-        ),
+        onTap: () => Get.toNamed(AppRoutes.reminderDetails, arguments: item.id),
         actions: [
           if ((item.clientMobile ?? '').isNotEmpty)
             _actionButton(
@@ -178,10 +182,8 @@ class _ReminderWorkCard extends GetView<TodaysWorkController> {
               ),
             ),
           OutlinedButton(
-            onPressed: () => Get.toNamed(
-              AppRoutes.reminderDetails,
-              arguments: item.id,
-            ),
+            onPressed: () =>
+                Get.toNamed(AppRoutes.reminderDetails, arguments: item.id),
             child: Text(TranslationKeys.viewDetails.tr),
           ),
           FilledButton(
@@ -213,10 +215,7 @@ class _FollowUpWorkCard extends GetView<TodaysWorkController> {
         subtitle:
             '${item.type} - ${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(item.followUpDateTime))}\n'
             '${item.policyNumber ?? TranslationKeys.noPolicyLinked.tr}',
-        onTap: () => Get.toNamed(
-          AppRoutes.followUpDetails,
-          arguments: item.id,
-        ),
+        onTap: () => Get.toNamed(AppRoutes.followUpDetails, arguments: item.id),
         actions: [
           if ((item.clientMobile ?? '').isNotEmpty)
             _actionButton(
@@ -242,10 +241,8 @@ class _FollowUpWorkCard extends GetView<TodaysWorkController> {
               ),
             ),
           OutlinedButton(
-            onPressed: () => Get.toNamed(
-              AppRoutes.followUpDetails,
-              arguments: item.id,
-            ),
+            onPressed: () =>
+                Get.toNamed(AppRoutes.followUpDetails, arguments: item.id),
             child: Text(TranslationKeys.viewDetails.tr),
           ),
           FilledButton(

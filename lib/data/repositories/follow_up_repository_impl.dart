@@ -40,14 +40,18 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
     final model = FollowUpModel.fromEntity(followUp).copyWith(
       id: followUp.id.isEmpty ? _uuid.v4() : followUp.id,
       businessId: currentUser.businessId,
-      createdBy: followUp.createdBy.isEmpty ? currentUser.id : followUp.createdBy,
+      createdBy: followUp.createdBy.isEmpty
+          ? currentUser.id
+          : followUp.createdBy,
       agentId:
           followUp.agentId ??
           (currentUser.role == AppRole.agent.value ? currentUser.id : null),
       assignedTo:
           followUp.assignedTo ??
           followUp.agentId ??
-          (currentUser.role == AppRole.agent.value ? currentUser.id : currentUser.id),
+          (currentUser.role == AppRole.agent.value
+              ? currentUser.id
+              : currentUser.id),
       createdAt: followUp.createdAt == 0 ? now : followUp.createdAt,
       updatedAt: now,
       syncStatus: 'pending_create',
@@ -73,7 +77,8 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
       createdBy: existing.createdBy,
       createdAt: existing.createdAt,
       agentId: followUp.agentId ?? existing.agentId,
-      assignedTo: followUp.assignedTo ?? existing.assignedTo ?? existing.agentId,
+      assignedTo:
+          followUp.assignedTo ?? existing.assignedTo ?? existing.agentId,
       updatedAt: DateTime.now().millisecondsSinceEpoch,
       syncStatus: 'pending_update',
     );

@@ -6,5 +6,6 @@ class GetClientDetailsUseCase {
 
   final ClientRepository _repository;
 
-  Future<Client?> call(String clientId) => _repository.getClientDetails(clientId);
+  Future<Client?> call(String clientId) =>
+      _repository.getClientDetails(clientId);
 }

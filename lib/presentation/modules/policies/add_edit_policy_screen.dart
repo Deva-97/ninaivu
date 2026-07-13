@@ -30,6 +30,22 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
           child: ListView(
             padding: EdgeInsets.all(responsive.pagePadding),
             children: [
+              Obx(() {
+                if (!controller.usedExtractedData.value) {
+                  return const SizedBox.shrink();
+                }
+                return Padding(
+                  padding: EdgeInsets.only(bottom: responsive.itemGap),
+                  child: Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.info_outline),
+                      title: Text(
+                        TranslationKeys.autoFilledVerifyBeforeSaving.tr,
+                      ),
+                    ),
+                  ),
+                );
+              }),
               FormSectionCard(
                 title: TranslationKeys.clientInformation.tr,
                 subtitle: TranslationKeys.policiesLinkedToClient.tr,
@@ -39,6 +55,16 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
                       label: TranslationKeys.clientLabel.tr,
                       selectedClient: controller.selectedClient.value,
                       errorText: controller.clientValidationMessage.value,
+                      helperText:
+                          controller.extractedPolicyHolderHint.value == null
+                          ? null
+                          : TranslationKeys.extractedPolicyHolderPrompt
+                                .trParams({
+                                  'name': controller
+                                      .extractedPolicyHolderHint
+                                      .value!,
+                                }),
+                      initialQuery: controller.clientSearchSeed.value,
                       onSearch: controller.searchClients,
                       onChanged: controller.selectClient,
                     ),
@@ -52,12 +78,16 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
                   Obx(
                     () => DropdownButtonFormField<String>(
                       initialValue: controller.selectedInsuranceType.value,
-                      decoration: InputDecoration(labelText: TranslationKeys.insuranceType.tr),
+                      decoration: InputDecoration(
+                        labelText: TranslationKeys.insuranceType.tr,
+                      ),
                       items: PolicyFormController.insuranceTypes
                           .map(
                             (item) => DropdownMenuItem<String>(
                               value: item,
-                              child: Text(LocalizedValueHelper.policyInsuranceType(item)),
+                              child: Text(
+                                LocalizedValueHelper.policyInsuranceType(item),
+                              ),
                             ),
                           )
                           .toList(),
@@ -70,29 +100,49 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
                   ),
                   TextFormField(
                     controller: controller.policyNumberController,
-                    validator: (value) => controller.validateRequired(value, 'policy number'),
-                    decoration: InputDecoration(labelText: TranslationKeys.policyNumber.tr),
+                    validator: (value) =>
+                        controller.validateRequired(value, 'policy number'),
+                    decoration: InputDecoration(
+                      labelText: TranslationKeys.policyNumber.tr,
+                    ),
+                  ),
+                  TextFormField(
+                    controller: controller.policyHolderNameController,
+                    decoration: InputDecoration(
+                      labelText: TranslationKeys.policyHolderName.tr,
+                    ),
                   ),
                   TextFormField(
                     controller: controller.companyNameController,
-                    validator: (value) => controller.validateRequired(value, 'company name'),
-                    decoration: InputDecoration(labelText: TranslationKeys.companyName.tr),
+                    validator: (value) =>
+                        controller.validateRequired(value, 'company name'),
+                    decoration: InputDecoration(
+                      labelText: TranslationKeys.companyName.tr,
+                    ),
                   ),
                   TextFormField(
                     controller: controller.premiumController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     validator: controller.validatePremium,
-                    decoration: InputDecoration(labelText: TranslationKeys.premiumAmount.tr),
+                    decoration: InputDecoration(
+                      labelText: TranslationKeys.premiumAmount.tr,
+                    ),
                   ),
                   Obx(
                     () => DropdownButtonFormField<String>(
                       initialValue: controller.selectedPaymentFrequency.value,
-                      decoration: InputDecoration(labelText: TranslationKeys.paymentFrequency.tr),
+                      decoration: InputDecoration(
+                        labelText: TranslationKeys.paymentFrequency.tr,
+                      ),
                       items: PolicyFormController.paymentFrequencies
                           .map(
                             (item) => DropdownMenuItem<String>(
                               value: item,
-                              child: Text(LocalizedValueHelper.paymentFrequency(item)),
+                              child: Text(
+                                LocalizedValueHelper.paymentFrequency(item),
+                              ),
                             ),
                           )
                           .toList(),
@@ -106,12 +156,16 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
                   Obx(
                     () => DropdownButtonFormField<String>(
                       initialValue: controller.selectedStatus.value,
-                      decoration: InputDecoration(labelText: TranslationKeys.status.tr),
+                      decoration: InputDecoration(
+                        labelText: TranslationKeys.status.tr,
+                      ),
                       items: PolicyFormController.policyStatuses
                           .map(
                             (item) => DropdownMenuItem<String>(
                               value: item,
-                              child: Text(LocalizedValueHelper.policyStatus(item)),
+                              child: Text(
+                                LocalizedValueHelper.policyStatus(item),
+                              ),
                             ),
                           )
                           .toList(),
@@ -125,12 +179,16 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
                   Obx(
                     () => DropdownButtonFormField<String>(
                       initialValue: controller.selectedRenewalStatus.value,
-                      decoration: InputDecoration(labelText: TranslationKeys.renewalStatus.tr),
+                      decoration: InputDecoration(
+                        labelText: TranslationKeys.renewalStatus.tr,
+                      ),
                       items: PolicyFormController.renewalStatuses
                           .map(
                             (item) => DropdownMenuItem<String>(
                               value: item,
-                              child: Text(LocalizedValueHelper.renewalStatus(item)),
+                              child: Text(
+                                LocalizedValueHelper.renewalStatus(item),
+                              ),
                             ),
                           )
                           .toList(),
@@ -145,18 +203,28 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
                     () => ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(TranslationKeys.startDate.tr),
-                      subtitle: Text(dateFormat.format(controller.startDate.value)),
+                      subtitle: Text(
+                        dateFormat.format(controller.startDate.value),
+                      ),
                       trailing: const Icon(Icons.calendar_today_outlined),
-                      onTap: () => controller.pickDate(context: context, isStartDate: true),
+                      onTap: () => controller.pickDate(
+                        context: context,
+                        isStartDate: true,
+                      ),
                     ),
                   ),
                   Obx(
                     () => ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(TranslationKeys.endDate.tr),
-                      subtitle: Text(dateFormat.format(controller.endDate.value)),
+                      subtitle: Text(
+                        dateFormat.format(controller.endDate.value),
+                      ),
                       trailing: const Icon(Icons.calendar_today_outlined),
-                      onTap: () => controller.pickDate(context: context, isStartDate: false),
+                      onTap: () => controller.pickDate(
+                        context: context,
+                        isStartDate: false,
+                      ),
                     ),
                   ),
                 ],
@@ -167,17 +235,23 @@ class AddEditPolicyScreen extends GetView<PolicyFormController> {
                 children: [
                   TextFormField(
                     controller: controller.vehicleNumberController,
-                    decoration: InputDecoration(labelText: TranslationKeys.vehicleNumber.tr),
+                    decoration: InputDecoration(
+                      labelText: TranslationKeys.vehicleNumber.tr,
+                    ),
                   ),
                   TextFormField(
                     controller: controller.vehicleModelController,
-                    decoration: InputDecoration(labelText: TranslationKeys.vehicleModel.tr),
+                    decoration: InputDecoration(
+                      labelText: TranslationKeys.vehicleModel.tr,
+                    ),
                   ),
                   TextFormField(
                     controller: controller.notesController,
                     minLines: 3,
                     maxLines: 5,
-                    decoration: InputDecoration(labelText: TranslationKeys.notes.tr),
+                    decoration: InputDecoration(
+                      labelText: TranslationKeys.notes.tr,
+                    ),
                   ),
                 ],
               ),

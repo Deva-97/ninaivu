@@ -17,7 +17,9 @@ abstract class ClientRepository {
     required String mobile,
     String? excludingClientId,
   });
-  Future<List<UpcomingClientEvent>> getUpcomingSpecialDates({int withinDays = 30});
+  Future<List<UpcomingClientEvent>> getUpcomingSpecialDates({
+    int withinDays = 30,
+  });
   Future<Client> addClient({
     required String name,
     required String mobile,

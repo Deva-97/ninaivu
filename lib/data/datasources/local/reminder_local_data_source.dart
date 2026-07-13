@@ -37,14 +37,17 @@ class ReminderLocalDataSource {
     });
   }
 
-  Future<void> updateReminder(ReminderModel reminder) => insertReminder(reminder);
+  Future<void> updateReminder(ReminderModel reminder) =>
+      insertReminder(reminder);
 
   Future<ReminderModel?> getReminderById(String reminderId) async {
     await markDueRemindersAsMissed();
     return _getReminderById(reminderId, includeDeleted: false);
   }
 
-  Future<ReminderModel?> getReminderByIdIncludingDeleted(String reminderId) async {
+  Future<ReminderModel?> getReminderByIdIncludingDeleted(
+    String reminderId,
+  ) async {
     return _getReminderById(reminderId, includeDeleted: true);
   }
 
@@ -127,7 +130,9 @@ class ReminderLocalDataSource {
         args.add(startMs);
         break;
       case 'today':
-        whereClauses.add('r.reminder_date_time >= ? AND r.reminder_date_time < ?');
+        whereClauses.add(
+          'r.reminder_date_time >= ? AND r.reminder_date_time < ?',
+        );
         args.addAll([startMs, endOfToday]);
         break;
       case 'upcoming7days':
@@ -177,8 +182,7 @@ class ReminderLocalDataSource {
     final db = await _databaseHelper.database;
     final result = await db.rawQuery(
       _baseReminderQuery(
-        whereClause:
-            'r.client_id = ? AND r.${DatabaseColumns.isDeleted} = 0',
+        whereClause: 'r.client_id = ? AND r.${DatabaseColumns.isDeleted} = 0',
       ),
       [clientId],
     );

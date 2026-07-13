@@ -8,10 +8,7 @@ import 'package:ninaivu/core/services/app_lock_service.dart';
 /// It listens to the shared `AppLockService` so every route is protected
 /// consistently without each screen needing its own lock logic.
 class AppLockOverlay extends StatefulWidget {
-  const AppLockOverlay({
-    super.key,
-    required this.child,
-  });
+  const AppLockOverlay({super.key, required this.child});
 
   final Widget child;
 
@@ -47,7 +44,9 @@ class _AppLockOverlayState extends State<AppLockOverlay> {
         children: [
           widget.child,
           ColoredBox(
-            color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.94),
+            color: Theme.of(
+              context,
+            ).colorScheme.surface.withValues(alpha: 0.94),
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 360),
@@ -139,7 +138,9 @@ class _AppLockOverlayState extends State<AppLockOverlay> {
       return;
     }
     final isValid = _appLockService.verifyPin(pin);
-    setState(() => _errorText = isValid ? null : TranslationKeys.incorrectPin.tr);
+    setState(
+      () => _errorText = isValid ? null : TranslationKeys.incorrectPin.tr,
+    );
     if (isValid) {
       _pinController.clear();
     }

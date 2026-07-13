@@ -22,12 +22,11 @@ abstract class DashboardController<T> extends GetxController {
     SyncQueueLocalDataSource? syncQueueLocalDataSource,
     SyncService? syncService,
     UserRepositoryImpl? userRepository,
-  })
-    : _authService = authService ?? AuthService(),
-      _syncQueueLocalDataSource =
-          syncQueueLocalDataSource ?? SyncQueueLocalDataSource(),
-      _syncService = syncService ?? SyncService(),
-      _userRepository = userRepository ?? UserRepositoryImpl();
+  }) : _authService = authService ?? AuthService(),
+       _syncQueueLocalDataSource =
+           syncQueueLocalDataSource ?? SyncQueueLocalDataSource(),
+       _syncService = syncService ?? SyncService(),
+       _userRepository = userRepository ?? UserRepositoryImpl();
 
   final AuthService _authService;
   final SyncQueueLocalDataSource _syncQueueLocalDataSource;
@@ -148,7 +147,9 @@ abstract class DashboardController<T> extends GetxController {
     if (pendingCount > 0) {
       backupStatusLabel.value = 'Backup pending';
     } else {
-      backupStatusLabel.value = lastSyncTime == null ? 'Saved offline' : 'Backed up';
+      backupStatusLabel.value = lastSyncTime == null
+          ? 'Saved offline'
+          : 'Backed up';
     }
     if (lastSyncTime == null) {
       lastSyncLabel.value = 'Never synced';

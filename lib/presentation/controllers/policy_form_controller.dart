@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/validation/policy_validator.dart';
-import 'package:ninaivu/domain/entities/client.dart';
 import 'package:ninaivu/data/models/policy_model.dart';
+import 'package:ninaivu/domain/entities/client.dart';
+import 'package:ninaivu/domain/entities/extracted_policy_data.dart';
 import 'package:ninaivu/domain/entities/policy.dart';
 import 'package:ninaivu/domain/usecases/clients/get_client_details_usecase.dart';
 import 'package:ninaivu/domain/usecases/clients/search_clients_usecase.dart';
@@ -36,6 +37,7 @@ class PolicyFormController extends GetxController {
 
   final formKey = GlobalKey<FormState>();
   final policyNumberController = TextEditingController();
+  final policyHolderNameController = TextEditingController();
   final companyNameController = TextEditingController();
   final premiumController = TextEditingController();
   final vehicleNumberController = TextEditingController();
@@ -50,6 +52,9 @@ class PolicyFormController extends GetxController {
   final isSaving = false.obs;
   final selectedClient = Rxn<Client>();
   final clientValidationMessage = RxnString();
+  final extractedPolicyHolderHint = RxnString();
+  final clientSearchSeed = RxnString();
+  final usedExtractedData = false.obs;
 
   Policy? editingPolicy;
 
@@ -105,10 +110,15 @@ class PolicyFormController extends GetxController {
       if (initialClientId != null && initialClientId.isNotEmpty) {
         _loadClient(initialClientId);
       }
+      final extracted = args['extractedPolicyData'] as ExtractedPolicyData?;
+      if (editingPolicy == null && extracted != null) {
+        _applyExtractedPolicyData(extracted);
+      }
     }
 
     if (editingPolicy != null) {
       policyNumberController.text = editingPolicy!.policyNumber;
+      policyHolderNameController.text = editingPolicy!.policyHolderName ?? '';
       companyNameController.text = editingPolicy!.companyName;
       premiumController.text = editingPolicy!.premiumAmount.toStringAsFixed(0);
       vehicleNumberController.text = editingPolicy!.vehicleNumber ?? '';
@@ -119,15 +129,29 @@ class PolicyFormController extends GetxController {
           editingPolicy!.paymentFrequency ?? selectedPaymentFrequency.value;
       selectedStatus.value = editingPolicy!.status;
       selectedRenewalStatus.value = editingPolicy!.renewalStatus;
-      startDate.value = DateTime.fromMillisecondsSinceEpoch(editingPolicy!.startDate);
-      endDate.value = DateTime.fromMillisecondsSinceEpoch(editingPolicy!.endDate);
+      startDate.value = DateTime.fromMillisecondsSinceEpoch(
+        editingPolicy!.startDate,
+      );
+      endDate.value = DateTime.fromMillisecondsSinceEpoch(
+        editingPolicy!.endDate,
+      );
       _loadClient(editingPolicy!.clientId);
+    }
+
+    if (usedExtractedData.value) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.snackbar(
+          TranslationKeys.extractionCompleted.tr,
+          TranslationKeys.reviewBeforeSaving.tr,
+        );
+      });
     }
   }
 
   @override
   void onClose() {
     policyNumberController.dispose();
+    policyHolderNameController.dispose();
     companyNameController.dispose();
     premiumController.dispose();
     vehicleNumberController.dispose();
@@ -165,7 +189,8 @@ class PolicyFormController extends GetxController {
       return;
     }
     if (selectedClient.value == null) {
-      clientValidationMessage.value = TranslationKeys.selectClientBeforeSaving.tr;
+      clientValidationMessage.value =
+          TranslationKeys.selectClientBeforeSaving.tr;
       return;
     }
 
@@ -190,6 +215,7 @@ class PolicyFormController extends GetxController {
         clientId: selectedClient.value!.id,
         insuranceType: selectedInsuranceType.value,
         policyNumber: policyNumberController.text.trim(),
+        policyHolderName: _nullIfEmpty(policyHolderNameController.text),
         companyName: companyNameController.text.trim(),
         startDate: startDate.value.millisecondsSinceEpoch,
         endDate: endDate.value.millisecondsSinceEpoch,
@@ -235,7 +261,8 @@ class PolicyFormController extends GetxController {
     return null;
   }
 
-  Future<List<Client>> searchClients(String query) => _searchClientsUseCase(query);
+  Future<List<Client>> searchClients(String query) =>
+      _searchClientsUseCase(query);
 
   void selectClient(Client client) {
     selectedClient.value = client;
@@ -260,5 +287,88 @@ class PolicyFormController extends GetxController {
   String? _nullIfEmpty(String value) {
     final trimmed = value.trim();
     return trimmed.isEmpty ? null : trimmed;
+  }
+
+  void _applyExtractedPolicyData(ExtractedPolicyData extracted) {
+    usedExtractedData.value = true;
+    _setTextIfPresent(policyNumberController, extracted.policyNumber);
+    _setTextIfPresent(policyHolderNameController, extracted.policyHolderName);
+    _setTextIfPresent(companyNameController, extracted.companyName);
+    _setTextIfPresent(vehicleNumberController, extracted.vehicleNumber);
+    _setTextIfPresent(vehicleModelController, extracted.vehicleModel);
+    if (extracted.premiumAmount != null) {
+      premiumController.text = _formatPremium(extracted.premiumAmount!);
+    }
+    if (extracted.startDateMs != null) {
+      startDate.value = DateTime.fromMillisecondsSinceEpoch(
+        extracted.startDateMs!,
+      );
+    }
+    if (extracted.endDateMs != null) {
+      endDate.value = DateTime.fromMillisecondsSinceEpoch(extracted.endDateMs!);
+    }
+
+    final insuranceType = _matchOption(extracted.insuranceType, insuranceTypes);
+    if (insuranceType != null) {
+      selectedInsuranceType.value = insuranceType;
+    }
+    final paymentFrequency = _matchOption(
+      extracted.paymentFrequency,
+      paymentFrequencies,
+    );
+    if (paymentFrequency != null) {
+      selectedPaymentFrequency.value = paymentFrequency;
+    }
+    final status = _matchOption(extracted.status, policyStatuses);
+    if (status != null) {
+      selectedStatus.value = status;
+    }
+    if (extracted.policyHolderName != null &&
+        extracted.policyHolderName!.trim().isNotEmpty) {
+      extractedPolicyHolderHint.value = extracted.policyHolderName!.trim();
+      clientSearchSeed.value = extracted.policyHolderName!.trim();
+    }
+    final shouldPrefillRawText =
+        extracted.hasWarnings || extracted.structuredFieldCount <= 2;
+    if (shouldPrefillRawText &&
+        notesController.text.trim().isEmpty &&
+        extracted.rawText.trim().isNotEmpty) {
+      notesController.text = _buildRawTextSummary(extracted.rawText);
+    }
+  }
+
+  void _setTextIfPresent(TextEditingController controller, String? value) {
+    if (value != null && value.trim().isNotEmpty) {
+      controller.text = value.trim();
+    }
+  }
+
+  String? _matchOption(String? extractedValue, List<String> options) {
+    if (extractedValue == null) {
+      return null;
+    }
+    final normalized = extractedValue.trim().toLowerCase();
+    for (final option in options) {
+      if (option.toLowerCase() == normalized) {
+        return option;
+      }
+    }
+    return null;
+  }
+
+  String _formatPremium(double value) {
+    final rounded = value.roundToDouble();
+    if (rounded == value) {
+      return rounded.toStringAsFixed(0);
+    }
+    return value.toStringAsFixed(2);
+  }
+
+  String _buildRawTextSummary(String rawText) {
+    final compact = rawText.replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (compact.length <= 280) {
+      return compact;
+    }
+    return '${compact.substring(0, 280).trim()}...';
   }
 }

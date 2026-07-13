@@ -5,5 +5,6 @@ class DeleteFollowUpUseCase {
 
   final FollowUpRepository _repository;
 
-  Future<void> call(String followUpId) => _repository.deleteFollowUp(followUpId);
+  Future<void> call(String followUpId) =>
+      _repository.deleteFollowUp(followUpId);
 }

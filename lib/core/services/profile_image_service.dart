@@ -8,7 +8,9 @@ class ProfileImageService {
 
   final ImagePicker _imagePicker;
 
-  Future<String?> pickImagePath({ImageSource source = ImageSource.gallery}) async {
+  Future<String?> pickImagePath({
+    ImageSource source = ImageSource.gallery,
+  }) async {
     final file = await _imagePicker.pickImage(
       source: source,
       maxWidth: 1200,
@@ -42,6 +44,5 @@ class ProfileImageService {
   Future<String?> pickFromGallery() =>
       pickImagePath(source: ImageSource.gallery);
 
-  Future<String?> pickFromCamera() =>
-      pickImagePath(source: ImageSource.camera);
+  Future<String?> pickFromCamera() => pickImagePath(source: ImageSource.camera);
 }

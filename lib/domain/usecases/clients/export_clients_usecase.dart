@@ -34,9 +34,9 @@ class ExportClientsUseCase {
               client.areaCity ?? '',
               client.address ?? '',
               client.notes ?? '',
-              DateFormat('dd MMM yyyy, hh:mm a').format(
-                DateTime.fromMillisecondsSinceEpoch(client.createdAt),
-              ),
+              DateFormat(
+                'dd MMM yyyy, hh:mm a',
+              ).format(DateTime.fromMillisecondsSinceEpoch(client.createdAt)),
             ],
           )
           .toList(),

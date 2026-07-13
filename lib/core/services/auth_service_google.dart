@@ -3,9 +3,7 @@ part of 'auth_service.dart';
 extension _AuthServiceGoogle on AuthService {
   Future<void> _signInWithGoogle() async {
     try {
-      final auth = _requireFirebaseAuth(
-        action: 'Google sign-in',
-      );
+      final auth = _requireFirebaseAuth(action: 'Google sign-in');
       await _ensureGoogleSignInInitialized();
       final googleUser = await GoogleSignIn.instance.authenticate();
       final googleAuth = googleUser.authentication;
@@ -26,9 +24,7 @@ extension _AuthServiceGoogle on AuthService {
       final message = _errorMessage(e);
       if (_looksLikeGoogleReauthIssue(message)) {
         try {
-          final auth = _requireFirebaseAuth(
-            action: 'Google sign-in',
-          );
+          final auth = _requireFirebaseAuth(action: 'Google sign-in');
           await _ensureGoogleSignInInitialized();
           await GoogleSignIn.instance.signOut();
           final googleUser = await GoogleSignIn.instance.authenticate();
@@ -60,8 +56,7 @@ extension _AuthServiceGoogle on AuthService {
 
   Future<void> _ensureGoogleSignInInitialized() {
     final initialization = AuthService._googleSignInInitialization ??=
-        GoogleSignIn.instance
-        .initialize(
+        GoogleSignIn.instance.initialize(
           serverClientId: defaultTargetPlatform == TargetPlatform.android
               ? null
               : AuthService._googleServerClientId,

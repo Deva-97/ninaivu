@@ -5,6 +5,7 @@ import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/client_detail_controller.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/app_shell.dart';
+import 'package:ninaivu/presentation/modules/policies/widgets/add_policy_method_sheet.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
 
 class ClientDetailScreen extends GetView<ClientDetailController> {
@@ -23,7 +24,10 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
             onPressed: () async {
               final client = controller.client.value;
               if (client == null) return;
-              final refreshed = await Get.toNamed(AppRoutes.clientForm, arguments: client);
+              final refreshed = await Get.toNamed(
+                AppRoutes.clientForm,
+                arguments: client,
+              );
               if (refreshed == true) {
                 await controller.loadClient();
               }
@@ -59,22 +63,28 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
             children: [
               ProfileAvatarBlock(
                 name: client.name,
-                subtitle: [client.mobile, client.areaCity]
-                    .whereType<String>()
-                    .where((e) => e.isNotEmpty)
-                    .join(' • '),
+                subtitle: [
+                  client.mobile,
+                  client.areaCity,
+                ].whereType<String>().where((e) => e.isNotEmpty).join(' • '),
                 statusLabel: client.syncStatus,
                 imagePath: client.profileImagePath,
-                onTap: () => controller.updateProfileImage().catchError(_showError),
+                onTap: () =>
+                    controller.updateProfileImage().catchError(_showError),
               ),
               SizedBox(height: responsive.itemGap),
               FormSectionCard(
                 title: TranslationKeys.clientInformation.tr,
                 children: [
-                  DetailFieldRow(label: TranslationKeys.mobile.tr, value: client.mobile),
+                  DetailFieldRow(
+                    label: TranslationKeys.mobile.tr,
+                    value: client.mobile,
+                  ),
                   DetailFieldRow(
                     label: TranslationKeys.alternate.tr,
-                    value: client.alternateMobile ?? TranslationKeys.notProvided.tr,
+                    value:
+                        client.alternateMobile ??
+                        TranslationKeys.notProvided.tr,
                   ),
                   DetailFieldRow(
                     label: TranslationKeys.email.tr,
@@ -97,7 +107,9 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
                     value: client.dateOfBirthMs == null
                         ? TranslationKeys.notSet.tr
                         : DateFormat('dd MMM yyyy').format(
-                            DateTime.fromMillisecondsSinceEpoch(client.dateOfBirthMs!),
+                            DateTime.fromMillisecondsSinceEpoch(
+                              client.dateOfBirthMs!,
+                            ),
                           ),
                   ),
                   DetailFieldRow(
@@ -120,14 +132,16 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
                   AppButton(
                     label: TranslationKeys.call.tr,
                     icon: Icons.call_outlined,
-                    onPressed: () => controller.callClient().catchError(_showError),
+                    onPressed: () =>
+                        controller.callClient().catchError(_showError),
                     expanded: false,
                   ),
                   AppButton(
                     label: TranslationKeys.whatsapp.tr,
                     icon: Icons.chat_outlined,
                     outlined: true,
-                    onPressed: () => controller.whatsappClient().catchError(_showError),
+                    onPressed: () =>
+                        controller.whatsappClient().catchError(_showError),
                     expanded: false,
                   ),
                   AppButton(
@@ -144,9 +158,9 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
                     label: TranslationKeys.addPolicy.tr,
                     icon: Icons.add_card_outlined,
                     outlined: true,
-                    onPressed: () => Get.toNamed(
-                      AppRoutes.policyForm,
-                      arguments: {'clientId': client.id},
+                    onPressed: () => showAddPolicyMethodSheet(
+                      clientId: client.id,
+                      onPolicySaved: controller.loadClient,
                     ),
                     expanded: false,
                   ),
@@ -167,7 +181,9 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
                   children: controller.timelineItems
                       .map(
                         (item) => Padding(
-                          padding: EdgeInsets.only(bottom: responsive.scaled(10, min: 8)),
+                          padding: EdgeInsets.only(
+                            bottom: responsive.scaled(10, min: 8),
+                          ),
                           child: Card(
                             child: ListTile(
                               leading: Icon(_timelineIcon(item.type)),
@@ -196,7 +212,9 @@ class ClientDetailScreen extends GetView<ClientDetailController> {
                     final confirmed = await Get.dialog<bool>(
                       AlertDialog(
                         title: Text(TranslationKeys.deleteClient.tr),
-                        content: Text('${TranslationKeys.softDeleteClient.tr}\n${client.name}'),
+                        content: Text(
+                          '${TranslationKeys.softDeleteClient.tr}\n${client.name}',
+                        ),
                         actions: [
                           TextButton(
                             onPressed: () => Get.back(result: false),

@@ -6,7 +6,6 @@ class FollowUpStatusHelper {
     required int followUpDateTime,
     required DateTime now,
   }) {
-    return status == 'Pending' &&
-        followUpDateTime < now.millisecondsSinceEpoch;
+    return status == 'Pending' && followUpDateTime < now.millisecondsSinceEpoch;
   }
 }

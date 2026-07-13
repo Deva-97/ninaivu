@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:ninaivu/core/constants/app_colors.dart';
 
 class StatusBadge extends StatelessWidget {
-  const StatusBadge({
-    super.key,
-    required this.label,
-  });
+  const StatusBadge({super.key, required this.label});
 
   final String label;
 

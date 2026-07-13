@@ -5,8 +5,6 @@ class VerifyOtpUseCase {
 
   final AuthRepository _repository;
 
-  Future<void> call({
-    required String verificationId,
-    required String otp,
-  }) => _repository.verifyOtp(verificationId: verificationId, otp: otp);
+  Future<void> call({required String verificationId, required String otp}) =>
+      _repository.verifyOtp(verificationId: verificationId, otp: otp);
 }

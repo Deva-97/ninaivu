@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ninaivu/core/constants/app_constants.dart';
 
 class AppLogo extends StatelessWidget {
-  const AppLogo({
-    super.key,
-    required this.size,
-    this.semanticLabel,
-  });
+  const AppLogo({super.key, required this.size, this.semanticLabel});
 
   final double size;
   final String? semanticLabel;

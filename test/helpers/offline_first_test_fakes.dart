@@ -215,7 +215,8 @@ class FakeClientLocalDataSource extends ClientLocalDataSource {
   }
 
   @override
-  Future<ClientModel?> getClientById(String clientId) async => clientsById[clientId];
+  Future<ClientModel?> getClientById(String clientId) async =>
+      clientsById[clientId];
 
   @override
   Future<void> softDeleteClient(String clientId) async {
@@ -246,7 +247,8 @@ class FakePolicyLocalDataSource extends PolicyLocalDataSource {
   }
 
   @override
-  Future<PolicyModel?> getPolicyById(String policyId) async => policiesById[policyId];
+  Future<PolicyModel?> getPolicyById(String policyId) async =>
+      policiesById[policyId];
 
   @override
   Future<void> softDeletePolicy(String policyId) async {
@@ -290,7 +292,8 @@ class FakeReminderLocalDataSource extends ReminderLocalDataSource {
 
   Map<String, ReminderModel> remindersById;
   Map<String, List<ReminderModel>> remindersByPolicy;
-  final List<List<ReminderModel>> insertedReminderBatches = <List<ReminderModel>>[];
+  final List<List<ReminderModel>> insertedReminderBatches =
+      <List<ReminderModel>>[];
   final List<String> completedReminderIds = <String>[];
   final List<String> renewedReminderIds = <String>[];
   final List<String> softDeletedPolicyIds = <String>[];
@@ -300,12 +303,15 @@ class FakeReminderLocalDataSource extends ReminderLocalDataSource {
     insertedReminderBatches.add(reminders);
     for (final reminder in reminders) {
       remindersById[reminder.id] = reminder;
-      remindersByPolicy.putIfAbsent(reminder.policyId, () => <ReminderModel>[]).add(reminder);
+      remindersByPolicy
+          .putIfAbsent(reminder.policyId, () => <ReminderModel>[])
+          .add(reminder);
     }
   }
 
   @override
-  Future<ReminderModel?> getReminderById(String reminderId) async => remindersById[reminderId];
+  Future<ReminderModel?> getReminderById(String reminderId) async =>
+      remindersById[reminderId];
 
   @override
   Future<List<ReminderModel>> getRemindersByPolicy(String policyId) async {
@@ -329,7 +335,9 @@ class FakeReminderLocalDataSource extends ReminderLocalDataSource {
 
   @override
   Future<List<ReminderModel>> getRemindersByClient(String clientId) async {
-    return remindersById.values.where((item) => item.clientId == clientId).toList();
+    return remindersById.values
+        .where((item) => item.clientId == clientId)
+        .toList();
   }
 }
 
@@ -383,7 +391,10 @@ class FakeFollowUpLocalDataSource extends FollowUpLocalDataSource {
 }
 
 class RescheduleRequest {
-  const RescheduleRequest({required this.followUpId, required this.scheduledAt});
+  const RescheduleRequest({
+    required this.followUpId,
+    required this.scheduledAt,
+  });
 
   final String followUpId;
   final int scheduledAt;
@@ -406,7 +417,8 @@ class FakeReminderSchedulerService extends ReminderSchedulerService {
   FakeReminderSchedulerService();
 
   final List<ScheduleRequest> scheduleRequests = <ScheduleRequest>[];
-  final List<List<ReminderModel>> cancelledReminderBatches = <List<ReminderModel>>[];
+  final List<List<ReminderModel>> cancelledReminderBatches =
+      <List<ReminderModel>>[];
 
   @override
   Future<void> scheduleReminders({

@@ -6,10 +6,7 @@ class SearchPoliciesUseCase {
 
   final PolicyRepository _repository;
 
-  Future<List<Policy>> call({
-    required String query,
-    String? clientId,
-  }) {
+  Future<List<Policy>> call({required String query, String? clientId}) {
     return _repository.searchPolicies(query: query, clientId: clientId);
   }
 }

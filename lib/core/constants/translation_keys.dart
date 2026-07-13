@@ -19,7 +19,6 @@ class TranslationKeys {
   static const delete = 'delete';
   static const deleteAccount = 'delete_account';
   static const logout = 'logout';
-  static const language = 'language';
   static const theme = 'theme';
   static const appLock = 'app_lock';
   static const appLockPlaceholder = 'app_lock_placeholder';
@@ -30,8 +29,7 @@ class TranslationKeys {
   static const useBiometricUnlock = 'use_biometric_unlock';
   static const pin = 'pin';
   static const pinMustBeExactly4Digits = 'pin_must_be_exactly_4_digits';
-  static const pinConfirmationDoesNotMatch =
-      'pin_confirmation_does_not_match';
+  static const pinConfirmationDoesNotMatch = 'pin_confirmation_does_not_match';
   static const enterYour4DigitPin = 'enter_your_4_digit_pin';
   static const incorrectPin = 'incorrect_pin';
   static const appLocked = 'app_locked';
@@ -39,17 +37,13 @@ class TranslationKeys {
   static const useBiometric = 'use_biometric';
   static const usePin = 'use_pin';
   static const unlock = 'unlock';
-  static const biometricUnlockNotCompleted =
-      'biometric_unlock_not_completed';
+  static const biometricUnlockNotCompleted = 'biometric_unlock_not_completed';
   static const export = 'export';
   static const importLabel = 'import';
   static const close = 'close';
   static const continueLabel = 'continue_label';
   static const enable = 'enable';
   static const disable = 'disable';
-  static const english = 'english';
-  static const tamil = 'tamil';
-  static const telugu = 'telugu';
   static const profile = 'profile';
   static const clearLocalData = 'clear_local_data';
   static const clearLocalDataSubtitle = 'clear_local_data_subtitle';
@@ -120,6 +114,23 @@ class TranslationKeys {
   static const importPoliciesCsv = 'import_policies_csv';
   static const importDocuments = 'import_documents';
   static const documentParserPlaceholder = 'document_parser_placeholder';
+  static const enterManually = 'enter_manually';
+  static const extractFromInsuranceHardCopy =
+      'extract_from_insurance_hard_copy';
+  static const choosePolicyImageFromGallery =
+      'choose_policy_image_from_gallery';
+  static const chooseSoftCopyPdf = 'choose_soft_copy_pdf';
+  static const extractingPolicyDetails = 'extracting_policy_details';
+  static const extractionCompleted = 'extraction_completed';
+  static const reviewBeforeSaving = 'review_before_saving';
+  static const extractedPolicyHolderPrompt = 'extracted_policy_holder_prompt';
+  static const noReadableTextFound = 'no_readable_text_found';
+  static const pleaseTryClearerImage = 'please_try_clearer_image';
+  static const scannedPdfNotSupportedYet = 'scanned_pdf_not_supported_yet';
+  static const autoFilledVerifyBeforeSaving =
+      'auto_filled_verify_before_saving';
+  static const noFileSelected = 'no_file_selected';
+  static const couldNotReadDocument = 'could_not_read_document';
   static const renewalReminder = 'renewal_reminder';
   static const paymentReminder = 'payment_reminder';
   static const documentCollectionReminder = 'document_collection_reminder';
@@ -240,6 +251,9 @@ class TranslationKeys {
   static const noRemindersSubtitle = 'no_reminders_subtitle';
   static const followUpSubtitle = 'follow_up_subtitle';
   static const clientLabel = 'client_label';
+  static const selectClient = 'select_client';
+  static const searchByNameOrMobile = 'search_by_name_or_mobile';
+  static const noClientsFound = 'no_clients_found';
   static const policyLabel = 'policy_label';
   static const insuranceLabel = 'insurance_label';
   static const openClient = 'open_client';
@@ -261,6 +275,7 @@ class TranslationKeys {
   static const updateFollowUp = 'update_follow_up';
   static const insuranceType = 'insurance_type';
   static const policyNumber = 'policy_number';
+  static const policyHolderName = 'policy_holder_name';
   static const companyName = 'company_name';
   static const premiumAmount = 'premium_amount';
   static const paymentFrequency = 'payment_frequency';

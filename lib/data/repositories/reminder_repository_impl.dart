@@ -16,7 +16,8 @@ import 'package:ninaivu/domain/entities/reminder.dart';
 import 'package:ninaivu/domain/repositories/reminder_repository.dart';
 import 'package:uuid/uuid.dart';
 
-typedef ReminderNotificationCanceller = Future<void> Function(int notificationId);
+typedef ReminderNotificationCanceller =
+    Future<void> Function(int notificationId);
 
 class ReminderRepositoryImpl implements ReminderRepository {
   ReminderRepositoryImpl({
@@ -29,9 +30,11 @@ class ReminderRepositoryImpl implements ReminderRepository {
     SyncService? syncService,
     Uuid? uuid,
   }) : _localDataSource = localDataSource ?? ReminderLocalDataSource(),
-       _policyLocalDataSource = policyLocalDataSource ?? PolicyLocalDataSource(),
+       _policyLocalDataSource =
+           policyLocalDataSource ?? PolicyLocalDataSource(),
        _userLocalDataSource = userLocalDataSource ?? UserLocalDataSource(),
-       _notificationService = notificationService ?? NotificationService.instance,
+       _notificationService =
+           notificationService ?? NotificationService.instance,
        _notificationCanceller = notificationCanceller,
        _syncQueueLocalDataSource =
            syncQueueLocalDataSource ?? SyncQueueLocalDataSource(),
@@ -112,7 +115,9 @@ class ReminderRepositoryImpl implements ReminderRepository {
       syncStatus: 'pending_update',
     );
 
-    final policy = await _policyLocalDataSource.getPolicyById(reminder.policyId);
+    final policy = await _policyLocalDataSource.getPolicyById(
+      reminder.policyId,
+    );
     if (policy != null) {
       await _policyLocalDataSource.updateRenewalStatus(
         policyId: policy.id,

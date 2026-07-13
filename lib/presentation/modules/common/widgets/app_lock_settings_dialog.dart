@@ -36,9 +36,7 @@ class _AppLockSettingsDialogState extends State<AppLockSettingsDialog> {
       title: Text(TranslationKeys.appLock.tr),
       content: Obx(() {
         if (_appLockService.isEnabled.value) {
-          return Text(
-            TranslationKeys.appLockEnabledDescription.tr,
-          );
+          return Text(TranslationKeys.appLockEnabledDescription.tr);
         }
 
         return Column(
@@ -119,10 +117,7 @@ class _AppLockSettingsDialogState extends State<AppLockSettingsDialog> {
       return;
     }
 
-    await _appLockService.savePin(
-      pin: pin,
-      enableBiometric: _enableBiometric,
-    );
+    await _appLockService.savePin(pin: pin, enableBiometric: _enableBiometric);
     if (mounted) {
       Navigator.of(context).pop();
     }

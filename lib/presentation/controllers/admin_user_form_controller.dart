@@ -37,8 +37,12 @@ class AdminUserFormController extends GetxController {
   AppUser? editingUser;
 
   String get title => editingUser == null
-      ? (isAgentForm ? TranslationKeys.addAgent.tr : TranslationKeys.addCustomer.tr)
-      : (isAgentForm ? TranslationKeys.editAgent.tr : TranslationKeys.editCustomer.tr);
+      ? (isAgentForm
+            ? TranslationKeys.addAgent.tr
+            : TranslationKeys.addCustomer.tr)
+      : (isAgentForm
+            ? TranslationKeys.editAgent.tr
+            : TranslationKeys.editCustomer.tr);
 
   @override
   void onInit() {

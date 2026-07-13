@@ -11,7 +11,7 @@ Ninaivu is an offline-first Flutter app for insurance renewal operations. SQLite
 - Policy management with renewal status tracking
 - Reminder and follow-up workflows
 - Global search across clients, policies, and agents
-- Settings for language, theme, app lock, profile image, sync status, and exports
+- Settings for theme, app lock, profile image, sync status, and exports
 - CSV import/export for clients and policies
 - Local notifications for reminders
 - Background and queued sync retries on Android and iOS

@@ -27,15 +27,15 @@ Application bootstrap:
 
 ### `lib/app.dart`
 
-Root `GetMaterialApp` with routes, localization, and theme selection from settings.
+Root `GetMaterialApp` with routes, English translations, and theme selection from settings.
 
 ### `lib/core/`
 
 Shared infrastructure.
 
-- `constants/`: route labels, translations, colors, and app-wide constants
+- `constants/`: route labels, translation keys, colors, and app-wide constants
 - `database/`: SQLite table names, columns, and bootstrap helper
-- `localization/`: app languages and translations
+- `localization/`: English GetX translation data
 - `permissions/`: role and access helpers
 - `services/`: auth, sync, notifications, search, import/export, app lock, and profile image services
 - `theme/`: material theme setup

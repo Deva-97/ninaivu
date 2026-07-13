@@ -28,9 +28,8 @@ class InsuranceRemindersApp extends StatelessWidget {
         darkTheme: AppTheme.darkTheme,
         themeMode: settingsService.materialThemeMode,
         translations: AppTranslations(),
-        locale: settingsService.locale,
-        fallbackLocale: AppLanguage.english.locale,
-        supportedLocales: AppLanguage.values.map((item) => item.locale).toList(),
+        locale: appEnglishLocale,
+        supportedLocales: const [appEnglishLocale],
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,

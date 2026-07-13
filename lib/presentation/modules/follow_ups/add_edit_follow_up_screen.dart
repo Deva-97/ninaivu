@@ -56,12 +56,16 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
                   Obx(
                     () => DropdownButtonFormField<String>(
                       initialValue: controller.selectedType.value,
-                      decoration: InputDecoration(labelText: TranslationKeys.type.tr),
+                      decoration: InputDecoration(
+                        labelText: TranslationKeys.type.tr,
+                      ),
                       items: FollowUpFormController.followUpTypes
                           .map(
                             (item) => DropdownMenuItem<String>(
                               value: item,
-                              child: Text(LocalizedValueHelper.followUpType(item)),
+                              child: Text(
+                                LocalizedValueHelper.followUpType(item),
+                              ),
                             ),
                           )
                           .toList(),
@@ -75,12 +79,16 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
                   Obx(
                     () => DropdownButtonFormField<String>(
                       initialValue: controller.selectedStatus.value,
-                      decoration: InputDecoration(labelText: TranslationKeys.status.tr),
+                      decoration: InputDecoration(
+                        labelText: TranslationKeys.status.tr,
+                      ),
                       items: FollowUpFormController.followUpStatuses
                           .map(
                             (item) => DropdownMenuItem<String>(
                               value: item,
-                              child: Text(LocalizedValueHelper.followUpStatus(item)),
+                              child: Text(
+                                LocalizedValueHelper.followUpStatus(item),
+                              ),
                             ),
                           )
                           .toList(),
@@ -95,7 +103,9 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
                     () => ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(TranslationKeys.followUpDate.tr),
-                      subtitle: Text(dateFormat.format(controller.selectedDate.value)),
+                      subtitle: Text(
+                        dateFormat.format(controller.selectedDate.value),
+                      ),
                       trailing: const Icon(Icons.calendar_today_outlined),
                       onTap: () => controller.pickDate(context),
                     ),
@@ -104,7 +114,9 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
                     () => ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(TranslationKeys.followUpTime.tr),
-                      subtitle: Text(controller.selectedTime.value.format(context)),
+                      subtitle: Text(
+                        controller.selectedTime.value.format(context),
+                      ),
                       trailing: const Icon(Icons.access_time_outlined),
                       onTap: () => controller.pickTime(context),
                     ),
@@ -113,7 +125,9 @@ class AddEditFollowUpScreen extends GetView<FollowUpFormController> {
                     controller: controller.remarksController,
                     minLines: 3,
                     maxLines: 5,
-                    decoration: InputDecoration(labelText: TranslationKeys.remarks.tr),
+                    decoration: InputDecoration(
+                      labelText: TranslationKeys.remarks.tr,
+                    ),
                   ),
                 ],
               ),

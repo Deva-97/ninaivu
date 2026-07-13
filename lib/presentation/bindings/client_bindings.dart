@@ -29,10 +29,7 @@ class ClientListBinding extends Bindings {
       () => ClientListController(
         getClientsUseCase: GetClientsUseCase(repository),
         deleteClientUseCase: DeleteClientUseCase(repository),
-        exportClientsUseCase: ExportClientsUseCase(
-          repository,
-          ExportService(),
-        ),
+        exportClientsUseCase: ExportClientsUseCase(repository, ExportService()),
         communicationService: CommunicationService(),
       ),
     );
@@ -46,7 +43,9 @@ class ClientFormBinding extends Bindings {
     Get.lazyPut(
       () => ClientFormController(
         addClientUseCase: AddClientUseCase(repository),
-        checkDuplicateClientMobileUseCase: CheckDuplicateClientMobileUseCase(repository),
+        checkDuplicateClientMobileUseCase: CheckDuplicateClientMobileUseCase(
+          repository,
+        ),
         findClientByMobileUseCase: FindClientByMobileUseCase(repository),
         updateClientUseCase: UpdateClientUseCase(repository),
         profileImageService: ProfileImageService(),
@@ -66,9 +65,15 @@ class ClientDetailBinding extends Bindings {
       () => ClientDetailController(
         getClientDetailsUseCase: GetClientDetailsUseCase(repository),
         deleteClientUseCase: DeleteClientUseCase(repository),
-        getFollowUpsByClientUseCase: GetFollowUpsByClientUseCase(followUpRepository),
-        getPoliciesByClientUseCase: GetPoliciesByClientUseCase(policyRepository),
-        getRemindersByClientUseCase: GetRemindersByClientUseCase(reminderRepository),
+        getFollowUpsByClientUseCase: GetFollowUpsByClientUseCase(
+          followUpRepository,
+        ),
+        getPoliciesByClientUseCase: GetPoliciesByClientUseCase(
+          policyRepository,
+        ),
+        getRemindersByClientUseCase: GetRemindersByClientUseCase(
+          reminderRepository,
+        ),
         updateClientUseCase: UpdateClientUseCase(repository),
         communicationService: CommunicationService(),
         profileImageService: ProfileImageService(),

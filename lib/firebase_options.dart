@@ -51,8 +51,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '302492772767',
     projectId: 'insurance-reminder-6899c',
     storageBucket: 'insurance-reminder-6899c.firebasestorage.app',
-    androidClientId: '302492772767-3vo5u7sdqs71q6odt984ptrkqj1np3j9.apps.googleusercontent.com',
-    iosClientId: '302492772767-sia4ikp13r3uukts9713q1q76jbr2hcs.apps.googleusercontent.com',
+    androidClientId:
+        '302492772767-3vo5u7sdqs71q6odt984ptrkqj1np3j9.apps.googleusercontent.com',
+    iosClientId:
+        '302492772767-sia4ikp13r3uukts9713q1q76jbr2hcs.apps.googleusercontent.com',
     iosBundleId: 'com.devendiran.ninaivu',
   );
 
@@ -65,5 +67,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'insurance-reminder-6899c.firebasestorage.app',
     measurementId: 'G-BH5QQSZ673',
   );
-
 }

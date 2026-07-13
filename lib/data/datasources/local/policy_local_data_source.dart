@@ -136,10 +136,17 @@ class PolicyLocalDataSource {
     final clauses = <String>[
       '${DatabaseColumns.businessId} = ?',
       '${DatabaseColumns.isDeleted} = 0',
-      '(policy_number LIKE ? OR company_name LIKE ? OR insurance_type LIKE ? OR vehicle_number LIKE ?)',
+      '(policy_number LIKE ? OR ${DatabaseColumns.policyHolderName} LIKE ? OR company_name LIKE ? OR insurance_type LIKE ? OR vehicle_number LIKE ?)',
     ];
     final pattern = '%${query.trim()}%';
-    final args = <Object?>[businessId, pattern, pattern, pattern, pattern];
+    final args = <Object?>[
+      businessId,
+      pattern,
+      pattern,
+      pattern,
+      pattern,
+      pattern,
+    ];
     if (clientId != null && clientId.isNotEmpty) {
       clauses.add('client_id = ?');
       args.add(clientId);
@@ -221,9 +228,7 @@ class PolicyLocalDataSource {
   }) {
     final now = DateTime.now();
     final start = DateTime(now.year, now.month, now.day).millisecondsSinceEpoch;
-    final end = now
-        .add(Duration(days: withinDays))
-        .millisecondsSinceEpoch;
+    final end = now.add(Duration(days: withinDays)).millisecondsSinceEpoch;
 
     final clauses = <String>[
       '${DatabaseColumns.businessId} = ?',
@@ -285,10 +290,10 @@ class PolicyLocalDataSource {
     final args = [...whereArgs];
     if (query != null && query.trim().isNotEmpty) {
       clauses.add(
-        '(policy_number LIKE ? OR company_name LIKE ? OR insurance_type LIKE ? OR vehicle_number LIKE ?)',
+        '(policy_number LIKE ? OR ${DatabaseColumns.policyHolderName} LIKE ? OR company_name LIKE ? OR insurance_type LIKE ? OR vehicle_number LIKE ?)',
       );
       final pattern = '%${query.trim()}%';
-      args.addAll([pattern, pattern, pattern, pattern]);
+      args.addAll([pattern, pattern, pattern, pattern, pattern]);
     }
 
     final result = await db.query(

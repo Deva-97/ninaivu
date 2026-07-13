@@ -6,9 +6,6 @@ class GetPoliciesUseCase {
 
   final PolicyRepository _repository;
 
-  Future<List<Policy>> call({
-    String? query,
-    int limit = 50,
-    int offset = 0,
-  }) => _repository.getPolicies(query: query, limit: limit, offset: offset);
+  Future<List<Policy>> call({String? query, int limit = 50, int offset = 0}) =>
+      _repository.getPolicies(query: query, limit: limit, offset: offset);
 }

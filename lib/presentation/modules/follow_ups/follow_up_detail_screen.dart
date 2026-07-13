@@ -78,7 +78,11 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       SizedBox(height: responsive.itemGap),
-                      StatusBadge(label: LocalizedValueHelper.followUpStatus(followUp.status)),
+                      StatusBadge(
+                        label: LocalizedValueHelper.followUpStatus(
+                          followUp.status,
+                        ),
+                      ),
                       SizedBox(height: responsive.scaled(18, min: 14)),
                       _DetailRow(
                         label: TranslationKeys.type.tr,
@@ -94,19 +98,25 @@ class FollowUpDetailScreen extends GetView<FollowUpDetailController> {
                       ),
                       _DetailRow(
                         label: TranslationKeys.policyLabel.tr,
-                        value: followUp.policyNumber ??
+                        value:
+                            followUp.policyNumber ??
                             followUp.policyId ??
                             TranslationKeys.notLinked.tr,
                       ),
                       _DetailRow(
                         label: TranslationKeys.customerMobile.tr,
-                        value: followUp.clientMobile ?? TranslationKeys.notAvailable.tr,
+                        value:
+                            followUp.clientMobile ??
+                            TranslationKeys.notAvailable.tr,
                       ),
                       _DetailRow(
                         label: TranslationKeys.remarks.tr,
                         value: followUp.remarks ?? TranslationKeys.noNotes.tr,
                       ),
-                      _DetailRow(label: TranslationKeys.syncStatus.tr, value: followUp.syncStatus),
+                      _DetailRow(
+                        label: TranslationKeys.syncStatus.tr,
+                        value: followUp.syncStatus,
+                      ),
                     ],
                   ),
                 ),

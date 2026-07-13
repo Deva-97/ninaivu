@@ -8,7 +8,8 @@ import 'package:ninaivu/domain/usecases/dashboard/get_admin_dashboard_stats_usec
 import 'package:ninaivu/domain/usecases/policies/export_policies_usecase.dart';
 import 'package:ninaivu/presentation/controllers/dashboard_controller.dart';
 
-class AdminDashboardController extends DashboardController<AdminDashboardStats> {
+class AdminDashboardController
+    extends DashboardController<AdminDashboardStats> {
   AdminDashboardController({
     required ExportClientsUseCase exportClientsUseCase,
     required ExportPoliciesUseCase exportPoliciesUseCase,
@@ -39,7 +40,9 @@ class AdminDashboardController extends DashboardController<AdminDashboardStats> 
     errorMessage.value = null;
     try {
       stats.value = await _getAdminDashboardStatsUseCase();
-      upcomingEvents.assignAll(await _getUpcomingSpecialDatesUseCase(withinDays: 30));
+      upcomingEvents.assignAll(
+        await _getUpcomingSpecialDatesUseCase(withinDays: 30),
+      );
     } catch (e) {
       errorMessage.value = e.toString().replaceFirst('Exception: ', '');
     } finally {

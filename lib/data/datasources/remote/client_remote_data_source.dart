@@ -2,15 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ninaivu/data/models/client_model.dart';
 
 class ClientRemoteDataSource {
-  ClientRemoteDataSource({FirebaseFirestore? firestore}) : _firestore = firestore;
+  ClientRemoteDataSource({FirebaseFirestore? firestore})
+    : _firestore = firestore;
 
   FirebaseFirestore? _firestore;
 
   Future<void> upsertClient(ClientModel client) async {
-    await _collection(client.businessId).doc(client.id).set(
-      client.toFirestore(),
-      SetOptions(merge: true),
-    );
+    await _collection(
+      client.businessId,
+    ).doc(client.id).set(client.toFirestore(), SetOptions(merge: true));
   }
 
   Future<void> deleteClient({

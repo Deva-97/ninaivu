@@ -143,7 +143,14 @@ class DashboardLocalDataSource {
       'WHERE ${DatabaseColumns.businessId} = ? AND ${DatabaseColumns.isDeleted} = 0 '
       'AND follow_up_date_time >= ? AND follow_up_date_time < ? '
       'AND $ownFollowUpFilter',
-      [businessId, range.startOfToday, range.endOfToday, userId, userId, userId],
+      [
+        businessId,
+        range.startOfToday,
+        range.endOfToday,
+        userId,
+        userId,
+        userId,
+      ],
     );
     final missedFollowUps = await _count(
       db,
@@ -151,7 +158,13 @@ class DashboardLocalDataSource {
       'WHERE ${DatabaseColumns.businessId} = ? AND ${DatabaseColumns.isDeleted} = 0 '
       "AND (status = 'Missed' OR (status = 'Pending' AND follow_up_date_time < ?)) "
       'AND $ownFollowUpFilter',
-      [businessId, DateTime.now().millisecondsSinceEpoch, userId, userId, userId],
+      [
+        businessId,
+        DateTime.now().millisecondsSinceEpoch,
+        userId,
+        userId,
+        userId,
+      ],
     );
 
     return AgentDashboardStats(
@@ -177,7 +190,9 @@ class DashboardLocalDataSource {
       startOfToday: start.millisecondsSinceEpoch,
       endOfToday: start.add(const Duration(days: 1)).millisecondsSinceEpoch,
       upcoming7Days: start.add(const Duration(days: 8)).millisecondsSinceEpoch,
-      upcoming30Days: start.add(const Duration(days: 31)).millisecondsSinceEpoch,
+      upcoming30Days: start
+          .add(const Duration(days: 31))
+          .millisecondsSinceEpoch,
     );
   }
 }

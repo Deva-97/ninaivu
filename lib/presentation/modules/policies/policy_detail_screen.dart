@@ -27,7 +27,10 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
             onPressed: () async {
               final policy = controller.policy.value;
               if (policy == null) return;
-              final refreshed = await Get.toNamed(AppRoutes.policyForm, arguments: policy);
+              final refreshed = await Get.toNamed(
+                AppRoutes.policyForm,
+                arguments: policy,
+              );
               if (refreshed == true) {
                 await controller.loadPolicy();
               }
@@ -67,16 +70,26 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
                     '${policy.companyName} • ${LocalizedValueHelper.policyInsuranceType(policy.insuranceType)}',
                 children: [
                   DetailFieldRow(
+                    label: TranslationKeys.policyHolderName.tr,
+                    value:
+                        policy.policyHolderName ??
+                        TranslationKeys.notProvided.tr,
+                  ),
+                  DetailFieldRow(
                     label: TranslationKeys.premium.tr,
                     value: currency.format(policy.premiumAmount),
                   ),
                   DetailFieldRow(
                     label: TranslationKeys.startDate.tr,
-                    value: dateFormat.format(DateTime.fromMillisecondsSinceEpoch(policy.startDate)),
+                    value: dateFormat.format(
+                      DateTime.fromMillisecondsSinceEpoch(policy.startDate),
+                    ),
                   ),
                   DetailFieldRow(
                     label: TranslationKeys.endDate.tr,
-                    value: dateFormat.format(DateTime.fromMillisecondsSinceEpoch(policy.endDate)),
+                    value: dateFormat.format(
+                      DateTime.fromMillisecondsSinceEpoch(policy.endDate),
+                    ),
                   ),
                   DetailFieldRow(
                     label: TranslationKeys.status.tr,
@@ -84,10 +97,18 @@ class PolicyDetailScreen extends GetView<PolicyDetailController> {
                   ),
                   DetailFieldRow(
                     label: TranslationKeys.renewalStatus.tr,
-                    value: LocalizedValueHelper.renewalStatus(policy.renewalStatus),
+                    value: LocalizedValueHelper.renewalStatus(
+                      policy.renewalStatus,
+                    ),
                   ),
-                  DetailFieldRow(label: TranslationKeys.syncStatus.tr, value: policy.syncStatus),
-                  DetailFieldRow(label: TranslationKeys.clientLabel.tr, value: policy.clientId),
+                  DetailFieldRow(
+                    label: TranslationKeys.syncStatus.tr,
+                    value: policy.syncStatus,
+                  ),
+                  DetailFieldRow(
+                    label: TranslationKeys.clientLabel.tr,
+                    value: policy.clientId,
+                  ),
                   DetailFieldRow(
                     label: TranslationKeys.vehicle.tr,
                     value:

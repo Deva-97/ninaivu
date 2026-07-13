@@ -2,15 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ninaivu/data/models/reminder_model.dart';
 
 class ReminderRemoteDataSource {
-  ReminderRemoteDataSource({FirebaseFirestore? firestore}) : _firestore = firestore;
+  ReminderRemoteDataSource({FirebaseFirestore? firestore})
+    : _firestore = firestore;
 
   FirebaseFirestore? _firestore;
 
   Future<void> upsertReminder(ReminderModel reminder) async {
-    await _collection(reminder.businessId).doc(reminder.id).set(
-      reminder.toFirestore(),
-      SetOptions(merge: true),
-    );
+    await _collection(
+      reminder.businessId,
+    ).doc(reminder.id).set(reminder.toFirestore(), SetOptions(merge: true));
   }
 
   Future<void> deleteReminder({

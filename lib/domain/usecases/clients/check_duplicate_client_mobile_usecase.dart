@@ -5,10 +5,7 @@ class CheckDuplicateClientMobileUseCase {
 
   final ClientRepository _repository;
 
-  Future<bool> call({
-    required String mobile,
-    String? excludingClientId,
-  }) {
+  Future<bool> call({required String mobile, String? excludingClientId}) {
     return _repository.hasDuplicateMobile(
       mobile: mobile,
       excludingClientId: excludingClientId,

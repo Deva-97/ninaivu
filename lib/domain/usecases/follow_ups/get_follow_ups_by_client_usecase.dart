@@ -6,10 +6,7 @@ class GetFollowUpsByClientUseCase {
 
   final FollowUpRepository _repository;
 
-  Future<List<FollowUp>> call(
-    String clientId, {
-    String? filter,
-  }) {
+  Future<List<FollowUp>> call(String clientId, {String? filter}) {
     return _repository.getFollowUpsByClient(clientId, filter: filter);
   }
 }

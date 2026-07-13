@@ -6,5 +6,6 @@ class GetAgentsUseCase {
 
   final UserRepository _repository;
 
-  Future<List<AppUser>> call({String? query}) => _repository.getAgents(query: query);
+  Future<List<AppUser>> call({String? query}) =>
+      _repository.getAgents(query: query);
 }

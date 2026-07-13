@@ -51,7 +51,9 @@ class FollowUpListScreen extends GetView<FollowUpListController> {
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
-                return AppLoadingView(message: TranslationKeys.loadingFollowUps.tr);
+                return AppLoadingView(
+                  message: TranslationKeys.loadingFollowUps.tr,
+                );
               }
               final error = controller.errorMessage.value;
               if (error != null) {
@@ -110,7 +112,9 @@ class FollowUpListScreen extends GetView<FollowUpListController> {
                             final confirmed = await Get.dialog<bool>(
                               AlertDialog(
                                 title: Text(TranslationKeys.deleteFollowUp.tr),
-                                content: Text(TranslationKeys.softDeleteFollowUp.tr),
+                                content: Text(
+                                  TranslationKeys.softDeleteFollowUp.tr,
+                                ),
                                 actions: [
                                   TextButton(
                                     onPressed: () => Get.back(result: false),

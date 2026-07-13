@@ -3,9 +3,8 @@ import 'package:ninaivu/domain/entities/reminder.dart';
 import 'package:ninaivu/domain/usecases/reminders/get_reminders_usecase.dart';
 
 class ReminderListController extends GetxController {
-  ReminderListController({
-    required GetRemindersUseCase getRemindersUseCase,
-  }) : _getRemindersUseCase = getRemindersUseCase;
+  ReminderListController({required GetRemindersUseCase getRemindersUseCase})
+    : _getRemindersUseCase = getRemindersUseCase;
 
   final GetRemindersUseCase _getRemindersUseCase;
 

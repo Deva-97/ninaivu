@@ -12,7 +12,8 @@ import 'package:ninaivu/domain/usecases/clients/update_client_usecase.dart';
 class ClientFormController extends GetxController {
   ClientFormController({
     required AddClientUseCase addClientUseCase,
-    required CheckDuplicateClientMobileUseCase checkDuplicateClientMobileUseCase,
+    required CheckDuplicateClientMobileUseCase
+    checkDuplicateClientMobileUseCase,
     required FindClientByMobileUseCase findClientByMobileUseCase,
     required UpdateClientUseCase updateClientUseCase,
     required ProfileImageService profileImageService,

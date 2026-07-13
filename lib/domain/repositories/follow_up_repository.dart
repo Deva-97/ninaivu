@@ -8,9 +8,7 @@ abstract class FollowUpRepository {
   Future<List<FollowUp>> getTodayFollowUps();
   Future<List<FollowUp>> getMissedFollowUps();
   Future<List<FollowUp>> getUpcomingFollowUps({int withinDays = 30});
-  Future<List<FollowUp>> getFollowUps({
-    String filter = 'today',
-  });
+  Future<List<FollowUp>> getFollowUps({String filter = 'today'});
   Future<FollowUp?> getFollowUpById(String followUpId);
   Future<void> rescheduleFollowUp({
     required String followUpId,

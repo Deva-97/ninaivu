@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ninaivu/core/database/database_helper.dart';
@@ -9,7 +6,6 @@ import 'package:ninaivu/core/services/app_preferences.dart';
 import 'package:ninaivu/core/services/app_settings_service.dart';
 import 'package:ninaivu/core/services/auth_service.dart';
 import 'package:ninaivu/core/services/import_export_service.dart';
-import 'package:ninaivu/core/services/insurance_document_parser.dart';
 import 'package:ninaivu/core/services/profile_image_service.dart';
 import 'package:ninaivu/data/repositories/user_repository_impl.dart';
 import 'package:ninaivu/domain/entities/app_user.dart';
@@ -30,15 +26,14 @@ class SettingsController extends GetxController {
     ImportExportService? importExportService,
     DatabaseHelper? databaseHelper,
     AppLockService? appLockService,
-    InsuranceDocumentParser? documentParser,
   }) : _authService = authService ?? AuthService(),
        _userRepository = userRepository ?? UserRepositoryImpl(),
-       _appSettingsService = appSettingsService ?? Get.find<AppSettingsService>(),
+       _appSettingsService =
+           appSettingsService ?? Get.find<AppSettingsService>(),
        _profileImageService = profileImageService ?? ProfileImageService(),
        _importExportService = importExportService ?? ImportExportService(),
        _databaseHelper = databaseHelper ?? DatabaseHelper.instance,
-       _appLockService = appLockService ?? Get.find<AppLockService>(),
-       _documentParser = documentParser ?? const PlaceholderInsuranceDocumentParser();
+       _appLockService = appLockService ?? Get.find<AppLockService>();
 
   final AuthService _authService;
   final UserRepositoryImpl _userRepository;
@@ -47,10 +42,11 @@ class SettingsController extends GetxController {
   final ImportExportService _importExportService;
   final DatabaseHelper _databaseHelper;
   final AppLockService _appLockService;
-  final InsuranceDocumentParser _documentParser;
 
-  late final UpdateCurrentUserProfileImageUseCase _updateCurrentUserProfileImageUseCase =
-      UpdateCurrentUserProfileImageUseCase(_userRepository);
+  late final UpdateCurrentUserProfileImageUseCase
+  _updateCurrentUserProfileImageUseCase = UpdateCurrentUserProfileImageUseCase(
+    _userRepository,
+  );
 
   final currentUser = Rxn<AppUser>();
   final isLoading = false.obs;
@@ -119,24 +115,10 @@ class SettingsController extends GetxController {
 
   Future<void> exportClientsCsv() => _importExportService.exportClientsCsv();
   Future<void> exportPoliciesCsv() => _importExportService.exportPoliciesCsv();
-  Future<void> exportFollowUpsCsv() => _importExportService.exportFollowUpsCsv();
-  Future<void> exportRemindersCsv() => _importExportService.exportRemindersCsv();
-
-  Future<ImportSummary?> importClientsCsv() => _importExportService.importClientsCsv();
-  Future<ImportSummary?> importPoliciesCsv() => _importExportService.importPoliciesCsv();
-
-  Future<String?> importDocumentPlaceholder() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: const ['pdf', 'png', 'jpg', 'jpeg'],
-    );
-    final path = result?.files.single.path;
-    if (path == null || path.isEmpty) {
-      return null;
-    }
-    final parsed = await _documentParser.parseDocument(File(path));
-    return parsed.message;
-  }
+  Future<void> exportFollowUpsCsv() =>
+      _importExportService.exportFollowUpsCsv();
+  Future<void> exportRemindersCsv() =>
+      _importExportService.exportRemindersCsv();
 
   Future<int> _countPendingSync() async {
     final db = await _databaseHelper.database;

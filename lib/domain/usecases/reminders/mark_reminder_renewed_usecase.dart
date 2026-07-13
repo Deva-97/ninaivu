@@ -5,5 +5,6 @@ class MarkReminderRenewedUseCase {
 
   final ReminderRepository _repository;
 
-  Future<void> call(String reminderId) => _repository.markReminderRenewed(reminderId);
+  Future<void> call(String reminderId) =>
+      _repository.markReminderRenewed(reminderId);
 }

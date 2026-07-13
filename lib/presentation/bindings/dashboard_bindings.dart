@@ -29,7 +29,9 @@ class AdminDashboardBinding extends Bindings {
           clientRepository,
           exportService,
         ),
-        getAdminDashboardStatsUseCase: GetAdminDashboardStatsUseCase(repository),
+        getAdminDashboardStatsUseCase: GetAdminDashboardStatsUseCase(
+          repository,
+        ),
         getUpcomingSpecialDatesUseCase: GetUpcomingSpecialDatesUseCase(
           clientRepository,
         ),
@@ -56,7 +58,9 @@ class AgentDashboardBinding extends Bindings {
           clientRepository,
           exportService,
         ),
-        getAgentDashboardStatsUseCase: GetAgentDashboardStatsUseCase(repository),
+        getAgentDashboardStatsUseCase: GetAgentDashboardStatsUseCase(
+          repository,
+        ),
         getUpcomingSpecialDatesUseCase: GetUpcomingSpecialDatesUseCase(
           clientRepository,
         ),

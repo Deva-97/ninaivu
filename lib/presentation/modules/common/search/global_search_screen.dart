@@ -84,7 +84,9 @@ class GlobalSearchScreen extends GetView<GlobalSearchController> {
                               (agent) => Card(
                                 child: ListTile(
                                   title: Text(agent.name),
-                                  subtitle: Text(agent.mobile ?? agent.email ?? ''),
+                                  subtitle: Text(
+                                    agent.mobile ?? agent.email ?? '',
+                                  ),
                                 ),
                               ),
                             )

@@ -42,7 +42,9 @@ class FollowUpFormBinding extends Bindings {
       () => FollowUpFormController(
         addFollowUpUseCase: AddFollowUpUseCase(repository),
         getClientDetailsUseCase: GetClientDetailsUseCase(clientRepository),
-        getPoliciesByClientUseCase: GetPoliciesByClientUseCase(policyRepository),
+        getPoliciesByClientUseCase: GetPoliciesByClientUseCase(
+          policyRepository,
+        ),
         getPolicyByIdUseCase: GetPolicyByIdUseCase(policyRepository),
         searchClientsUseCase: SearchClientsUseCase(clientRepository),
         searchPoliciesUseCase: SearchPoliciesUseCase(policyRepository),

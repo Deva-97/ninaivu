@@ -1,11 +1,15 @@
 import 'package:get/get.dart';
 import 'package:ninaivu/core/services/communication_service.dart';
+import 'package:ninaivu/core/services/policy_document_prefill_service.dart';
 import 'package:ninaivu/core/services/export_service.dart';
+import 'package:ninaivu/core/services/policy_document_picker_service.dart';
+import 'package:ninaivu/core/services/policy_text_extraction_service.dart';
 import 'package:ninaivu/data/repositories/policy_repository_impl.dart';
 import 'package:ninaivu/data/repositories/client_repository_impl.dart';
 import 'package:ninaivu/domain/usecases/policies/add_policy_usecase.dart';
 import 'package:ninaivu/domain/usecases/policies/delete_policy_usecase.dart';
 import 'package:ninaivu/domain/usecases/clients/get_client_details_usecase.dart';
+import 'package:ninaivu/domain/usecases/policies/extract_policy_from_document_usecase.dart';
 import 'package:ninaivu/domain/usecases/clients/search_clients_usecase.dart';
 import 'package:ninaivu/domain/usecases/policies/export_policies_usecase.dart';
 import 'package:ninaivu/domain/usecases/policies/get_policies_by_client_usecase.dart';
@@ -14,6 +18,28 @@ import 'package:ninaivu/domain/usecases/policies/update_policy_usecase.dart';
 import 'package:ninaivu/presentation/controllers/policy_detail_controller.dart';
 import 'package:ninaivu/presentation/controllers/policy_form_controller.dart';
 import 'package:ninaivu/presentation/controllers/policy_list_controller.dart';
+
+void ensurePolicyDocumentExtractionDependencies() {
+  if (!Get.isRegistered<PolicyDocumentPickerService>()) {
+    Get.lazyPut(() => PolicyDocumentPickerService(), fenix: true);
+  }
+  if (!Get.isRegistered<PolicyTextExtractionService>()) {
+    Get.lazyPut(() => const PolicyTextExtractionService(), fenix: true);
+  }
+  if (!Get.isRegistered<PolicyDocumentPrefillService>()) {
+    Get.lazyPut(() => const PolicyDocumentPrefillService(), fenix: true);
+  }
+  if (!Get.isRegistered<ExtractPolicyFromDocumentUseCase>()) {
+    Get.lazyPut(
+      () => ExtractPolicyFromDocumentUseCase(
+        Get.find<PolicyDocumentPickerService>(),
+        Get.find<PolicyTextExtractionService>(),
+        Get.find<PolicyDocumentPrefillService>(),
+      ),
+      fenix: true,
+    );
+  }
+}
 
 class PolicyListBinding extends Bindings {
   @override
@@ -39,6 +65,7 @@ class PolicyFormBinding extends Bindings {
   void dependencies() {
     final repository = PolicyRepositoryImpl();
     final clientRepository = ClientRepositoryImpl();
+    ensurePolicyDocumentExtractionDependencies();
     Get.lazyPut(
       () => PolicyFormController(
         addPolicyUseCase: AddPolicyUseCase(repository),

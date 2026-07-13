@@ -62,7 +62,8 @@ class WhatsAppTemplateBuilder {
         'Type: ${data.insuranceType!.trim()}',
       if (data.expiryDateMillis != null)
         'Expiry: ${DateFormat('dd MMM yyyy').format(DateTime.fromMillisecondsSinceEpoch(data.expiryDateMillis!))}',
-      if (data.premiumAmount != null) 'Premium: Rs. ${data.premiumAmount!.toStringAsFixed(0)}',
+      if (data.premiumAmount != null)
+        'Premium: Rs. ${data.premiumAmount!.toStringAsFixed(0)}',
     ];
     final sender = _senderLine(data);
 
@@ -105,6 +106,8 @@ class WhatsAppTemplateBuilder {
       if ((data.agentName ?? '').trim().isNotEmpty) data.agentName!.trim(),
       if ((data.agentMobile ?? '').trim().isNotEmpty) data.agentMobile!.trim(),
     ];
-    return senderParts.isEmpty ? 'Regards,\nNinaivu Insurance Team' : 'Regards,\n${senderParts.join('\n')}';
+    return senderParts.isEmpty
+        ? 'Regards,\nNinaivu Insurance Team'
+        : 'Regards,\n${senderParts.join('\n')}';
   }
 }

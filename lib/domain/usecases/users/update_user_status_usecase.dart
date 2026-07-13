@@ -6,8 +6,6 @@ class UpdateUserStatusUseCase {
 
   final UserRepository _repository;
 
-  Future<AppUser> call({
-    required String userId,
-    required String status,
-  }) => _repository.updateUserStatus(userId: userId, status: status);
+  Future<AppUser> call({required String userId, required String status}) =>
+      _repository.updateUserStatus(userId: userId, status: status);
 }

@@ -65,11 +65,15 @@ class ReminderDetailScreen extends GetView<ReminderDetailController> {
                       ),
                       _DetailRow(
                         label: TranslationKeys.company.tr,
-                        value: reminder.companyName ?? TranslationKeys.notAvailable.tr,
+                        value:
+                            reminder.companyName ??
+                            TranslationKeys.notAvailable.tr,
                       ),
                       _DetailRow(
                         label: TranslationKeys.reminderType.tr,
-                        value: LocalizedValueHelper.reminderType(reminder.reminderType),
+                        value: LocalizedValueHelper.reminderType(
+                          reminder.reminderType,
+                        ),
                       ),
                       _DetailRow(
                         label: TranslationKeys.schedule.tr,
@@ -81,7 +85,8 @@ class ReminderDetailScreen extends GetView<ReminderDetailController> {
                       ),
                       _DetailRow(
                         label: TranslationKeys.notificationId.tr,
-                        value: reminder.notificationId?.toString() ??
+                        value:
+                            reminder.notificationId?.toString() ??
                             TranslationKeys.notScheduled.tr,
                       ),
                       _DetailRow(

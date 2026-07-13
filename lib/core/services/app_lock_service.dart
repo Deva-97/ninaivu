@@ -137,8 +137,8 @@ class AppLockService extends GetxService {
         return false;
       }
 
-      final availableBiometrics =
-          await _localAuthentication.getAvailableBiometrics();
+      final availableBiometrics = await _localAuthentication
+          .getAvailableBiometrics();
       return availableBiometrics.isNotEmpty;
     } catch (_) {
       return false;

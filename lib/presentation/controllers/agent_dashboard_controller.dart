@@ -8,7 +8,8 @@ import 'package:ninaivu/domain/usecases/dashboard/get_agent_dashboard_stats_usec
 import 'package:ninaivu/domain/usecases/policies/export_policies_usecase.dart';
 import 'package:ninaivu/presentation/controllers/dashboard_controller.dart';
 
-class AgentDashboardController extends DashboardController<AgentDashboardStats> {
+class AgentDashboardController
+    extends DashboardController<AgentDashboardStats> {
   AgentDashboardController({
     required ExportClientsUseCase exportClientsUseCase,
     required ExportPoliciesUseCase exportPoliciesUseCase,
@@ -39,7 +40,9 @@ class AgentDashboardController extends DashboardController<AgentDashboardStats> 
     errorMessage.value = null;
     try {
       stats.value = await _getAgentDashboardStatsUseCase();
-      upcomingEvents.assignAll(await _getUpcomingSpecialDatesUseCase(withinDays: 30));
+      upcomingEvents.assignAll(
+        await _getUpcomingSpecialDatesUseCase(withinDays: 30),
+      );
     } catch (e) {
       errorMessage.value = e.toString().replaceFirst('Exception: ', '');
     } finally {

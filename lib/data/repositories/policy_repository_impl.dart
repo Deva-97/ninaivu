@@ -34,7 +34,8 @@ class PolicyRepositoryImpl implements PolicyRepository {
     SyncService? syncService,
     Uuid? uuid,
   }) : _localDataSource = localDataSource ?? PolicyLocalDataSource(),
-       _clientLocalDataSource = clientLocalDataSource ?? ClientLocalDataSource(),
+       _clientLocalDataSource =
+           clientLocalDataSource ?? ClientLocalDataSource(),
        _userLocalDataSource = userLocalDataSource ?? UserLocalDataSource(),
        _reminderLocalDataSource =
            reminderLocalDataSource ?? ReminderLocalDataSource(),
@@ -90,7 +91,11 @@ class PolicyRepositoryImpl implements PolicyRepository {
     if (client == null) {
       return const [];
     }
-    _ensurePolicyAccess(currentUser, createdBy: client.createdBy, agentId: client.agentId);
+    _ensurePolicyAccess(
+      currentUser,
+      createdBy: client.createdBy,
+      agentId: client.agentId,
+    );
     return _localDataSource.getPoliciesByClient(clientId);
   }
 
@@ -156,7 +161,9 @@ class PolicyRepositoryImpl implements PolicyRepository {
       id: policy.id.isEmpty ? _uuid.v4() : policy.id,
       businessId: currentUser.businessId,
       createdBy: policy.createdBy.isEmpty ? currentUser.id : policy.createdBy,
-      agentId: policy.agentId ?? (currentUser.role == AppRole.agent.value ? currentUser.id : null),
+      agentId:
+          policy.agentId ??
+          (currentUser.role == AppRole.agent.value ? currentUser.id : null),
       updatedAt: DateTime.now().millisecondsSinceEpoch,
       syncStatus: 'pending_create',
     );
@@ -315,9 +322,8 @@ class PolicyRepositoryImpl implements PolicyRepository {
   }
 
   Future<void> _cancelAndSoftDeleteReminders(String policyId) async {
-    final existingReminders = await _reminderLocalDataSource.getRemindersByPolicy(
-      policyId,
-    );
+    final existingReminders = await _reminderLocalDataSource
+        .getRemindersByPolicy(policyId);
     if (existingReminders.isNotEmpty) {
       // Old reminders are soft-deleted and queued for sync so devices and
       // Firestore stay consistent after policy date changes.

@@ -39,11 +39,31 @@ extension _DatabaseMigrations on DatabaseHelper {
     }
 
     if (oldVersion < 5) {
-      await _addColumnIfMissing(db, DatabaseTables.users, 'profile_image_path TEXT');
-      await _addColumnIfMissing(db, DatabaseTables.clients, 'profile_image_path TEXT');
-      await _addColumnIfMissing(db, DatabaseTables.clients, 'date_of_birth_ms INTEGER');
-      await _addColumnIfMissing(db, DatabaseTables.clients, 'special_date_ms INTEGER');
-      await _addColumnIfMissing(db, DatabaseTables.clients, 'special_date_label TEXT');
+      await _addColumnIfMissing(
+        db,
+        DatabaseTables.users,
+        'profile_image_path TEXT',
+      );
+      await _addColumnIfMissing(
+        db,
+        DatabaseTables.clients,
+        'profile_image_path TEXT',
+      );
+      await _addColumnIfMissing(
+        db,
+        DatabaseTables.clients,
+        'date_of_birth_ms INTEGER',
+      );
+      await _addColumnIfMissing(
+        db,
+        DatabaseTables.clients,
+        'special_date_ms INTEGER',
+      );
+      await _addColumnIfMissing(
+        db,
+        DatabaseTables.clients,
+        'special_date_label TEXT',
+      );
       await _createAllIndexes(db);
     }
 
@@ -52,7 +72,20 @@ extension _DatabaseMigrations on DatabaseHelper {
     }
 
     if (oldVersion < 7) {
-      await _addColumnIfMissing(db, DatabaseTables.users, 'profile_image_data TEXT');
+      await _addColumnIfMissing(
+        db,
+        DatabaseTables.users,
+        'profile_image_data TEXT',
+      );
+    }
+
+    if (oldVersion < 8) {
+      await _addColumnIfMissing(
+        db,
+        DatabaseTables.policies,
+        '${DatabaseColumns.policyHolderName} TEXT',
+      );
+      await _createAllIndexes(db);
     }
   }
 

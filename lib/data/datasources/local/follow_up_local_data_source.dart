@@ -19,7 +19,8 @@ class FollowUpLocalDataSource {
     );
   }
 
-  Future<void> updateFollowUp(FollowUpModel followUp) => insertFollowUp(followUp);
+  Future<void> updateFollowUp(FollowUpModel followUp) =>
+      insertFollowUp(followUp);
 
   Future<void> softDeleteFollowUp(String followUpId) async {
     final db = await _databaseHelper.database;
@@ -41,7 +42,9 @@ class FollowUpLocalDataSource {
     return _getFollowUpById(followUpId, includeDeleted: false);
   }
 
-  Future<FollowUpModel?> getFollowUpByIdIncludingDeleted(String followUpId) async {
+  Future<FollowUpModel?> getFollowUpByIdIncludingDeleted(
+    String followUpId,
+  ) async {
     return _getFollowUpById(followUpId, includeDeleted: true);
   }
 

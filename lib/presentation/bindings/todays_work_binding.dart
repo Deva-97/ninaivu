@@ -17,13 +17,23 @@ class TodaysWorkBinding extends Bindings {
     final followUpRepository = FollowUpRepositoryImpl();
     Get.lazyPut(
       () => TodaysWorkController(
-        getMissedFollowUpsUseCase: GetMissedFollowUpsUseCase(followUpRepository),
+        getMissedFollowUpsUseCase: GetMissedFollowUpsUseCase(
+          followUpRepository,
+        ),
         getRemindersUseCase: GetRemindersUseCase(reminderRepository),
         getTodayFollowUpsUseCase: GetTodayFollowUpsUseCase(followUpRepository),
-        markFollowUpCompletedUseCase: MarkFollowUpCompletedUseCase(followUpRepository),
-        markReminderCompletedUseCase: MarkReminderCompletedUseCase(reminderRepository),
-        markReminderRenewedUseCase: MarkReminderRenewedUseCase(reminderRepository),
-        rescheduleFollowUpUseCase: RescheduleFollowUpUseCase(followUpRepository),
+        markFollowUpCompletedUseCase: MarkFollowUpCompletedUseCase(
+          followUpRepository,
+        ),
+        markReminderCompletedUseCase: MarkReminderCompletedUseCase(
+          reminderRepository,
+        ),
+        markReminderRenewedUseCase: MarkReminderRenewedUseCase(
+          reminderRepository,
+        ),
+        rescheduleFollowUpUseCase: RescheduleFollowUpUseCase(
+          followUpRepository,
+        ),
       ),
     );
   }

@@ -113,9 +113,7 @@ class AccountActionsMenu extends StatelessWidget {
       builder: (dialogContext) {
         return AlertDialog(
           title: Text(TranslationKeys.logout.tr),
-          content: Text(
-            TranslationKeys.signOutDialogMessage.tr,
-          ),
+          content: Text(TranslationKeys.signOutDialogMessage.tr),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -141,9 +139,7 @@ class AccountActionsMenu extends StatelessWidget {
       builder: (dialogContext) {
         return AlertDialog(
           title: Text(TranslationKeys.deleteAccount.tr),
-          content: Text(
-            TranslationKeys.deleteAccountBrowserDialogMessage.tr,
-          ),
+          content: Text(TranslationKeys.deleteAccountBrowserDialogMessage.tr),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -169,9 +165,7 @@ class AccountActionsMenu extends StatelessWidget {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            TranslationKeys.unableToOpenDeleteAccountPage.tr,
-          ),
+          content: Text(TranslationKeys.unableToOpenDeleteAccountPage.tr),
         ),
       );
     }

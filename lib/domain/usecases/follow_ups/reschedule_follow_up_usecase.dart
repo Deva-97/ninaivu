@@ -5,10 +5,7 @@ class RescheduleFollowUpUseCase {
 
   final FollowUpRepository _repository;
 
-  Future<void> call({
-    required String followUpId,
-    required int scheduledAt,
-  }) {
+  Future<void> call({required String followUpId, required int scheduledAt}) {
     return _repository.rescheduleFollowUp(
       followUpId: followUpId,
       scheduledAt: scheduledAt,

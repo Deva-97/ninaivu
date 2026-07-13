@@ -78,7 +78,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _showError(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -136,7 +138,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           controller: _mobileController,
                           keyboardType: TextInputType.phone,
                           maxLength: 10,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                           decoration: InputDecoration(
                             labelText: TranslationKeys.mobileNumber.tr,
                             hintText: TranslationKeys.enter10DigitMobile.tr,
@@ -158,7 +162,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: [
                             const Expanded(child: Divider()),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
                               child: Text(
                                 TranslationKeys.orLabel.tr,
                                 style: theme.textTheme.bodySmall,
@@ -172,7 +178,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: responsive.buttonHeight,
                           child: OutlinedButton.icon(
                             onPressed: _continueWithGoogle,
-                            icon: const Icon(Icons.g_mobiledata_rounded, size: 28),
+                            icon: const Icon(
+                              Icons.g_mobiledata_rounded,
+                              size: 28,
+                            ),
                             label: Text(TranslationKeys.continueWithGoogle.tr),
                           ),
                         ),

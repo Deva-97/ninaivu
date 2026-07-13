@@ -38,7 +38,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Ninaivu uses your photo library so you can choose profile images for users and clients.</string>
+	<string>Ninaivu uses your photo library so you can choose profile images and insurance policy copies for OCR-based form filling.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Ninaivu uses the camera to capture insurance policy copies for OCR-based form filling.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

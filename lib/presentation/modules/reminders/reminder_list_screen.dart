@@ -40,7 +40,9 @@ class ReminderListScreen extends GetView<ReminderListController> {
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
-                return AppLoadingView(message: TranslationKeys.loadingReminders.tr);
+                return AppLoadingView(
+                  message: TranslationKeys.loadingReminders.tr,
+                );
               }
               final error = controller.errorMessage.value;
               if (error != null) {

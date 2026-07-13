@@ -4,7 +4,9 @@ import 'package:ninaivu/core/utils/whatsapp_template_builder.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CommunicationService {
-  static final RegExp _indianMobilePattern = RegExp(r'^(?:\+91|91)?[6-9]\d{9}$');
+  static final RegExp _indianMobilePattern = RegExp(
+    r'^(?:\+91|91)?[6-9]\d{9}$',
+  );
 
   bool isValidIndianMobile(String? value) {
     if (value == null) {
@@ -56,7 +58,10 @@ class CommunicationService {
     required WhatsAppTemplateType template,
     required WhatsAppTemplateData data,
   }) {
-    final message = WhatsAppTemplateBuilder.build(template: template, data: data);
+    final message = WhatsAppTemplateBuilder.build(
+      template: template,
+      data: data,
+    );
     return openWhatsAppChat(mobile, message: message);
   }
 }

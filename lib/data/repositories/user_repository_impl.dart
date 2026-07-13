@@ -202,9 +202,9 @@ class UserRepositoryImpl implements UserRepository {
   Future<void> _enqueue(
     AppUserModel user,
     String operation,
-    String syncStatus,
-    {Map<String, dynamic>? payload,}
-  ) async {
+    String syncStatus, {
+    Map<String, dynamic>? payload,
+  }) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     await _syncQueueLocalDataSource.enqueue(
       SyncQueueModel(

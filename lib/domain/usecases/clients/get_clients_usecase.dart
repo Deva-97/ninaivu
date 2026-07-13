@@ -6,9 +6,6 @@ class GetClientsUseCase {
 
   final ClientRepository _repository;
 
-  Future<List<Client>> call({
-    String? query,
-    int limit = 50,
-    int offset = 0,
-  }) => _repository.getClients(query: query, limit: limit, offset: offset);
+  Future<List<Client>> call({String? query, int limit = 50, int offset = 0}) =>
+      _repository.getClients(query: query, limit: limit, offset: offset);
 }

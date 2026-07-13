@@ -169,7 +169,9 @@ class DashboardHeroCard extends StatelessWidget {
             Text(
               title,
               style: theme.textTheme.labelLarge?.copyWith(
-                color: isDark ? AppColors.infoDarkText : AppColors.infoLightText,
+                color: isDark
+                    ? AppColors.infoDarkText
+                    : AppColors.infoLightText,
               ),
             ),
             const SizedBox(height: 8),
@@ -185,10 +187,7 @@ class DashboardHeroCard extends StatelessWidget {
                 AppIconChip(icon: primaryIcon, color: AppColors.primary),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Text(
-                    primaryLabel,
-                    style: theme.textTheme.titleMedium,
-                  ),
+                  child: Text(primaryLabel, style: theme.textTheme.titleMedium),
                 ),
               ],
             ),
@@ -240,11 +239,7 @@ class DashboardActionGroup extends StatelessWidget {
       children: [
         SectionTitle(title: title, subtitle: subtitle),
         const SizedBox(height: 12),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: children,
-        ),
+        Wrap(spacing: 12, runSpacing: 12, children: children),
       ],
     );
   }

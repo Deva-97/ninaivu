@@ -6,10 +6,7 @@ class UpdateCurrentUserProfileImageUseCase {
 
   final UserRepository _repository;
 
-  Future<AppUser> call({
-    String? profileImageData,
-    bool removeImage = false,
-  }) {
+  Future<AppUser> call({String? profileImageData, bool removeImage = false}) {
     return _repository.updateCurrentUserProfileImage(
       profileImageData: profileImageData,
       removeImage: removeImage,

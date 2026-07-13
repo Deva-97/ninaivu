@@ -377,7 +377,10 @@ class ProfileAvatarBlock extends StatelessWidget {
                 Text(name, style: Theme.of(context).textTheme.titleLarge),
                 if (subtitle != null) ...[
                   const SizedBox(height: 4),
-                  Text(subtitle!, style: Theme.of(context).textTheme.bodyMedium),
+                  Text(
+                    subtitle!,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
                 ],
                 if (statusLabel != null) ...[
                   const SizedBox(height: 10),
@@ -397,11 +400,7 @@ class ProfileAvatarBlock extends StatelessWidget {
 }
 
 class DetailFieldRow extends StatelessWidget {
-  const DetailFieldRow({
-    super.key,
-    required this.label,
-    required this.value,
-  });
+  const DetailFieldRow({super.key, required this.label, required this.value});
 
   final String label;
   final String value;

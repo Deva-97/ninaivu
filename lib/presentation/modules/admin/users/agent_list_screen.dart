@@ -139,7 +139,8 @@ class _AdminUserListScaffold extends StatelessWidget {
                                     content: Text('Soft-delete ${user.name}?'),
                                     actions: [
                                       TextButton(
-                                        onPressed: () => Get.back(result: false),
+                                        onPressed: () =>
+                                            Get.back(result: false),
                                         child: const Text('Cancel'),
                                       ),
                                       ElevatedButton(
@@ -159,7 +160,10 @@ class _AdminUserListScaffold extends StatelessWidget {
                                 value: 'edit',
                                 child: Text('Edit status'),
                               ),
-                              PopupMenuItem(value: 'delete', child: Text('Delete')),
+                              PopupMenuItem(
+                                value: 'delete',
+                                child: Text('Delete'),
+                              ),
                             ],
                           ),
                         ),

@@ -42,7 +42,9 @@ class AddEditClientScreen extends GetView<ClientFormController> {
                   TextFormField(
                     controller: controller.nameController,
                     validator: controller.validateName,
-                    decoration: InputDecoration(labelText: TranslationKeys.clientName.tr),
+                    decoration: InputDecoration(
+                      labelText: TranslationKeys.clientName.tr,
+                    ),
                   ),
                   TextFormField(
                     controller: controller.mobileController,
@@ -58,7 +60,9 @@ class AddEditClientScreen extends GetView<ClientFormController> {
                     if (warning == null) return const SizedBox.shrink();
                     return Text(
                       warning,
-                      style: TextStyle(color: Theme.of(context).colorScheme.error),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
                     );
                   }),
                   TextFormField(
@@ -73,7 +77,9 @@ class AddEditClientScreen extends GetView<ClientFormController> {
                     controller: controller.emailController,
                     validator: controller.validateOptionalEmail,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(labelText: TranslationKeys.email.tr),
+                    decoration: InputDecoration(
+                      labelText: TranslationKeys.email.tr,
+                    ),
                   ),
                 ],
               ),
@@ -85,17 +91,23 @@ class AddEditClientScreen extends GetView<ClientFormController> {
                     controller: controller.addressController,
                     minLines: 2,
                     maxLines: 3,
-                    decoration: InputDecoration(labelText: TranslationKeys.address.tr),
+                    decoration: InputDecoration(
+                      labelText: TranslationKeys.address.tr,
+                    ),
                   ),
                   TextFormField(
                     controller: controller.areaCityController,
-                    decoration: InputDecoration(labelText: TranslationKeys.areaCity.tr),
+                    decoration: InputDecoration(
+                      labelText: TranslationKeys.areaCity.tr,
+                    ),
                   ),
                   TextFormField(
                     controller: controller.notesController,
                     minLines: 3,
                     maxLines: 5,
-                    decoration: InputDecoration(labelText: TranslationKeys.notes.tr),
+                    decoration: InputDecoration(
+                      labelText: TranslationKeys.notes.tr,
+                    ),
                   ),
                   Obx(
                     () => ListTile(
@@ -123,7 +135,8 @@ class AddEditClientScreen extends GetView<ClientFormController> {
                           lastDate: DateTime.now(),
                         );
                         if (picked != null) {
-                          controller.dateOfBirthMs.value = picked.millisecondsSinceEpoch;
+                          controller.dateOfBirthMs.value =
+                              picked.millisecondsSinceEpoch;
                         }
                       },
                     ),
@@ -154,7 +167,8 @@ class AddEditClientScreen extends GetView<ClientFormController> {
                           lastDate: DateTime(2100),
                         );
                         if (picked != null) {
-                          controller.specialDateMs.value = picked.millisecondsSinceEpoch;
+                          controller.specialDateMs.value =
+                              picked.millisecondsSinceEpoch;
                         }
                       },
                     ),
@@ -162,7 +176,9 @@ class AddEditClientScreen extends GetView<ClientFormController> {
                   Obx(
                     () => DropdownButtonFormField<String>(
                       initialValue: controller.specialDateLabel.value,
-                      decoration: InputDecoration(labelText: TranslationKeys.specialDateLabel.tr),
+                      decoration: InputDecoration(
+                        labelText: TranslationKeys.specialDateLabel.tr,
+                      ),
                       items: [
                         DropdownMenuItem(
                           value: TranslationKeys.anniversary.tr,
@@ -181,7 +197,8 @@ class AddEditClientScreen extends GetView<ClientFormController> {
                           child: Text(TranslationKeys.other.tr),
                         ),
                       ],
-                      onChanged: (value) => controller.specialDateLabel.value = value,
+                      onChanged: (value) =>
+                          controller.specialDateLabel.value = value,
                     ),
                   ),
                 ],

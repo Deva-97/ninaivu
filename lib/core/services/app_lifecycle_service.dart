@@ -80,11 +80,7 @@ class AppLifecycleService with WidgetsBindingObserver {
     try {
       await _onResume();
     } catch (error, stackTrace) {
-      await _errorReporter(
-        error,
-        stackTrace,
-        'App resume handling failed',
-      );
+      await _errorReporter(error, stackTrace, 'App resume handling failed');
     }
   }
 

@@ -6,10 +6,7 @@ class FindClientByMobileUseCase {
 
   final ClientRepository _repository;
 
-  Future<Client?> call({
-    required String mobile,
-    String? excludingClientId,
-  }) {
+  Future<Client?> call({required String mobile, String? excludingClientId}) {
     return _repository.findClientByMobile(
       mobile: mobile,
       excludingClientId: excludingClientId,

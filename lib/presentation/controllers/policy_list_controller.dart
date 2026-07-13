@@ -137,7 +137,8 @@ class PolicyListController extends GetxController {
   }
 
   void _onScroll() {
-    if (!scrollController.hasClients || clientId != null && clientId!.isNotEmpty) {
+    if (!scrollController.hasClients ||
+        clientId != null && clientId!.isNotEmpty) {
       return;
     }
 

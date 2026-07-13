@@ -25,6 +25,7 @@ class ExportPoliciesUseCase {
       headers: const [
         'Client Name',
         'Policy Number',
+        'Policy Holder Name',
         'Insurance Type',
         'Company Name',
         'Start Date',
@@ -41,14 +42,15 @@ class ExportPoliciesUseCase {
             (policy) => [
               clientMap[policy.clientId] ?? '',
               policy.policyNumber,
+              policy.policyHolderName ?? '',
               policy.insuranceType,
               policy.companyName,
-              DateFormat('dd MMM yyyy').format(
-                DateTime.fromMillisecondsSinceEpoch(policy.startDate),
-              ),
-              DateFormat('dd MMM yyyy').format(
-                DateTime.fromMillisecondsSinceEpoch(policy.endDate),
-              ),
+              DateFormat(
+                'dd MMM yyyy',
+              ).format(DateTime.fromMillisecondsSinceEpoch(policy.startDate)),
+              DateFormat(
+                'dd MMM yyyy',
+              ).format(DateTime.fromMillisecondsSinceEpoch(policy.endDate)),
               policy.premiumAmount.toStringAsFixed(0),
               policy.paymentFrequency ?? '',
               policy.vehicleNumber ?? '',

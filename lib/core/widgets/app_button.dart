@@ -36,24 +36,13 @@ class AppButton extends StatelessWidget {
           Icon(icon, size: responsive.scaled(18, min: 16)),
         if (isLoading || icon != null)
           SizedBox(width: responsive.scaled(10, min: 8)),
-        Flexible(
-          child: Text(
-            label,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
+        Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
       ],
     );
 
     final button = outlined
-        ? OutlinedButton(
-        onPressed: isLoading ? null : onPressed,
-        child: child,
-      )
-        : ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
-        child: child,
-      );
+        ? OutlinedButton(onPressed: isLoading ? null : onPressed, child: child)
+        : ElevatedButton(onPressed: isLoading ? null : onPressed, child: child);
 
     if (!expanded) {
       return button;

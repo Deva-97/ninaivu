@@ -3,9 +3,7 @@ import 'package:get/get.dart';
 import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/core/models/export_format.dart';
 
-Future<ExportFormat?> showExportFormatPicker({
-  required String title,
-}) {
+Future<ExportFormat?> showExportFormatPicker({required String title}) {
   return Get.bottomSheet<ExportFormat>(
     SafeArea(
       child: Material(

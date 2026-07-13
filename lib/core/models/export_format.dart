@@ -1,9 +1,4 @@
-enum ExportFormat {
-  csv,
-  pdf,
-  doc,
-  txt,
-}
+enum ExportFormat { csv, pdf, doc, txt }
 
 extension ExportFormatX on ExportFormat {
   String get label => switch (this) {

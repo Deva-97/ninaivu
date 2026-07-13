@@ -8,10 +8,7 @@ abstract class AuthRepository {
     required String mobileNumber,
     required int? resendToken,
   });
-  Future<void> verifyOtp({
-    required String verificationId,
-    required String otp,
-  });
+  Future<void> verifyOtp({required String verificationId, required String otp});
   Future<void> checkUserAfterLogin();
   Future<String?> checkUserAfterLoginError();
   Future<void> completeProfile({

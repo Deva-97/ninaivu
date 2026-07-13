@@ -200,8 +200,7 @@ class ClientLocalDataSource {
       args.add(excludingClientId);
     }
 
-    final result = await db.rawQuery(
-      '''
+    final result = await db.rawQuery('''
       SELECT c.*,
         (
           SELECT COUNT(*)
@@ -211,9 +210,7 @@ class ClientLocalDataSource {
       FROM ${DatabaseTables.clients} c
       WHERE ${whereClauses.join(' AND ')}
       LIMIT 1
-      ''',
-      args,
-    );
+      ''', args);
 
     if (result.isEmpty) {
       return null;
@@ -230,7 +227,11 @@ class ClientLocalDataSource {
     // Special dates are derived in Dart because the source values are stored as
     // full timestamps, but the recurrence rule is based only on month/day.
     final clients = isAdmin
-        ? await getClientsForAdmin(businessId: businessId, limit: 500, offset: 0)
+        ? await getClientsForAdmin(
+            businessId: businessId,
+            limit: 500,
+            offset: 0,
+          )
         : await getClientsForAgent(
             businessId: businessId,
             userId: userId,
@@ -257,7 +258,8 @@ class ClientLocalDataSource {
       }
 
       final specialDate = _nextOccurrence(client.specialDateMs, now);
-      if (specialDate != null && specialDate.difference(now).inDays <= withinDays) {
+      if (specialDate != null &&
+          specialDate.difference(now).inDays <= withinDays) {
         events.add(
           UpcomingClientEvent(
             clientId: client.id,

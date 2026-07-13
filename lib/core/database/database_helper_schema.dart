@@ -61,6 +61,7 @@ extension _DatabaseSchema on DatabaseHelper {
         client_id TEXT NOT NULL,
         insurance_type TEXT NOT NULL,
         policy_number TEXT NOT NULL,
+        ${DatabaseColumns.policyHolderName} TEXT,
         company_name TEXT NOT NULL,
         start_date INTEGER NOT NULL,
         end_date INTEGER NOT NULL,

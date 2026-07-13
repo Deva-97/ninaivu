@@ -138,7 +138,8 @@ class FollowUpFormController extends GetxController {
       return;
     }
     if (selectedClient.value == null) {
-      clientValidationMessage.value = TranslationKeys.selectClientBeforeSaving.tr;
+      clientValidationMessage.value =
+          TranslationKeys.selectClientBeforeSaving.tr;
       return;
     }
 
@@ -169,7 +170,9 @@ class FollowUpFormController extends GetxController {
         createdAt: editingFollowUp?.createdAt ?? now,
         updatedAt: now,
         isDeleted: false,
-        syncStatus: editingFollowUp == null ? 'pending_create' : 'pending_update',
+        syncStatus: editingFollowUp == null
+            ? 'pending_create'
+            : 'pending_update',
         clientName: editingFollowUp?.clientName,
         clientMobile: editingFollowUp?.clientMobile,
         policyNumber: editingFollowUp?.policyNumber,
@@ -199,7 +202,8 @@ class FollowUpFormController extends GetxController {
     return null;
   }
 
-  Future<List<Client>> searchClients(String query) => _searchClientsUseCase(query);
+  Future<List<Client>> searchClients(String query) =>
+      _searchClientsUseCase(query);
 
   Future<List<Policy>> searchPolicies(String query) async {
     final clientId = selectedClient.value?.id;
@@ -221,7 +225,8 @@ class FollowUpFormController extends GetxController {
   }
 
   void selectPolicy(Policy policy) {
-    if (selectedClient.value == null || policy.clientId != selectedClient.value!.id) {
+    if (selectedClient.value == null ||
+        policy.clientId != selectedClient.value!.id) {
       clientValidationMessage.value =
           TranslationKeys.selectedPolicyMustBelongToSelectedClient.tr;
       return;

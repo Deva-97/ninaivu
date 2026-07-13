@@ -54,21 +54,25 @@ class ResponsiveLayout {
   double get titleSize => size(26, mobile: 22, tablet: 28);
   double get helperTextSize => size(12, mobile: 11, tablet: 13);
   double get contentMaxWidth => isTablet ? 760 : 640;
-  double get dashboardContentMaxWidth =>
-      width >= 1440
-          ? 1320
-          : width >= 1200
-          ? 1180
-          : width >= 960
-          ? 980
-          : width >= 600
-          ? 760
-          : 520;
+  double get dashboardContentMaxWidth => width >= 1440
+      ? 1320
+      : width >= 1200
+      ? 1180
+      : width >= 960
+      ? 980
+      : width >= 600
+      ? 760
+      : 520;
   double get detailLabelWidth => size(120, mobile: 96, tablet: 140);
   double get metricGridSpacing => size(14, mobile: 10, tablet: 16);
   int get dashboardGridCount => width >= 420 ? 2 : 1;
-  double get dashboardMetricHeight =>
-      width >= 1440 ? 188 : width >= 960 ? 182 : width >= 600 ? 176 : 170;
+  double get dashboardMetricHeight => width >= 1440
+      ? 188
+      : width >= 960
+      ? 182
+      : width >= 600
+      ? 176
+      : 170;
 }
 
 extension ResponsiveLayoutContext on BuildContext {

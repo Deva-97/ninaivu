@@ -6,5 +6,6 @@ class GetRemindersByClientUseCase {
 
   final ReminderRepository _repository;
 
-  Future<List<Reminder>> call(String clientId) => _repository.getRemindersByClient(clientId);
+  Future<List<Reminder>> call(String clientId) =>
+      _repository.getRemindersByClient(clientId);
 }

@@ -19,7 +19,6 @@ const Map<String, String> englishTranslations = {
   TranslationKeys.delete: 'Delete',
   TranslationKeys.deleteAccount: 'Delete account',
   TranslationKeys.logout: 'Logout',
-  TranslationKeys.language: 'Language',
   TranslationKeys.theme: 'Theme',
   TranslationKeys.appLock: 'App Lock',
   TranslationKeys.appLockPlaceholder:
@@ -51,9 +50,6 @@ const Map<String, String> englishTranslations = {
   TranslationKeys.continueLabel: 'Continue',
   TranslationKeys.enable: 'Enable',
   TranslationKeys.disable: 'Disable',
-  TranslationKeys.english: 'English',
-  TranslationKeys.tamil: 'Tamil',
-  TranslationKeys.telugu: 'Telugu',
   TranslationKeys.profile: 'Profile',
   TranslationKeys.clearLocalData: 'Clear Local Data',
   TranslationKeys.clearLocalDataSubtitle:
@@ -135,6 +131,26 @@ const Map<String, String> englishTranslations = {
   TranslationKeys.importDocuments: 'Import Documents',
   TranslationKeys.documentParserPlaceholder:
       'Automatic insurance detail extraction will be added in a future update.',
+  TranslationKeys.enterManually: 'Enter Manually',
+  TranslationKeys.extractFromInsuranceHardCopy:
+      'Extract from Insurance Hard Copy',
+  TranslationKeys.choosePolicyImageFromGallery:
+      'Choose Policy Image from Gallery',
+  TranslationKeys.chooseSoftCopyPdf: 'Choose Soft Copy PDF',
+  TranslationKeys.extractingPolicyDetails: 'Extracting policy details...',
+  TranslationKeys.extractionCompleted: 'Extraction completed',
+  TranslationKeys.reviewBeforeSaving:
+      'Details extracted. Please review before saving.',
+  TranslationKeys.extractedPolicyHolderPrompt:
+      'Extracted policy holder: @name. Please select the matching client.',
+  TranslationKeys.noReadableTextFound: 'No readable text found.',
+  TranslationKeys.pleaseTryClearerImage: 'Please try a clearer image.',
+  TranslationKeys.scannedPdfNotSupportedYet:
+      'Scanned PDF OCR will be supported later. Please upload a clear image for now.',
+  TranslationKeys.autoFilledVerifyBeforeSaving:
+      'Auto-filled from policy copy. Please verify before saving.',
+  TranslationKeys.noFileSelected: 'No file selected.',
+  TranslationKeys.couldNotReadDocument: 'Could not read document.',
   TranslationKeys.renewalReminder: 'Renewal reminder',
   TranslationKeys.paymentReminder: 'Payment reminder',
   TranslationKeys.documentCollectionReminder: 'Document collection reminder',
@@ -249,7 +265,8 @@ const Map<String, String> englishTranslations = {
   TranslationKeys.areaNotSet: 'Area not set',
   TranslationKeys.trackActivePolicies: 'Track active policies and renewals',
   TranslationKeys.policiesLinkedToClient: 'Policies linked to this client',
-  TranslationKeys.searchPoliciesHint: 'Search by policy number, company or type',
+  TranslationKeys.searchPoliciesHint:
+      'Search by policy number, company or type',
   TranslationKeys.loadingPolicies: 'Loading policies...',
   TranslationKeys.unableToLoadPolicies: 'Unable to load policies',
   TranslationKeys.noPoliciesYet: 'No policies yet',
@@ -269,9 +286,11 @@ const Map<String, String> englishTranslations = {
   TranslationKeys.noRemindersFound: 'No reminders found',
   TranslationKeys.noRemindersSubtitle:
       'Renewal reminders will appear here once policies are due.',
-  TranslationKeys.followUpSubtitle:
-      'Track follow-up calls and pending actions',
+  TranslationKeys.followUpSubtitle: 'Track follow-up calls and pending actions',
   TranslationKeys.clientLabel: 'Client',
+  TranslationKeys.selectClient: 'Select Client',
+  TranslationKeys.searchByNameOrMobile: 'Search by name or mobile',
+  TranslationKeys.noClientsFound: 'No clients found',
   TranslationKeys.policyLabel: 'Policy',
   TranslationKeys.insuranceLabel: 'Insurance',
   TranslationKeys.openClient: 'Open client',
@@ -293,6 +312,7 @@ const Map<String, String> englishTranslations = {
   TranslationKeys.updateFollowUp: 'Update Follow-up',
   TranslationKeys.insuranceType: 'Insurance Type',
   TranslationKeys.policyNumber: 'Policy Number',
+  TranslationKeys.policyHolderName: 'Policy Holder Name',
   TranslationKeys.companyName: 'Company Name',
   TranslationKeys.premiumAmount: 'Premium Amount',
   TranslationKeys.paymentFrequency: 'Payment Frequency',

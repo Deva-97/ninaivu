@@ -47,10 +47,7 @@ class AppErrorView extends StatelessWidget {
               ),
               if (onRetry != null) ...[
                 SizedBox(height: responsive.scaled(20, min: 16)),
-                AppButton(
-                  label: 'Retry',
-                  onPressed: onRetry,
-                ),
+                AppButton(label: 'Retry', onPressed: onRetry),
               ],
             ],
           ),

@@ -59,7 +59,9 @@ class ClientListScreen extends GetView<ClientListController> {
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
-                return AppLoadingView(message: TranslationKeys.loadingClients.tr);
+                return AppLoadingView(
+                  message: TranslationKeys.loadingClients.tr,
+                );
               }
 
               final error = controller.errorMessage.value;
@@ -90,8 +92,11 @@ class ClientListScreen extends GetView<ClientListController> {
                       responsive.pagePadding,
                       responsive.scaled(110, min: 96),
                     ),
-                    itemCount: controller.clients.length + (controller.isLoadingMore.value ? 1 : 0),
-                    separatorBuilder: (_, _) => SizedBox(height: responsive.scaled(12, min: 10)),
+                    itemCount:
+                        controller.clients.length +
+                        (controller.isLoadingMore.value ? 1 : 0),
+                    separatorBuilder: (_, _) =>
+                        SizedBox(height: responsive.scaled(12, min: 10)),
                     itemBuilder: (context, index) {
                       if (index >= controller.clients.length) {
                         return const Padding(
@@ -103,7 +108,8 @@ class ClientListScreen extends GetView<ClientListController> {
                       return ClientCard(
                         client: client,
                         onCall: () => controller.callClient(client.mobile),
-                        onWhatsApp: () => controller.whatsappClient(client.mobile),
+                        onWhatsApp: () =>
+                            controller.whatsappClient(client.mobile),
                         onTap: () async {
                           final refreshed = await Get.toNamed(
                             AppRoutes.clientDetails,

@@ -3,7 +3,8 @@ import 'package:ninaivu/data/models/reminder_model.dart';
 
 class ReminderSchedulerService {
   ReminderSchedulerService({NotificationService? notificationService})
-    : _notificationService = notificationService ?? NotificationService.instance;
+    : _notificationService =
+          notificationService ?? NotificationService.instance;
 
   final NotificationService _notificationService;
 

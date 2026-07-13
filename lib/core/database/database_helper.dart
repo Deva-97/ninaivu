@@ -19,7 +19,7 @@ class DatabaseHelper {
   static Database? _database;
 
   static const String databaseName = 'ninaivu.db';
-  static const int databaseVersion = 7;
+  static const int databaseVersion = 8;
 
   Future<Database> get database async {
     if (_database != null) return _database!;

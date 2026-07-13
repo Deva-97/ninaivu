@@ -85,86 +85,93 @@ void main() {
       },
     );
 
-    test('persists retry state and throws when syncing a queued item fails', () async {
-      final user = _user(id: 'user-2');
-      final queue = FakeSyncQueueLocalDataSource(
-        pendingItems: [_queueItem(recordId: user.id)],
-      );
-      final userLocal = FakeUserLocalDataSource(
-        usersById: {user.id: user},
-      );
-      final remote = FakeUserRemoteDataSource(
-        upsertError: Exception('remote write failed'),
-      );
-      final logs = <String>[];
-      final recordedReasons = <String>[];
+    test(
+      'persists retry state and throws when syncing a queued item fails',
+      () async {
+        final user = _user(id: 'user-2');
+        final queue = FakeSyncQueueLocalDataSource(
+          pendingItems: [_queueItem(recordId: user.id)],
+        );
+        final userLocal = FakeUserLocalDataSource(usersById: {user.id: user});
+        final remote = FakeUserRemoteDataSource(
+          upsertError: Exception('remote write failed'),
+        );
+        final logs = <String>[];
+        final recordedReasons = <String>[];
 
-      final service = _buildService(
-        connectivityResults: [ConnectivityResult.mobile],
-        syncQueueLocalDataSource: queue,
-        userLocalDataSource: userLocal,
-        userRemoteDataSource: remote,
-        logWriter: (message) async {
-          logs.add(message);
-        },
-        errorRecorder: (error, stackTrace, {required reason, required fatal}) async {
-          recordedReasons.add(reason);
-        },
-      );
+        final service = _buildService(
+          connectivityResults: [ConnectivityResult.mobile],
+          syncQueueLocalDataSource: queue,
+          userLocalDataSource: userLocal,
+          userRemoteDataSource: remote,
+          logWriter: (message) async {
+            logs.add(message);
+          },
+          errorRecorder:
+              (error, stackTrace, {required reason, required fatal}) async {
+                recordedReasons.add(reason);
+              },
+        );
 
-      await expectLater(
-        service.syncPendingData(),
-        throwsA(
-          isA<SyncFailureException>().having(
-            (error) => error.message,
-            'message',
-            contains('remote write failed'),
+        await expectLater(
+          service.syncPendingData(),
+          throwsA(
+            isA<SyncFailureException>().having(
+              (error) => error.message,
+              'message',
+              contains('remote write failed'),
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(queue.markSyncedIds, isEmpty);
-      expect(queue.deletedIds, isEmpty);
-      expect(queue.failureUpdates, hasLength(1));
-      expect(queue.failureUpdates.single.queueId, 'queue-1');
-      expect(queue.failureUpdates.single.retryCount, 1);
-      expect(queue.failureUpdates.single.syncStatus, 'pending_create');
-      expect(queue.failureUpdates.single.lastError, 'remote write failed');
-      expect(logs.single, contains('remote write failed'));
-      expect(recordedReasons.single, 'Failed syncing users/${user.id}');
-    });
+        expect(queue.markSyncedIds, isEmpty);
+        expect(queue.deletedIds, isEmpty);
+        expect(queue.failureUpdates, hasLength(1));
+        expect(queue.failureUpdates.single.queueId, 'queue-1');
+        expect(queue.failureUpdates.single.retryCount, 1);
+        expect(queue.failureUpdates.single.syncStatus, 'pending_create');
+        expect(queue.failureUpdates.single.lastError, 'remote write failed');
+        expect(logs.single, contains('remote write failed'));
+        expect(recordedReasons.single, 'Failed syncing users/${user.id}');
+      },
+    );
 
-    test('best-effort sync swallows failures and leaves the retry state intact', () async {
-      final user = _user(id: 'user-3');
-      final queue = FakeSyncQueueLocalDataSource(
-        pendingItems: [_queueItem(recordId: user.id)],
-      );
-      final userLocal = FakeUserLocalDataSource(
-        usersById: {user.id: user},
-      );
-      final remote = FakeUserRemoteDataSource(
-        upsertError: Exception('temporary outage'),
-      );
-      final recordedReasons = <String>[];
+    test(
+      'best-effort sync swallows failures and leaves the retry state intact',
+      () async {
+        final user = _user(id: 'user-3');
+        final queue = FakeSyncQueueLocalDataSource(
+          pendingItems: [_queueItem(recordId: user.id)],
+        );
+        final userLocal = FakeUserLocalDataSource(usersById: {user.id: user});
+        final remote = FakeUserRemoteDataSource(
+          upsertError: Exception('temporary outage'),
+        );
+        final recordedReasons = <String>[];
 
-      final service = _buildService(
-        connectivityResults: [ConnectivityResult.wifi],
-        syncQueueLocalDataSource: queue,
-        userLocalDataSource: userLocal,
-        userRemoteDataSource: remote,
-        logWriter: (_) async {},
-        errorRecorder: (error, stackTrace, {required reason, required fatal}) async {
-          recordedReasons.add(reason);
-        },
-      );
+        final service = _buildService(
+          connectivityResults: [ConnectivityResult.wifi],
+          syncQueueLocalDataSource: queue,
+          userLocalDataSource: userLocal,
+          userRemoteDataSource: remote,
+          logWriter: (_) async {},
+          errorRecorder:
+              (error, stackTrace, {required reason, required fatal}) async {
+                recordedReasons.add(reason);
+              },
+        );
 
-      final syncedCount = await service.syncPendingDataBestEffort();
+        final syncedCount = await service.syncPendingDataBestEffort();
 
-      expect(syncedCount, 0);
-      expect(queue.failureUpdates, hasLength(1));
-      expect(queue.failureUpdates.single.lastError, 'temporary outage');
-      expect(recordedReasons, contains('Best-effort sync deferred queued changes'));
-    });
+        expect(syncedCount, 0);
+        expect(queue.failureUpdates, hasLength(1));
+        expect(queue.failureUpdates.single.lastError, 'temporary outage');
+        expect(
+          recordedReasons,
+          contains('Best-effort sync deferred queued changes'),
+        );
+      },
+    );
   });
 }
 

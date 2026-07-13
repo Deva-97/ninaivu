@@ -28,7 +28,10 @@ class UserLocalDataSource {
     return _getUserById(id, includeDeleted: true);
   }
 
-  Future<AppUserModel?> _getUserById(String id, {required bool includeDeleted}) async {
+  Future<AppUserModel?> _getUserById(
+    String id, {
+    required bool includeDeleted,
+  }) async {
     final db = await databaseHelper.database;
     final result = await db.query(
       DatabaseTables.users,
@@ -46,7 +49,10 @@ class UserLocalDataSource {
     return AppUserModel.fromMap(result.first);
   }
 
-  Future<List<AppUserModel>> getUsersByRole(String role, {String? query}) async {
+  Future<List<AppUserModel>> getUsersByRole(
+    String role, {
+    String? query,
+  }) async {
     final db = await databaseHelper.database;
     final whereClauses = <String>[
       'role = ?',

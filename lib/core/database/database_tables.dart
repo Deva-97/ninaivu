@@ -14,6 +14,7 @@ class DatabaseColumns {
 
   static const String id = 'id';
   static const String businessId = 'business_id';
+  static const String policyHolderName = 'policy_holder_name';
   static const String createdBy = 'created_by';
   static const String agentId = 'agent_id';
   static const String subAgentId = 'sub_agent_id';

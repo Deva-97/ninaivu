@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:ninaivu/core/constants/translation_keys.dart';
 import 'package:ninaivu/domain/entities/client.dart';
 
 class SearchableClientPicker extends StatelessWidget {
@@ -9,6 +11,8 @@ class SearchableClientPicker extends StatelessWidget {
     required this.onSearch,
     required this.onChanged,
     this.errorText,
+    this.helperText,
+    this.initialQuery,
   });
 
   final String label;
@@ -16,6 +20,8 @@ class SearchableClientPicker extends StatelessWidget {
   final Future<List<Client>> Function(String query) onSearch;
   final ValueChanged<Client> onChanged;
   final String? errorText;
+  final String? helperText;
+  final String? initialQuery;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +29,10 @@ class SearchableClientPicker extends StatelessWidget {
       onTap: () async {
         final selected = await showDialog<Client>(
           context: context,
-          builder: (_) => _ClientSearchDialog(onSearch: onSearch),
+          builder: (_) => _ClientSearchDialog(
+            onSearch: onSearch,
+            initialQuery: initialQuery,
+          ),
         );
         if (selected != null) {
           onChanged(selected);
@@ -33,10 +42,11 @@ class SearchableClientPicker extends StatelessWidget {
         decoration: InputDecoration(
           labelText: label,
           errorText: errorText,
+          helperText: helperText,
           suffixIcon: const Icon(Icons.search),
         ),
         child: selectedClient == null
-            ? const Text('Select a client')
+            ? Text(TranslationKeys.selectClient.tr)
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -60,9 +70,10 @@ class SearchableClientPicker extends StatelessWidget {
 }
 
 class _ClientSearchDialog extends StatefulWidget {
-  const _ClientSearchDialog({required this.onSearch});
+  const _ClientSearchDialog({required this.onSearch, this.initialQuery});
 
   final Future<List<Client>> Function(String query) onSearch;
+  final String? initialQuery;
 
   @override
   State<_ClientSearchDialog> createState() => _ClientSearchDialogState();
@@ -76,7 +87,8 @@ class _ClientSearchDialogState extends State<_ClientSearchDialog> {
   @override
   void initState() {
     super.initState();
-    _load();
+    _searchController.text = widget.initialQuery?.trim() ?? '';
+    _load(_searchController.text.trim());
   }
 
   @override
@@ -101,7 +113,7 @@ class _ClientSearchDialogState extends State<_ClientSearchDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Select Client'),
+      title: Text(TranslationKeys.selectClient.tr),
       content: SizedBox(
         width: 420,
         child: Column(
@@ -110,7 +122,7 @@ class _ClientSearchDialogState extends State<_ClientSearchDialog> {
             TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search by name or mobile',
+                hintText: TranslationKeys.searchByNameOrMobile.tr,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: IconButton(
                   onPressed: () => _load(_searchController.text.trim()),
@@ -124,7 +136,7 @@ class _ClientSearchDialogState extends State<_ClientSearchDialog> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _results.isEmpty
-                  ? const Center(child: Text('No clients found'))
+                  ? Center(child: Text(TranslationKeys.noClientsFound.tr))
                   : ListView.separated(
                       shrinkWrap: true,
                       itemCount: _results.length,
@@ -151,7 +163,7 @@ class _ClientSearchDialogState extends State<_ClientSearchDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
+          child: Text(TranslationKeys.close.tr),
         ),
       ],
     );

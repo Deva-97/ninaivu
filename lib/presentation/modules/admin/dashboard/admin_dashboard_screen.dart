@@ -9,6 +9,7 @@ import 'package:ninaivu/presentation/modules/common/widgets/app_shell.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/dashboard_widgets.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/export_format_picker.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/profile_image_actions.dart';
+import 'package:ninaivu/presentation/modules/policies/widgets/add_policy_method_sheet.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
 
 class AdminDashboardScreen extends GetView<AdminDashboardController> {
@@ -67,7 +68,9 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
           child: Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: responsive.dashboardContentMaxWidth),
+              constraints: BoxConstraints(
+                maxWidth: responsive.dashboardContentMaxWidth,
+              ),
               child: ListView(
                 padding: EdgeInsets.fromLTRB(
                   responsive.pagePadding,
@@ -83,7 +86,8 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
                     }
                     return ProfileAvatarBlock(
                       name: user.name,
-                      subtitle: '${controller.backupStatusLabel.value} - ${controller.lastSyncLabel.value}',
+                      subtitle:
+                          '${controller.backupStatusLabel.value} - ${controller.lastSyncLabel.value}',
                       statusLabel: TranslationKeys.roleAdmin.tr,
                       imagePath: user.profileImagePath,
                       imageData: user.profileImageData,
@@ -213,7 +217,7 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
                         icon: Icons.note_add_outlined,
                         color: AppColors.heroBlue,
                         prominent: true,
-                        onTap: () => Get.toNamed(AppRoutes.policyForm),
+                        onTap: () => showAddPolicyMethodSheet(),
                       ),
                       DashboardQuickAction(
                         label: TranslationKeys.addFollowUp.tr,

@@ -75,13 +75,20 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? AppColors.darkSurfaceSoft : AppColors.surfaceHighlight,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        fillColor: isDark
+            ? AppColors.darkSurfaceSoft
+            : AppColors.surfaceHighlight,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         hintStyle: textTheme.bodyMedium?.copyWith(
           color: isDark ? AppColors.darkTextMuted : AppColors.lightTextMuted,
         ),
         labelStyle: textTheme.labelMedium?.copyWith(
-          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+          color: isDark
+              ? AppColors.darkTextSecondary
+              : AppColors.lightTextSecondary,
         ),
         helperStyle: textTheme.bodySmall,
         border: _inputBorder(colors.outline),
@@ -102,7 +109,9 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          textStyle: textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -110,18 +119,24 @@ class AppTheme {
           foregroundColor: colors.onSurface,
           minimumSize: const Size(double.infinity, 52),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-          backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+          backgroundColor: isDark
+              ? AppColors.darkSurface
+              : AppColors.lightSurface,
           side: BorderSide(color: colors.outline.withValues(alpha: 0.85)),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          textStyle: textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
-          textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          textStyle: textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -133,7 +148,9 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          textStyle: textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
@@ -148,7 +165,9 @@ class AppTheme {
       ),
       listTileTheme: ListTileThemeData(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        iconColor: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+        iconColor: isDark
+            ? AppColors.darkTextSecondary
+            : AppColors.lightTextSecondary,
         textColor: colors.onSurface,
         subtitleTextStyle: textTheme.bodyMedium,
       ),
@@ -162,8 +181,12 @@ class AppTheme {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-        indicatorColor: AppColors.primaryLight.withValues(alpha: isDark ? 0.18 : 0.55),
+        backgroundColor: isDark
+            ? AppColors.darkSurface
+            : AppColors.lightSurface,
+        indicatorColor: AppColors.primaryLight.withValues(
+          alpha: isDark ? 0.18 : 0.55,
+        ),
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => textTheme.labelSmall?.copyWith(
             color: states.contains(WidgetState.selected)
@@ -185,7 +208,9 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: isDark ? AppColors.darkSurfaceSoft : AppColors.lightTextPrimary,
+        backgroundColor: isDark
+            ? AppColors.darkSurfaceSoft
+            : AppColors.lightTextPrimary,
         contentTextStyle: textTheme.bodyMedium?.copyWith(
           color: isDark ? AppColors.darkTextPrimary : Colors.white,
         ),
@@ -195,7 +220,9 @@ class AppTheme {
   }
 
   static TextTheme _textTheme(bool isDark) {
-    final primary = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final primary = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.lightTextPrimary;
     final secondary = isDark
         ? AppColors.darkTextSecondary
         : AppColors.lightTextSecondary;
@@ -300,7 +327,9 @@ class AppTheme {
       cardTheme: base.cardTheme.copyWith(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16 * scale),
-          side: (base.cardTheme.shape as RoundedRectangleBorder?)?.side ?? BorderSide.none,
+          side:
+              (base.cardTheme.shape as RoundedRectangleBorder?)?.side ??
+              BorderSide.none,
         ),
       ),
       inputDecorationTheme: inputTheme.copyWith(
@@ -322,17 +351,25 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: base.elevatedButtonTheme.style?.copyWith(
-          minimumSize: WidgetStatePropertyAll(Size(double.infinity, 52 * scale)),
+          minimumSize: WidgetStatePropertyAll(
+            Size(double.infinity, 52 * scale),
+          ),
           shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12 * scale)),
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12 * scale),
+            ),
           ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: base.outlinedButtonTheme.style?.copyWith(
-          minimumSize: WidgetStatePropertyAll(Size(double.infinity, 52 * scale)),
+          minimumSize: WidgetStatePropertyAll(
+            Size(double.infinity, 52 * scale),
+          ),
           shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12 * scale)),
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12 * scale),
+            ),
           ),
         ),
       ),
@@ -347,7 +384,9 @@ class AppTheme {
 
     return border.copyWith(
       borderRadius: BorderRadius.circular(12 * scale),
-      borderSide: border.borderSide.copyWith(width: border.borderSide.width * scale),
+      borderSide: border.borderSide.copyWith(
+        width: border.borderSide.width * scale,
+      ),
     );
   }
 }

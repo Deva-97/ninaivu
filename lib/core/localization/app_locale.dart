@@ -1,24 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum AppLanguage {
-  english('en', 'US'),
-  tamil('ta', 'IN'),
-  telugu('te', 'IN');
-
-  const AppLanguage(this.languageCode, this.countryCode);
-
-  final String languageCode;
-  final String countryCode;
-
-  Locale get locale => Locale(languageCode, countryCode);
-
-  static AppLanguage fromCode(String? code) {
-    return AppLanguage.values.firstWhere(
-      (value) => value.languageCode == code,
-      orElse: () => AppLanguage.english,
-    );
-  }
-}
+const Locale appEnglishLocale = Locale('en', 'US');
 
 enum AppThemeMode {
   system,

@@ -10,7 +10,6 @@ void main() {
       GetMaterialApp(
         translations: AppTranslations(),
         locale: const Locale('en', 'US'),
-        fallbackLocale: const Locale('en', 'US'),
         home: LoginScreen(onGoogleSignIn: () async {}, onSendOtp: (_) async {}),
       ),
     );

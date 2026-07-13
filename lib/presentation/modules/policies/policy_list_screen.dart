@@ -6,6 +6,7 @@ import 'package:ninaivu/core/widgets.dart';
 import 'package:ninaivu/presentation/controllers/policy_list_controller.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/app_shell.dart';
 import 'package:ninaivu/presentation/modules/common/widgets/export_format_picker.dart';
+import 'package:ninaivu/presentation/modules/policies/widgets/add_policy_method_sheet.dart';
 import 'package:ninaivu/presentation/routes/app_routes.dart';
 
 class PolicyListScreen extends GetView<PolicyListController> {
@@ -24,15 +25,10 @@ class PolicyListScreen extends GetView<PolicyListController> {
           ? TranslationKeys.trackActivePolicies.tr
           : TranslationKeys.policiesLinkedToClient.tr,
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final refreshed = await Get.toNamed(
-            AppRoutes.policyForm,
-            arguments: {'clientId': controller.clientId},
-          );
-          if (refreshed == true) {
-            await controller.loadPolicies();
-          }
-        },
+        onPressed: () => showAddPolicyMethodSheet(
+          clientId: controller.clientId,
+          onPolicySaved: controller.loadPolicies,
+        ),
         icon: const Icon(Icons.add),
         label: Text(TranslationKeys.addPolicy.tr),
       ),
@@ -55,7 +51,9 @@ class PolicyListScreen extends GetView<PolicyListController> {
           if (controller.clientId == null)
             ResponsiveContent(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: responsive.pagePadding),
+                padding: EdgeInsets.symmetric(
+                  horizontal: responsive.pagePadding,
+                ),
                 child: AppSearchField(
                   controller: controller.searchController,
                   hintText: TranslationKeys.searchPoliciesHint.tr,
@@ -68,7 +66,9 @@ class PolicyListScreen extends GetView<PolicyListController> {
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
-                return AppLoadingView(message: TranslationKeys.loadingPolicies.tr);
+                return AppLoadingView(
+                  message: TranslationKeys.loadingPolicies.tr,
+                );
               }
               final error = controller.errorMessage.value;
               if (error != null) {

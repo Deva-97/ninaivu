@@ -28,7 +28,8 @@ Future<void> showSettingsProfileImageOptions({
   required Future<void> Function(ImageSource source) onPickImage,
   required Future<void> Function() onRemoveImage,
 }) async {
-  final hasImage = ProfileAvatar.buildImageProvider(
+  final hasImage =
+      ProfileAvatar.buildImageProvider(
         imageData: imageData,
         imagePath: imagePath,
       ) !=
@@ -138,10 +139,7 @@ class _ProfileImageViewer extends StatelessWidget {
               child: Center(
                 child: imageProvider != null
                     ? InteractiveViewer(
-                        child: Image(
-                          image: imageProvider,
-                          fit: BoxFit.contain,
-                        ),
+                        child: Image(image: imageProvider, fit: BoxFit.contain),
                       )
                     : ProfileAvatar(
                         name: name,

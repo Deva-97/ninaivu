@@ -77,7 +77,8 @@ class SyncService {
        _connectivity = connectivity ?? Connectivity(),
        _onlineStatusChecker = onlineStatusChecker,
        _logWriter =
-           logWriter ?? ((message) => FirebaseCrashlytics.instance.log(message)),
+           logWriter ??
+           ((message) => FirebaseCrashlytics.instance.log(message)),
        _errorRecorder =
            errorRecorder ??
            ((error, stackTrace, {required reason, required fatal}) {
@@ -155,15 +156,13 @@ class SyncService {
   /// Firebase availability improves.
   Future<int> syncPendingDataBestEffort({
     bool removeSyncedQueueItems = true,
-    }) async {
+  }) async {
     try {
       return await syncPendingData(
         removeSyncedQueueItems: removeSyncedQueueItems,
       );
     } catch (error, stackTrace) {
-      await _logWriter(
-        'Best-effort sync deferred queued changes: $error',
-      );
+      await _logWriter('Best-effort sync deferred queued changes: $error');
       await _errorRecorder(
         error,
         stackTrace,
@@ -246,7 +245,9 @@ class SyncService {
 
   Future<void> _ensureCurrentUserRemoteAccess() async {
     final currentUser = await _userLocalDataSource.getCurrentUser();
-    if (currentUser == null || !currentUser.profileCompleted || currentUser.isDeleted) {
+    if (currentUser == null ||
+        !currentUser.profileCompleted ||
+        currentUser.isDeleted) {
       return;
     }
 

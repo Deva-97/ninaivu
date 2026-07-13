@@ -71,7 +71,11 @@ const List<_IndexSpec> _indexSpecs = [
     table: DatabaseTables.policies,
     column: DatabaseColumns.businessId,
   ),
-  (name: 'idx_policies_client_id', table: DatabaseTables.policies, column: 'client_id'),
+  (
+    name: 'idx_policies_client_id',
+    table: DatabaseTables.policies,
+    column: 'client_id',
+  ),
   (
     name: 'idx_policies_created_by',
     table: DatabaseTables.policies,
@@ -92,8 +96,16 @@ const List<_IndexSpec> _indexSpecs = [
     table: DatabaseTables.policies,
     column: 'vehicle_number',
   ),
-  (name: 'idx_policies_end_date', table: DatabaseTables.policies, column: 'end_date'),
-  (name: 'idx_policies_status', table: DatabaseTables.policies, column: 'status'),
+  (
+    name: 'idx_policies_end_date',
+    table: DatabaseTables.policies,
+    column: 'end_date',
+  ),
+  (
+    name: 'idx_policies_status',
+    table: DatabaseTables.policies,
+    column: 'status',
+  ),
   (
     name: 'idx_policies_renewal_status',
     table: DatabaseTables.policies,
@@ -114,14 +126,26 @@ const List<_IndexSpec> _indexSpecs = [
     table: DatabaseTables.reminders,
     column: DatabaseColumns.businessId,
   ),
-  (name: 'idx_reminders_client_id', table: DatabaseTables.reminders, column: 'client_id'),
-  (name: 'idx_reminders_policy_id', table: DatabaseTables.reminders, column: 'policy_id'),
+  (
+    name: 'idx_reminders_client_id',
+    table: DatabaseTables.reminders,
+    column: 'client_id',
+  ),
+  (
+    name: 'idx_reminders_policy_id',
+    table: DatabaseTables.reminders,
+    column: 'policy_id',
+  ),
   (
     name: 'idx_reminders_date_time',
     table: DatabaseTables.reminders,
     column: 'reminder_date_time',
   ),
-  (name: 'idx_reminders_status', table: DatabaseTables.reminders, column: 'status'),
+  (
+    name: 'idx_reminders_status',
+    table: DatabaseTables.reminders,
+    column: 'status',
+  ),
   (
     name: 'idx_reminders_notification_id',
     table: DatabaseTables.reminders,
@@ -142,14 +166,26 @@ const List<_IndexSpec> _indexSpecs = [
     table: DatabaseTables.followUps,
     column: DatabaseColumns.businessId,
   ),
-  (name: 'idx_follow_ups_client_id', table: DatabaseTables.followUps, column: 'client_id'),
-  (name: 'idx_follow_ups_policy_id', table: DatabaseTables.followUps, column: 'policy_id'),
+  (
+    name: 'idx_follow_ups_client_id',
+    table: DatabaseTables.followUps,
+    column: 'client_id',
+  ),
+  (
+    name: 'idx_follow_ups_policy_id',
+    table: DatabaseTables.followUps,
+    column: 'policy_id',
+  ),
   (
     name: 'idx_follow_ups_date_time',
     table: DatabaseTables.followUps,
     column: 'follow_up_date_time',
   ),
-  (name: 'idx_follow_ups_status', table: DatabaseTables.followUps, column: 'status'),
+  (
+    name: 'idx_follow_ups_status',
+    table: DatabaseTables.followUps,
+    column: 'status',
+  ),
   (
     name: 'idx_follow_ups_created_by',
     table: DatabaseTables.followUps,
