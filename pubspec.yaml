@@ -2,7 +2,7 @@ name: ninaivu
 description: "Offline-first Flutter app for managing insurance clients, policies, renewal reminders, follow-ups, and Firebase-backed sync."
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.0+4
 
 environment:
   sdk: ^3.11.3
